@@ -157,12 +157,13 @@ namespace SKSshAgent
 
 #if DEBUG
                             Debug.WriteLine("MakeCredential Challenge: " + Convert.ToHexString(challenge));
-                            Debug.WriteLine("MakeCredential Authenticator data: " + Convert.ToHexString(new Span<byte>(credentialAttestation->pbAuthenticatorData, (int)credentialAttestation->cbAuthenticatorData)));
+                            Debug.WriteLine("MakeCredential Authenticator data: " + Convert.ToHexString(new ReadOnlySpan<byte>(credentialAttestation->pbAuthenticatorData, (int)credentialAttestation->cbAuthenticatorData)));
                             Debug.WriteLine("MakeCredential Attestation format: " + credentialAttestation->pwszFormatType.ToString());
-                            Debug.WriteLine("MakeCredential Attestation statement: " + Convert.ToHexString(new Span<byte>(credentialAttestation->pbAttestation, (int)credentialAttestation->cbAttestation)));
+                            Debug.WriteLine("MakeCredential Attestation statement: " + Convert.ToHexString(new ReadOnlySpan<byte>(credentialAttestation->pbAttestation, (int)credentialAttestation->cbAttestation)));
 #endif
 
-                            var authenticatorData = WebAuthnAuthenticatorData.Parse(new Span<byte>(credentialAttestation->pbAuthenticatorData, (int)credentialAttestation->cbAuthenticatorData), out int authenticatorDataBytesUsed);
+                            var authenticatorDataSpan = new ReadOnlySpan<byte>(credentialAttestation->pbAuthenticatorData, (int)credentialAttestation->cbAuthenticatorData);
+                            var authenticatorData = WebAuthnAuthenticatorData.Parse(authenticatorDataSpan, out int authenticatorDataBytesUsed);
                             if (authenticatorDataBytesUsed < credentialAttestation->cbAuthenticatorData)
                                 throw new InvalidDataException("Excess data.");
 
@@ -182,7 +183,7 @@ namespace SKSshAgent
         /// <exception cref="OperationCanceledException"/>
         /// <exception cref="InvalidDataException"/>
         /// <exception cref="Win32Exception"/>
-        public static GetAssertionResult GetAssertion(HWND hWnd, CoseKey key, string rpId, ReadOnlySpan<byte> keyHandle, OpenSshSKFlags flags, byte[] challenge, CancellationToken cancellationToken)
+        public static GetAssertionResult GetAssertion(HWND hWnd, CoseKey key, string rpId, ReadOnlySpan<byte> keyHandle, OpenSshSKFlags flags, ReadOnlySpan<byte> challenge, CancellationToken cancellationToken)
         {
             if (Version < WEBAUTHN_API_VERSION_1)
                 throw new NotSupportedException("Insufficient WebAuthn version.");
@@ -259,16 +260,16 @@ namespace SKSshAgent
 
 #if DEBUG
                             Debug.WriteLine("GetAssertion Challenge: " + Convert.ToHexString(challenge));
-                            Debug.WriteLine("GetAssertion Authenticator data: " + Convert.ToHexString(new Span<byte>(assertion->pbAuthenticatorData, (int)assertion->cbAuthenticatorData)));
-                            Debug.WriteLine("GetAssertion Signature: " + Convert.ToHexString(new Span<byte>(assertion->pbSignature, (int)assertion->cbSignature)));
+                            Debug.WriteLine("GetAssertion Authenticator data: " + Convert.ToHexString(new ReadOnlySpan<byte>(assertion->pbAuthenticatorData, (int)assertion->cbAuthenticatorData)));
+                            Debug.WriteLine("GetAssertion Signature: " + Convert.ToHexString(new ReadOnlySpan<byte>(assertion->pbSignature, (int)assertion->cbSignature)));
 #endif
 
-                            var authenticatorDataSpan = new Span<byte>(assertion->pbAuthenticatorData, (int)assertion->cbAuthenticatorData);
+                            var authenticatorDataSpan = new ReadOnlySpan<byte>(assertion->pbAuthenticatorData, (int)assertion->cbAuthenticatorData);
                             var authenticatorData = WebAuthnAuthenticatorData.Parse(authenticatorDataSpan, out int authenticatorDataBytesUsed);
                             if (authenticatorDataBytesUsed < assertion->cbAuthenticatorData)
                                 throw new InvalidDataException("Excess data.");
 
-                            var signatureSpan = new Span<byte>(assertion->pbSignature, (int)assertion->cbSignature);
+                            var signatureSpan = new ReadOnlySpan<byte>(assertion->pbSignature, (int)assertion->cbSignature);
                             var signature = WebAuthnSignature.Parse(key, signatureSpan.ToArray(), out int signatureBytesUsed);
                             if (signatureBytesUsed < assertion->cbSignature)
                                 throw new InvalidDataException("Excess data.");
