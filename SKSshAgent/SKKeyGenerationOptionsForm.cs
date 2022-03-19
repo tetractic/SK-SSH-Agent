@@ -24,9 +24,9 @@ namespace SKSshAgent
         {
             InitializeComponent();
 
-            _ = _typeComboBox.Items.Add(SshKeyTypeInfo.SKEcdsaSha2NistP256KeyType);
+            _ = _typeComboBox.Items.Add(SshKeyTypeInfo.SKEcdsaSha2NistP256);
 
-            _keyTypeInfo = SshKeyTypeInfo.SKEcdsaSha2NistP256KeyType;
+            _keyTypeInfo = SshKeyTypeInfo.SKEcdsaSha2NistP256;
             _typeComboBox.SelectedItem = _keyTypeInfo;
 
             HandleTypeComboBoxSelectedIndexChanged(_typeComboBox, new EventArgs());

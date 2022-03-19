@@ -17,7 +17,7 @@ namespace SKSshAgent.Ssh.Tests
         public static void GetOpenSshKeyAuthorization_Always_ReturnsExpectedResult()
         {
             var key = new OpenSshEcdsaSKKey(
-                SshKeyTypeInfo.SKEcdsaSha2NistP256KeyType,
+                SshKeyTypeInfo.SKEcdsaSha2NistP256,
                 BigInteger.Parse("98079922062085566346477182080616450541634317430015585846706072972772164289161"),
                 BigInteger.Parse("10791305083879448925504919972385807166056302535066617515522020748831529237409"),
                 application: Convert.FromBase64String("c3NoOg==").ToImmutableArray(),
@@ -56,7 +56,7 @@ AAEGNhcmxAZXhhbXBsZS5jb20BAgME
         public static void FormatOpenSshPrivateKey_Always_CanBeParsedBackToOriginalKey()
         {
             var key = new OpenSshEcdsaSKKey(
-                SshKeyTypeInfo.SKEcdsaSha2NistP256KeyType,
+                SshKeyTypeInfo.SKEcdsaSha2NistP256,
                 BigInteger.Parse("98079922062085566346477182080616450541634317430015585846706072972772164289161"),
                 BigInteger.Parse("10791305083879448925504919972385807166056302535066617515522020748831529237409"),
                 application: Convert.FromBase64String("c3NoOg==").ToImmutableArray(),

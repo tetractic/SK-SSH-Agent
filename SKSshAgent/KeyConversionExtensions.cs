@@ -17,7 +17,7 @@ namespace SKSshAgent
     {
         internal static readonly Dictionary<SshKeyTypeInfo, (CoseKeyType KeyType, CoseAlgorithm Algorithm, CoseEllipticCurve Curve)> OpenSshKeyInfoNameToWebAuthnEllipticCurveInfo = new()
         {
-            [SshKeyTypeInfo.SKEcdsaSha2NistP256KeyType] = (CoseKeyType.EC2, CoseAlgorithm.ES256, CoseEllipticCurve.P256),
+            [SshKeyTypeInfo.SKEcdsaSha2NistP256] = (CoseKeyType.EC2, CoseAlgorithm.ES256, CoseEllipticCurve.P256),
         };
 
         internal static readonly Dictionary<(CoseKeyType KeyType, CoseAlgorithm Algorithm, CoseEllipticCurve Curve), SshKeyTypeInfo> WebAuthnEllipticCurveInfoToOpenSshKeyInfoName = InvertDictionary(OpenSshKeyInfoNameToWebAuthnEllipticCurveInfo);

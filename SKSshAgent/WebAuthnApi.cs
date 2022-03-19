@@ -53,7 +53,7 @@ namespace SKSshAgent
                 throw new NotSupportedException("Insufficient WebAuthn version.");
 
             int algorithm;
-            if (keyTypeInfo == SshKeyTypeInfo.SKEcdsaSha2NistP256KeyType)
+            if (keyTypeInfo == SshKeyTypeInfo.SKEcdsaSha2NistP256)
                 algorithm = WEBAUTHN_COSE_ALGORITHM_ECDSA_P256_WITH_SHA256;
             else
                 throw new ArgumentOutOfRangeException(nameof(keyTypeInfo));

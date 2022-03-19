@@ -12,7 +12,7 @@ namespace SKSshAgent.Ssh
 {
     internal sealed class SshKeyTypeInfo
     {
-        public static readonly SshKeyTypeInfo SKEcdsaSha2NistP256KeyType = new(
+        public static readonly SshKeyTypeInfo SKEcdsaSha2NistP256 = new(
             name: "sk-ecdsa-sha2-nistp256@openssh.com",
             type: SshKeyType.OpenSshEcdsaSK,
             hashAlgorithmName: HashAlgorithmName.SHA256,
@@ -22,13 +22,13 @@ namespace SKSshAgent.Ssh
 
         public static ImmutableArray<SshKeyTypeInfo> KeyTypeInfos = ImmutableArray.Create(new[]
         {
-            SKEcdsaSha2NistP256KeyType,
+            SKEcdsaSha2NistP256,
         });
 
         internal readonly ECCurve Curve;
         internal readonly int KeySizeBits;
 
-        internal SshKeyTypeInfo(string name, SshKeyType type, HashAlgorithmName hashAlgorithmName, string? curveName, ECCurve curve, int keySizeBits)
+        private SshKeyTypeInfo(string name, SshKeyType type, HashAlgorithmName hashAlgorithmName, string? curveName, ECCurve curve, int keySizeBits)
         {
             Name = name;
             Type = type;
