@@ -33,12 +33,16 @@ namespace SKSshAgent
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.ToolStripSeparator _keyMenuSeparator1;
             System.Windows.Forms.ToolStripSeparator _keyMenuSeparator2;
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KeyListForm));
             System.Windows.Forms.ToolStripSeparator _notifyIconContextMenuSeparator1;
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KeyListForm));
             this._keyListTypeColumnHeader = new System.Windows.Forms.ColumnHeader();
             this._keyListHashColumnHeader = new System.Windows.Forms.ColumnHeader();
             this._keyListCommentColumnHeader = new System.Windows.Forms.ColumnHeader();
             this._keyListView = new System.Windows.Forms.ListView();
+            this._keyListContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this._copyOpenSshKeyAuthorizationContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this._copyOpenSshPublicKeyContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this._removeKeyContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._keyMenu = new System.Windows.Forms.ToolStripMenuItem();
             this._loadFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._generateInSecurityKeyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,28 +54,39 @@ namespace SKSshAgent
             this._helpMenu = new System.Windows.Forms.ToolStripMenuItem();
             this._aboutMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._menuStrip = new System.Windows.Forms.MenuStrip();
-            this._copyOpenSshKeyAuthorizationContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this._copyOpenSshPublicKeyContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this._removeKeyContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this._keyListContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this._statusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this._openSshStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this._pageantStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this._statusStrip = new System.Windows.Forms.StatusStrip();
             this._notifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this._notifyIconContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this._loadFileNotifyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._showNotifyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._exitNotifyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this._notifyIconContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this._makeCredentialWorker = new System.ComponentModel.BackgroundWorker();
             _keyMenuSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             _keyMenuSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             _notifyIconContextMenuSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this._menuStrip.SuspendLayout();
             this._keyListContextMenu.SuspendLayout();
+            this._menuStrip.SuspendLayout();
             this._statusStrip.SuspendLayout();
             this._notifyIconContextMenu.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // _keyMenuSeparator1
+            // 
+            _keyMenuSeparator1.Name = "_keyMenuSeparator1";
+            _keyMenuSeparator1.Size = new System.Drawing.Size(207, 6);
+            // 
+            // _keyMenuSeparator2
+            // 
+            _keyMenuSeparator2.Name = "_keyMenuSeparator2";
+            _keyMenuSeparator2.Size = new System.Drawing.Size(207, 6);
+            // 
+            // _notifyIconContextMenuSeparator1
+            // 
+            _notifyIconContextMenuSeparator1.Name = "_notifyIconContextMenuSeparator1";
+            _notifyIconContextMenuSeparator1.Size = new System.Drawing.Size(127, 6);
             // 
             // _keyListTypeColumnHeader
             // 
@@ -108,6 +123,40 @@ namespace SKSshAgent
             this._keyListView.View = System.Windows.Forms.View.Details;
             this._keyListView.SelectedIndexChanged += new System.EventHandler(this.HandleKeyListViewSelectedIndexChanged);
             // 
+            // _keyListContextMenu
+            // 
+            this._keyListContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this._copyOpenSshKeyAuthorizationContextMenuItem,
+            this._copyOpenSshPublicKeyContextMenuItem,
+            this._removeKeyContextMenuItem});
+            this._keyListContextMenu.Name = "_keyListContextMenuStrip";
+            this._keyListContextMenu.Size = new System.Drawing.Size(253, 70);
+            this._keyListContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.HandleKeyListContextMenuOpening);
+            // 
+            // _copyOpenSshKeyAuthorizationContextMenuItem
+            // 
+            this._copyOpenSshKeyAuthorizationContextMenuItem.Image = global::SKSshAgent.Properties.Resources.page_white_copy;
+            this._copyOpenSshKeyAuthorizationContextMenuItem.Name = "_copyOpenSshKeyAuthorizationContextMenuItem";
+            this._copyOpenSshKeyAuthorizationContextMenuItem.Size = new System.Drawing.Size(252, 22);
+            this._copyOpenSshKeyAuthorizationContextMenuItem.Text = "&Copy OpenSSH Key Authorization";
+            this._copyOpenSshKeyAuthorizationContextMenuItem.Click += new System.EventHandler(this.HandleCopyOpenSshKeyAuthorizationMenuItemClicked);
+            // 
+            // _copyOpenSshPublicKeyContextMenuItem
+            // 
+            this._copyOpenSshPublicKeyContextMenuItem.Image = global::SKSshAgent.Properties.Resources.page_white_copy;
+            this._copyOpenSshPublicKeyContextMenuItem.Name = "_copyOpenSshPublicKeyContextMenuItem";
+            this._copyOpenSshPublicKeyContextMenuItem.Size = new System.Drawing.Size(252, 22);
+            this._copyOpenSshPublicKeyContextMenuItem.Text = "Copy OpenSSH &Public Key";
+            this._copyOpenSshPublicKeyContextMenuItem.Click += new System.EventHandler(this.HandleCopyOpenSshPublicKeyMenuItemClicked);
+            // 
+            // _removeKeyContextMenuItem
+            // 
+            this._removeKeyContextMenuItem.Image = global::SKSshAgent.Properties.Resources.key_delete;
+            this._removeKeyContextMenuItem.Name = "_removeKeyContextMenuItem";
+            this._removeKeyContextMenuItem.Size = new System.Drawing.Size(252, 22);
+            this._removeKeyContextMenuItem.Text = "&Remove";
+            this._removeKeyContextMenuItem.Click += new System.EventHandler(this.HandleRemoveMenuItemClicked);
+            // 
             // _keyMenu
             // 
             this._keyMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -129,11 +178,6 @@ namespace SKSshAgent
             this._loadFileMenuItem.Text = "&Load File...";
             this._loadFileMenuItem.Click += new System.EventHandler(this.HandleLoadFileMenuItemClicked);
             // 
-            // _keyMenuSeparator1
-            // 
-            _keyMenuSeparator1.Name = "_keyMenuSeparator1";
-            _keyMenuSeparator1.Size = new System.Drawing.Size(207, 6);
-            // 
             // _generateInSecurityKeyMenuItem
             // 
             this._generateInSecurityKeyMenuItem.Image = global::SKSshAgent.Properties.Resources.key_go;
@@ -141,11 +185,6 @@ namespace SKSshAgent
             this._generateInSecurityKeyMenuItem.Size = new System.Drawing.Size(210, 22);
             this._generateInSecurityKeyMenuItem.Text = "&Generate in Security Key...";
             this._generateInSecurityKeyMenuItem.Click += new System.EventHandler(this.HandleGenerateInSecurityKeyMenuItemClicked);
-            // 
-            // _keyMenuSeparator2
-            // 
-            _keyMenuSeparator2.Name = "_keyMenuSeparator2";
-            _keyMenuSeparator2.Size = new System.Drawing.Size(207, 6);
             // 
             // _exitMenuItem
             // 
@@ -226,40 +265,6 @@ namespace SKSshAgent
             this._menuStrip.Size = new System.Drawing.Size(784, 22);
             this._menuStrip.TabIndex = 0;
             // 
-            // _copyOpenSshKeyAuthorizationContextMenuItem
-            // 
-            this._copyOpenSshKeyAuthorizationContextMenuItem.Image = global::SKSshAgent.Properties.Resources.page_white_copy;
-            this._copyOpenSshKeyAuthorizationContextMenuItem.Name = "_copyOpenSshKeyAuthorizationContextMenuItem";
-            this._copyOpenSshKeyAuthorizationContextMenuItem.Size = new System.Drawing.Size(252, 22);
-            this._copyOpenSshKeyAuthorizationContextMenuItem.Text = "&Copy OpenSSH Key Authorization";
-            this._copyOpenSshKeyAuthorizationContextMenuItem.Click += new System.EventHandler(this.HandleCopyOpenSshKeyAuthorizationMenuItemClicked);
-            // 
-            // _copyOpenSshPublicKeyContextMenuItem
-            // 
-            this._copyOpenSshPublicKeyContextMenuItem.Image = global::SKSshAgent.Properties.Resources.page_white_copy;
-            this._copyOpenSshPublicKeyContextMenuItem.Name = "_copyOpenSshPublicKeyContextMenuItem";
-            this._copyOpenSshPublicKeyContextMenuItem.Size = new System.Drawing.Size(252, 22);
-            this._copyOpenSshPublicKeyContextMenuItem.Text = "Copy OpenSSH &Public Key";
-            this._copyOpenSshPublicKeyContextMenuItem.Click += new System.EventHandler(this.HandleCopyOpenSshPublicKeyMenuItemClicked);
-            // 
-            // _removeKeyContextMenuItem
-            // 
-            this._removeKeyContextMenuItem.Image = global::SKSshAgent.Properties.Resources.key_delete;
-            this._removeKeyContextMenuItem.Name = "_removeKeyContextMenuItem";
-            this._removeKeyContextMenuItem.Size = new System.Drawing.Size(252, 22);
-            this._removeKeyContextMenuItem.Text = "&Remove";
-            this._removeKeyContextMenuItem.Click += new System.EventHandler(this.HandleRemoveMenuItemClicked);
-            // 
-            // _keyListContextMenu
-            // 
-            this._keyListContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this._copyOpenSshKeyAuthorizationContextMenuItem,
-            this._copyOpenSshPublicKeyContextMenuItem,
-            this._removeKeyContextMenuItem});
-            this._keyListContextMenu.Name = "_keyListContextMenuStrip";
-            this._keyListContextMenu.Size = new System.Drawing.Size(253, 70);
-            this._keyListContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.HandleKeyListContextMenuOpening);
-            // 
             // _statusLabel
             // 
             this._statusLabel.Name = "_statusLabel";
@@ -305,35 +310,6 @@ namespace SKSshAgent
             this._notifyIcon.Visible = true;
             this._notifyIcon.Click += new System.EventHandler(this.HandleNotifyIconClicked);
             // 
-            // _loadFileNotifyMenuItem
-            // 
-            this._loadFileNotifyMenuItem.Image = global::SKSshAgent.Properties.Resources.folder_key;
-            this._loadFileNotifyMenuItem.Name = "_loadFileNotifyMenuItem";
-            this._loadFileNotifyMenuItem.Size = new System.Drawing.Size(180, 22);
-            this._loadFileNotifyMenuItem.Text = "&Load File...";
-            this._loadFileNotifyMenuItem.Click += new System.EventHandler(this.HandleLoadFileMenuItemClicked);
-            // 
-            // _notifyIconContextMenuSeparator1
-            // 
-            _notifyIconContextMenuSeparator1.Name = "_notifyIconContextMenuSeparator1";
-            _notifyIconContextMenuSeparator1.Size = new System.Drawing.Size(177, 6);
-            // 
-            // _showNotifyMenuItem
-            // 
-            this._showNotifyMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this._showNotifyMenuItem.Name = "_showNotifyMenuItem";
-            this._showNotifyMenuItem.Size = new System.Drawing.Size(180, 22);
-            this._showNotifyMenuItem.Text = "Show";
-            this._showNotifyMenuItem.Click += new System.EventHandler(this.HandleShowMenuItemClicked);
-            // 
-            // _exitNotifyMenuItem
-            // 
-            this._exitNotifyMenuItem.Image = global::SKSshAgent.Properties.Resources.door_open;
-            this._exitNotifyMenuItem.Name = "_exitNotifyMenuItem";
-            this._exitNotifyMenuItem.Size = new System.Drawing.Size(180, 22);
-            this._exitNotifyMenuItem.Text = "Exit";
-            this._exitNotifyMenuItem.Click += new System.EventHandler(this.HandleExitMenuItemClicked);
-            // 
             // _notifyIconContextMenu
             // 
             this._notifyIconContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -343,6 +319,30 @@ namespace SKSshAgent
             this._exitNotifyMenuItem});
             this._notifyIconContextMenu.Name = "_notifyIconContextMenu";
             this._notifyIconContextMenu.Size = new System.Drawing.Size(131, 76);
+            // 
+            // _loadFileNotifyMenuItem
+            // 
+            this._loadFileNotifyMenuItem.Image = global::SKSshAgent.Properties.Resources.folder_key;
+            this._loadFileNotifyMenuItem.Name = "_loadFileNotifyMenuItem";
+            this._loadFileNotifyMenuItem.Size = new System.Drawing.Size(130, 22);
+            this._loadFileNotifyMenuItem.Text = "&Load File...";
+            this._loadFileNotifyMenuItem.Click += new System.EventHandler(this.HandleLoadFileMenuItemClicked);
+            // 
+            // _showNotifyMenuItem
+            // 
+            this._showNotifyMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this._showNotifyMenuItem.Name = "_showNotifyMenuItem";
+            this._showNotifyMenuItem.Size = new System.Drawing.Size(130, 22);
+            this._showNotifyMenuItem.Text = "Show";
+            this._showNotifyMenuItem.Click += new System.EventHandler(this.HandleShowMenuItemClicked);
+            // 
+            // _exitNotifyMenuItem
+            // 
+            this._exitNotifyMenuItem.Image = global::SKSshAgent.Properties.Resources.door_open;
+            this._exitNotifyMenuItem.Name = "_exitNotifyMenuItem";
+            this._exitNotifyMenuItem.Size = new System.Drawing.Size(130, 22);
+            this._exitNotifyMenuItem.Text = "Exit";
+            this._exitNotifyMenuItem.Click += new System.EventHandler(this.HandleExitMenuItemClicked);
             // 
             // _makeCredentialWorker
             // 
@@ -367,9 +367,9 @@ namespace SKSshAgent
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "SK SSH Agent";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.HandleFormClosed);
+            this._keyListContextMenu.ResumeLayout(false);
             this._menuStrip.ResumeLayout(false);
             this._menuStrip.PerformLayout();
-            this._keyListContextMenu.ResumeLayout(false);
             this._statusStrip.ResumeLayout(false);
             this._statusStrip.PerformLayout();
             this._notifyIconContextMenu.ResumeLayout(false);
