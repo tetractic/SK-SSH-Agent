@@ -34,6 +34,11 @@ namespace SKSshAgent
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SKKeyGenerationOptionsForm));
+            this._toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this._requireUserVerificationInfoIcon = new System.Windows.Forms.PictureBox();
+            this._applicationInfoIcon = new System.Windows.Forms.PictureBox();
             this._typeLabel = new System.Windows.Forms.Label();
             this._typeComboBox = new System.Windows.Forms.ComboBox();
             this._requireUserVerificationCheckBox = new System.Windows.Forms.CheckBox();
@@ -45,7 +50,39 @@ namespace SKSshAgent
             this._commentTextBox = new System.Windows.Forms.TextBox();
             this._generateButon = new System.Windows.Forms.Button();
             this._cancelButton = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this._requireUserVerificationInfoIcon)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this._applicationInfoIcon)).BeginInit();
             this.SuspendLayout();
+            // 
+            // _toolTip
+            // 
+            this._toolTip.IsBalloon = true;
+            // 
+            // _requireUserVerificationInfoIcon
+            // 
+            this._requireUserVerificationInfoIcon.Image = global::SKSshAgent.Properties.Resources.information;
+            this._requireUserVerificationInfoIcon.Location = new System.Drawing.Point(240, 41);
+            this._requireUserVerificationInfoIcon.Name = "_requireUserVerificationInfoIcon";
+            this._requireUserVerificationInfoIcon.Size = new System.Drawing.Size(19, 19);
+            this._requireUserVerificationInfoIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this._requireUserVerificationInfoIcon.TabIndex = 0;
+            this._requireUserVerificationInfoIcon.TabStop = false;
+            this._toolTip.SetToolTip(this._requireUserVerificationInfoIcon, resources.GetString("_requireUserVerificationInfoIcon.ToolTip"));
+            this._requireUserVerificationInfoIcon.MouseEnter += new System.EventHandler(this.ShowToolTip);
+            this._requireUserVerificationInfoIcon.MouseLeave += new System.EventHandler(this.HideToolTip);
+            // 
+            // _applicationInfoIcon
+            // 
+            this._applicationInfoIcon.Image = global::SKSshAgent.Properties.Resources.information;
+            this._applicationInfoIcon.Location = new System.Drawing.Point(349, 95);
+            this._applicationInfoIcon.Name = "_applicationInfoIcon";
+            this._applicationInfoIcon.Size = new System.Drawing.Size(23, 23);
+            this._applicationInfoIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this._applicationInfoIcon.TabIndex = 0;
+            this._applicationInfoIcon.TabStop = false;
+            this._toolTip.SetToolTip(this._applicationInfoIcon, "The application name must begin with \"ssh:\".");
+            this._applicationInfoIcon.MouseEnter += new System.EventHandler(this.ShowToolTip);
+            this._applicationInfoIcon.MouseLeave += new System.EventHandler(this.HideToolTip);
             // 
             // _typeLabel
             // 
@@ -75,9 +112,9 @@ namespace SKSshAgent
             this._requireUserVerificationCheckBox.AutoSize = true;
             this._requireUserVerificationCheckBox.Location = new System.Drawing.Point(89, 41);
             this._requireUserVerificationCheckBox.Name = "_requireUserVerificationCheckBox";
-            this._requireUserVerificationCheckBox.Size = new System.Drawing.Size(206, 19);
+            this._requireUserVerificationCheckBox.Size = new System.Drawing.Size(154, 19);
             this._requireUserVerificationCheckBox.TabIndex = 2;
-            this._requireUserVerificationCheckBox.Text = "Require User &Verification (e.g. PIN)";
+            this._requireUserVerificationCheckBox.Text = "Require User &Verification";
             this._requireUserVerificationCheckBox.UseVisualStyleBackColor = true;
             // 
             // _userIdLabel
@@ -115,7 +152,7 @@ namespace SKSshAgent
             this._applicationTextBox.Location = new System.Drawing.Point(89, 95);
             this._applicationTextBox.Name = "_applicationTextBox";
             this._applicationTextBox.PlaceholderText = "ssh:(optional)";
-            this._applicationTextBox.Size = new System.Drawing.Size(283, 23);
+            this._applicationTextBox.Size = new System.Drawing.Size(260, 23);
             this._applicationTextBox.TabIndex = 6;
             this._applicationTextBox.TextChanged += new System.EventHandler(this.HandleApplicationTextBoxTextChanged);
             this._applicationTextBox.Enter += new System.EventHandler(this.HandleApplicationTextBoxEnter);
@@ -162,13 +199,15 @@ namespace SKSshAgent
             this._cancelButton.Text = "Cancel";
             this._cancelButton.UseVisualStyleBackColor = true;
             // 
-            // GenerateOptionsForm
+            // SKKeyGenerationOptionsForm
             // 
             this.AcceptButton = this._generateButon;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this._cancelButton;
             this.ClientSize = new System.Drawing.Size(384, 191);
+            this.Controls.Add(this._applicationInfoIcon);
+            this.Controls.Add(this._requireUserVerificationInfoIcon);
             this.Controls.Add(this._requireUserVerificationCheckBox);
             this.Controls.Add(this._applicationTextBox);
             this.Controls.Add(this._applicationLabel);
@@ -183,24 +222,28 @@ namespace SKSshAgent
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "GenerateOptionsForm";
+            this.Name = "SKKeyGenerationOptionsForm";
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Key Generation Options";
+            ((System.ComponentModel.ISupportInitialize)(this._requireUserVerificationInfoIcon)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this._applicationInfoIcon)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
 
         #endregion
-
+        private System.Windows.Forms.ToolTip _toolTip;
         private System.Windows.Forms.Label _typeLabel;
         private System.Windows.Forms.ComboBox _typeComboBox;
         private System.Windows.Forms.CheckBox _requireUserVerificationCheckBox;
+        private System.Windows.Forms.PictureBox _requireUserVerificationInfoIcon;
         private System.Windows.Forms.Label _userIdLabel;
         private System.Windows.Forms.TextBox _userIdTextBox;
         private System.Windows.Forms.Label _applicationLabel;
         private System.Windows.Forms.TextBox _applicationTextBox;
+        private System.Windows.Forms.PictureBox _applicationInfoIcon;
         private System.Windows.Forms.Label _commentLabel;
         private System.Windows.Forms.TextBox _commentTextBox;
         private System.Windows.Forms.Button _generateButon;

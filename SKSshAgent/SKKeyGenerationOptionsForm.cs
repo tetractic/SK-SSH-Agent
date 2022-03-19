@@ -140,6 +140,21 @@ namespace SKSshAgent
             DialogResult = DialogResult.OK;
         }
 
+        private void ShowToolTip(object sender, EventArgs e)
+        {
+            var control = (Control)sender;
+            string text = _toolTip.GetToolTip(control);
+            _toolTip.Show(string.Empty, control, 0);
+            _toolTip.Show(text, control, 30000);
+            _toolTip.SetToolTip(control, text);
+        }
+
+        private void HideToolTip(object sender, EventArgs e)
+        {
+            var control = (Control)sender;
+            _toolTip.Hide(control);
+        }
+
         internal sealed class FormResult
         {
             internal const int UserIdLength = 32;  // Including NUL terminator.

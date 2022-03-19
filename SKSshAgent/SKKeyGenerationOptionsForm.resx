@@ -57,4 +57,15 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <metadata name="_toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
+  <data name="_requireUserVerificationInfoIcon.ToolTip" xml:space="preserve">
+    <value>User verification is accomplished by requiring a PIN or by a
+mechanism that is built-in to the security key itself.  Not all
+security keys support user verification.
+
+When using the private key with OpenSSH, this option
+controls whether the user is prompted for a PIN.</value>
+  </data>
 </root>
