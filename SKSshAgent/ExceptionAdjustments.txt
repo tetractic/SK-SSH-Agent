@@ -1,0 +1,7 @@
+﻿# This file adjusts exception information used by Tetractic.CodeAnalysis.ExceptionAnalyzers.
+# Usage: <memberId>[ <accessor>] (-/+)<exceptionTypeId>
+# See ECMA-334, 5th Ed. § D.4.2 "ID string format" for a description of the ID format.
+
+P:System.Array.Length get -T:System.OverflowException
+M:System.Convert.ToBase64String(System.ReadOnlySpan{System.Byte},System.Base64FormattingOptions) -T:System.OutOfMemoryException
+M:System.String.Join``1(System.Char,System.Collections.Generic.IEnumerable{``0}) -T:System.OutOfMemoryException

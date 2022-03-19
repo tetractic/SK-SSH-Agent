@@ -1,0 +1,64 @@
+// Copyright 2022 Carl Reinke
+//
+// This file is part of a program that is licensed under the terms of the GNU
+// General Public License version 3 as published by the Free Software
+// Foundation.
+
+using System;
+using System.Collections.Immutable;
+
+namespace SKSshAgent.Cose
+{
+    internal sealed class CoseEcdsaSignature : CoseSignature
+    {
+        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentException"/>
+        public CoseEcdsaSignature(CoseAlgorithm algorithm, CoseEllipticCurve curve, ImmutableArray<byte> r, ImmutableArray<byte> s)
+            : base(CoseKeyType.EC2, algorithm)
+        {
+            switch (algorithm)
+            {
+                case CoseAlgorithm.ES256:
+                case CoseAlgorithm.ES384:
+                case CoseAlgorithm.ES512:
+                    switch (curve)
+                    {
+                        case CoseEllipticCurve.P256:
+                        case CoseEllipticCurve.P384:
+                        case CoseEllipticCurve.P521:
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(curve));
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(algorithm));
+            }
+            int keySizeBits = curve.GetKeySizeBits();
+            int keySizeBytes = Sec1.SizeBitsToLength(keySizeBits);
+            if (r == null)
+                throw new ArgumentNullException(nameof(r));
+            if (r.Length != keySizeBytes)
+                throw new ArgumentException("Invalid size for field element.", nameof(r));
+            if (Sec1.GetBitLength(r.AsSpan()) > keySizeBits)
+                throw new ArgumentOutOfRangeException(nameof(r));
+            if (s == null)
+                throw new ArgumentNullException(nameof(s));
+            if (s.Length != keySizeBytes)
+                throw new ArgumentException("Invalid size for field element.", nameof(s));
+            if (Sec1.GetBitLength(s.AsSpan()) > keySizeBits)
+                throw new ArgumentOutOfRangeException(nameof(s));
+
+            Curve = curve;
+            R = r;
+            S = s;
+        }
+
+        public CoseEllipticCurve Curve { get; }
+
+        public ImmutableArray<byte> R { get; }
+
+        public ImmutableArray<byte> S { get; }
+    }
+}

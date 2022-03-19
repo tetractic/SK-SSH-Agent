@@ -1,0 +1,60 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Features>strict</Features>
+    <Deterministic>true</Deterministic>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Resources\application_key.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Product>SK SSH Agent</Product>
+    <InformationalVersion>1.0</InformationalVersion>
+    <Copyright>© 2022 Carl Reinke</Copyright>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.txt" Link="LICENSE.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="ExceptionAdjustments.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\application_key.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.1.635-beta">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="System.Formats.Cbor" Version="6.0.0" />
+    <PackageReference Include="Tetractic.CodeAnalysis.ExceptionAnalyzers" Version="1.3.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>
