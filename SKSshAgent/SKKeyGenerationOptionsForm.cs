@@ -117,6 +117,8 @@ namespace SKSshAgent
             Encoding.UTF8.GetEncoder().Convert(userName, userId, flush: true, out _, out int bytesUsed, out bool completed);
             if (bytesUsed >= userId.Length || !completed)
             {
+                _ = _userIdTextBox.Focus();
+
                 _ = MessageBox.Show(this, "User ID must be less than 32 bytes.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
