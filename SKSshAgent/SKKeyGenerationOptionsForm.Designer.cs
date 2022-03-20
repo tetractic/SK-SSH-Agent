@@ -38,20 +38,20 @@ namespace SKSshAgent
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SKKeyGenerationOptionsForm));
             this._toolTip = new System.Windows.Forms.ToolTip(this.components);
             this._requireUserVerificationInfoIcon = new System.Windows.Forms.PictureBox();
-            this._applicationInfoIcon = new System.Windows.Forms.PictureBox();
+            this._applicationIdInfoIcon = new System.Windows.Forms.PictureBox();
             this._typeLabel = new System.Windows.Forms.Label();
             this._typeComboBox = new System.Windows.Forms.ComboBox();
             this._requireUserVerificationCheckBox = new System.Windows.Forms.CheckBox();
             this._userIdLabel = new System.Windows.Forms.Label();
             this._userIdTextBox = new System.Windows.Forms.TextBox();
-            this._applicationLabel = new System.Windows.Forms.Label();
-            this._applicationTextBox = new System.Windows.Forms.TextBox();
+            this._applicationIdLabel = new System.Windows.Forms.Label();
+            this._applicationIdTextBox = new System.Windows.Forms.TextBox();
             this._commentLabel = new System.Windows.Forms.Label();
             this._commentTextBox = new System.Windows.Forms.TextBox();
             this._generateButon = new System.Windows.Forms.Button();
             this._cancelButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this._requireUserVerificationInfoIcon)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this._applicationInfoIcon)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this._applicationIdInfoIcon)).BeginInit();
             this.SuspendLayout();
             // 
             // _toolTip
@@ -61,7 +61,7 @@ namespace SKSshAgent
             // _requireUserVerificationInfoIcon
             // 
             this._requireUserVerificationInfoIcon.Image = global::SKSshAgent.Properties.Resources.information;
-            this._requireUserVerificationInfoIcon.Location = new System.Drawing.Point(240, 41);
+            this._requireUserVerificationInfoIcon.Location = new System.Drawing.Point(254, 41);
             this._requireUserVerificationInfoIcon.Name = "_requireUserVerificationInfoIcon";
             this._requireUserVerificationInfoIcon.Size = new System.Drawing.Size(19, 19);
             this._requireUserVerificationInfoIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
@@ -71,23 +71,23 @@ namespace SKSshAgent
             this._requireUserVerificationInfoIcon.MouseEnter += new System.EventHandler(this.ShowToolTip);
             this._requireUserVerificationInfoIcon.MouseLeave += new System.EventHandler(this.HideToolTip);
             // 
-            // _applicationInfoIcon
+            // _applicationIdInfoIcon
             // 
-            this._applicationInfoIcon.Image = global::SKSshAgent.Properties.Resources.information;
-            this._applicationInfoIcon.Location = new System.Drawing.Point(349, 95);
-            this._applicationInfoIcon.Name = "_applicationInfoIcon";
-            this._applicationInfoIcon.Size = new System.Drawing.Size(23, 23);
-            this._applicationInfoIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-            this._applicationInfoIcon.TabIndex = 0;
-            this._applicationInfoIcon.TabStop = false;
-            this._toolTip.SetToolTip(this._applicationInfoIcon, "The application name must begin with \"ssh:\".");
-            this._applicationInfoIcon.MouseEnter += new System.EventHandler(this.ShowToolTip);
-            this._applicationInfoIcon.MouseLeave += new System.EventHandler(this.HideToolTip);
+            this._applicationIdInfoIcon.Image = global::SKSshAgent.Properties.Resources.information;
+            this._applicationIdInfoIcon.Location = new System.Drawing.Point(349, 95);
+            this._applicationIdInfoIcon.Name = "_applicationIdInfoIcon";
+            this._applicationIdInfoIcon.Size = new System.Drawing.Size(23, 23);
+            this._applicationIdInfoIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this._applicationIdInfoIcon.TabIndex = 0;
+            this._applicationIdInfoIcon.TabStop = false;
+            this._toolTip.SetToolTip(this._applicationIdInfoIcon, "The application ID must begin with \"ssh:\".");
+            this._applicationIdInfoIcon.MouseEnter += new System.EventHandler(this.ShowToolTip);
+            this._applicationIdInfoIcon.MouseLeave += new System.EventHandler(this.HideToolTip);
             // 
             // _typeLabel
             // 
             this._typeLabel.AutoSize = true;
-            this._typeLabel.Location = new System.Drawing.Point(49, 15);
+            this._typeLabel.Location = new System.Drawing.Point(63, 15);
             this._typeLabel.Name = "_typeLabel";
             this._typeLabel.Size = new System.Drawing.Size(34, 15);
             this._typeLabel.TabIndex = 0;
@@ -101,16 +101,16 @@ namespace SKSshAgent
             this._typeComboBox.DisplayMember = "Name";
             this._typeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this._typeComboBox.FormattingEnabled = true;
-            this._typeComboBox.Location = new System.Drawing.Point(89, 12);
+            this._typeComboBox.Location = new System.Drawing.Point(103, 12);
             this._typeComboBox.Name = "_typeComboBox";
-            this._typeComboBox.Size = new System.Drawing.Size(283, 23);
+            this._typeComboBox.Size = new System.Drawing.Size(269, 23);
             this._typeComboBox.TabIndex = 1;
             this._typeComboBox.SelectedIndexChanged += new System.EventHandler(this.HandleTypeComboBoxSelectedIndexChanged);
             // 
             // _requireUserVerificationCheckBox
             // 
             this._requireUserVerificationCheckBox.AutoSize = true;
-            this._requireUserVerificationCheckBox.Location = new System.Drawing.Point(89, 41);
+            this._requireUserVerificationCheckBox.Location = new System.Drawing.Point(103, 41);
             this._requireUserVerificationCheckBox.Name = "_requireUserVerificationCheckBox";
             this._requireUserVerificationCheckBox.Size = new System.Drawing.Size(154, 19);
             this._requireUserVerificationCheckBox.TabIndex = 2;
@@ -120,7 +120,7 @@ namespace SKSshAgent
             // _userIdLabel
             // 
             this._userIdLabel.AutoSize = true;
-            this._userIdLabel.Location = new System.Drawing.Point(36, 69);
+            this._userIdLabel.Location = new System.Drawing.Point(50, 69);
             this._userIdLabel.Name = "_userIdLabel";
             this._userIdLabel.Size = new System.Drawing.Size(47, 15);
             this._userIdLabel.TabIndex = 3;
@@ -130,40 +130,40 @@ namespace SKSshAgent
             // 
             this._userIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this._userIdTextBox.Location = new System.Drawing.Point(89, 66);
+            this._userIdTextBox.Location = new System.Drawing.Point(103, 66);
             this._userIdTextBox.Name = "_userIdTextBox";
             this._userIdTextBox.PlaceholderText = "(optional)";
-            this._userIdTextBox.Size = new System.Drawing.Size(283, 23);
+            this._userIdTextBox.Size = new System.Drawing.Size(269, 23);
             this._userIdTextBox.TabIndex = 4;
             // 
-            // _applicationLabel
+            // _applicationIdLabel
             // 
-            this._applicationLabel.AutoSize = true;
-            this._applicationLabel.Location = new System.Drawing.Point(12, 98);
-            this._applicationLabel.Name = "_applicationLabel";
-            this._applicationLabel.Size = new System.Drawing.Size(71, 15);
-            this._applicationLabel.TabIndex = 5;
-            this._applicationLabel.Text = "&Application:";
+            this._applicationIdLabel.AutoSize = true;
+            this._applicationIdLabel.Location = new System.Drawing.Point(12, 98);
+            this._applicationIdLabel.Name = "_applicationIdLabel";
+            this._applicationIdLabel.Size = new System.Drawing.Size(85, 15);
+            this._applicationIdLabel.TabIndex = 5;
+            this._applicationIdLabel.Text = "&Application ID:";
             // 
-            // _applicationTextBox
+            // _applicationIdTextBox
             // 
-            this._applicationTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this._applicationIdTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this._applicationTextBox.Location = new System.Drawing.Point(89, 95);
-            this._applicationTextBox.Name = "_applicationTextBox";
-            this._applicationTextBox.PlaceholderText = "ssh:(optional)";
-            this._applicationTextBox.Size = new System.Drawing.Size(260, 23);
-            this._applicationTextBox.TabIndex = 6;
-            this._applicationTextBox.TextChanged += new System.EventHandler(this.HandleApplicationTextBoxTextChanged);
-            this._applicationTextBox.Enter += new System.EventHandler(this.HandleApplicationTextBoxEnter);
-            this._applicationTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ApplicationTextBoxKeyDown);
-            this._applicationTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.HandleApplicationTextBoxKeyPress);
-            this._applicationTextBox.Leave += new System.EventHandler(this.HandleApplicationTextBoxLeave);
+            this._applicationIdTextBox.Location = new System.Drawing.Point(103, 95);
+            this._applicationIdTextBox.Name = "_applicationIdTextBox";
+            this._applicationIdTextBox.PlaceholderText = "ssh:(optional)";
+            this._applicationIdTextBox.Size = new System.Drawing.Size(246, 23);
+            this._applicationIdTextBox.TabIndex = 6;
+            this._applicationIdTextBox.TextChanged += new System.EventHandler(this.HandleApplicationIdTextBoxTextChanged);
+            this._applicationIdTextBox.Enter += new System.EventHandler(this.HandleApplicationIdTextBoxEnter);
+            this._applicationIdTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ApplicationIdTextBoxKeyDown);
+            this._applicationIdTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.HandleApplicationIdTextBoxKeyPress);
+            this._applicationIdTextBox.Leave += new System.EventHandler(this.HandleApplicationIdTextBoxLeave);
             // 
             // _commentLabel
             // 
             this._commentLabel.AutoSize = true;
-            this._commentLabel.Location = new System.Drawing.Point(22, 127);
+            this._commentLabel.Location = new System.Drawing.Point(36, 127);
             this._commentLabel.Name = "_commentLabel";
             this._commentLabel.Size = new System.Drawing.Size(61, 15);
             this._commentLabel.TabIndex = 7;
@@ -173,9 +173,9 @@ namespace SKSshAgent
             // 
             this._commentTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this._commentTextBox.Location = new System.Drawing.Point(89, 124);
+            this._commentTextBox.Location = new System.Drawing.Point(103, 124);
             this._commentTextBox.Name = "_commentTextBox";
-            this._commentTextBox.Size = new System.Drawing.Size(283, 23);
+            this._commentTextBox.Size = new System.Drawing.Size(269, 23);
             this._commentTextBox.TabIndex = 8;
             // 
             // _generateButon
@@ -206,11 +206,11 @@ namespace SKSshAgent
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this._cancelButton;
             this.ClientSize = new System.Drawing.Size(384, 191);
-            this.Controls.Add(this._applicationInfoIcon);
+            this.Controls.Add(this._applicationIdInfoIcon);
             this.Controls.Add(this._requireUserVerificationInfoIcon);
             this.Controls.Add(this._requireUserVerificationCheckBox);
-            this.Controls.Add(this._applicationTextBox);
-            this.Controls.Add(this._applicationLabel);
+            this.Controls.Add(this._applicationIdTextBox);
+            this.Controls.Add(this._applicationIdLabel);
             this.Controls.Add(this._userIdTextBox);
             this.Controls.Add(this._userIdLabel);
             this.Controls.Add(this._commentLabel);
@@ -227,7 +227,7 @@ namespace SKSshAgent
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Key Generation Options";
             ((System.ComponentModel.ISupportInitialize)(this._requireUserVerificationInfoIcon)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this._applicationInfoIcon)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this._applicationIdInfoIcon)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -241,9 +241,9 @@ namespace SKSshAgent
         private System.Windows.Forms.PictureBox _requireUserVerificationInfoIcon;
         private System.Windows.Forms.Label _userIdLabel;
         private System.Windows.Forms.TextBox _userIdTextBox;
-        private System.Windows.Forms.Label _applicationLabel;
-        private System.Windows.Forms.TextBox _applicationTextBox;
-        private System.Windows.Forms.PictureBox _applicationInfoIcon;
+        private System.Windows.Forms.Label _applicationIdLabel;
+        private System.Windows.Forms.TextBox _applicationIdTextBox;
+        private System.Windows.Forms.PictureBox _applicationIdInfoIcon;
         private System.Windows.Forms.Label _commentLabel;
         private System.Windows.Forms.TextBox _commentTextBox;
         private System.Windows.Forms.Button _generateButon;

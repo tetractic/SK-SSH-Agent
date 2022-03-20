@@ -212,7 +212,7 @@ namespace SKSshAgent
 
             _makeCredentialWorker.RunWorkerAsync(new MakeCredentialParams(
                 hWnd: new HWND(Handle),
-                rpId: options.Application,
+                rpId: options.ApplicationId,
                 userId: options.UserId,
                 userName: options.UserName,
                 keyTypeInfo: options.KeyTypeInfo,

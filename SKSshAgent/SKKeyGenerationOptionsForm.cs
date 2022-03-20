@@ -16,9 +16,9 @@ namespace SKSshAgent
     {
         private SshKeyTypeInfo _keyTypeInfo;
 
-        private const string _applicationPrefix = "ssh:";
+        private const string _applicationIdPrefix = "ssh:";
 
-        private string _previousApplicationText = string.Empty;
+        private string _previousApplicationIdText = string.Empty;
 
         public SKKeyGenerationOptionsForm()
         {
@@ -50,44 +50,44 @@ namespace SKSshAgent
             _keyTypeInfo = (SshKeyTypeInfo)_typeComboBox.SelectedItem;
         }
 
-        private void HandleApplicationTextBoxEnter(object sender, EventArgs e)
+        private void HandleApplicationIdTextBoxEnter(object sender, EventArgs e)
         {
-            if (_applicationTextBox.TextLength == 0)
+            if (_applicationIdTextBox.TextLength == 0)
             {
-                _applicationTextBox.Text = _applicationPrefix;
-                _applicationTextBox.Select(_applicationPrefix.Length, 0);
+                _applicationIdTextBox.Text = _applicationIdPrefix;
+                _applicationIdTextBox.Select(_applicationIdPrefix.Length, 0);
             }
 
-            _previousApplicationText = _applicationTextBox.Text;
+            _previousApplicationIdText = _applicationIdTextBox.Text;
         }
 
-        private void HandleApplicationTextBoxLeave(object sender, EventArgs e)
+        private void HandleApplicationIdTextBoxLeave(object sender, EventArgs e)
         {
-            _previousApplicationText = string.Empty;
+            _previousApplicationIdText = string.Empty;
 
-            if (_applicationTextBox.Text == _applicationPrefix)
-                _applicationTextBox.ResetText();
+            if (_applicationIdTextBox.Text == _applicationIdPrefix)
+                _applicationIdTextBox.ResetText();
         }
 
-        private void HandleApplicationTextBoxTextChanged(object sender, EventArgs e)
+        private void HandleApplicationIdTextBoxTextChanged(object sender, EventArgs e)
         {
-            if (!_applicationTextBox.Text.StartsWith(_applicationPrefix) &&
-                _previousApplicationText.Length != 0)
+            if (!_applicationIdTextBox.Text.StartsWith(_applicationIdPrefix) &&
+                _previousApplicationIdText.Length != 0)
             {
                 SystemSounds.Beep.Play();
 
-                _applicationTextBox.Text = _previousApplicationText;
-                _applicationTextBox.Select(_applicationPrefix.Length, 0);
+                _applicationIdTextBox.Text = _previousApplicationIdText;
+                _applicationIdTextBox.Select(_applicationIdPrefix.Length, 0);
             }
 
-            _previousApplicationText = _applicationTextBox.Text;
+            _previousApplicationIdText = _applicationIdTextBox.Text;
         }
 
-        private void ApplicationTextBoxKeyDown(object sender, KeyEventArgs e)
+        private void ApplicationIdTextBoxKeyDown(object sender, KeyEventArgs e)
         {
             // Try to prevent the user from accidentally deleting the prefix.
             if (e.KeyCode == Keys.Delete &&
-                _applicationTextBox.SelectionStart < _applicationPrefix.Length)
+                _applicationIdTextBox.SelectionStart < _applicationIdPrefix.Length)
             {
                 SystemSounds.Beep.Play();
 
@@ -95,13 +95,13 @@ namespace SKSshAgent
             }
         }
 
-        private void HandleApplicationTextBoxKeyPress(object sender, KeyPressEventArgs e)
+        private void HandleApplicationIdTextBoxKeyPress(object sender, KeyPressEventArgs e)
         {
             // Try to prevent the user from accidentally deleting the prefix.
             if (e.KeyChar == 8 &&
-                (_applicationTextBox.SelectionStart < _applicationPrefix.Length ||
-                 (_applicationTextBox.SelectionStart == _applicationPrefix.Length &&
-                  _applicationTextBox.SelectionLength == 0)))
+                (_applicationIdTextBox.SelectionStart < _applicationIdPrefix.Length ||
+                 (_applicationIdTextBox.SelectionStart == _applicationIdPrefix.Length &&
+                  _applicationIdTextBox.SelectionLength == 0)))
             {
                 SystemSounds.Beep.Play();
 
@@ -122,19 +122,19 @@ namespace SKSshAgent
             }
             userId[userId.Length - 1] = 0;
 
-            if (_applicationTextBox.TextLength > 0 && !_applicationTextBox.Text.StartsWith(_applicationPrefix))
-                _applicationTextBox.Text = string.Empty;
+            if (_applicationIdTextBox.TextLength > 0 && !_applicationIdTextBox.Text.StartsWith(_applicationIdPrefix))
+                _applicationIdTextBox.Text = string.Empty;
 
-            string application = _applicationTextBox.TextLength > 0
-                ? _applicationTextBox.Text
-                : _applicationPrefix;
+            string applicationId = _applicationIdTextBox.TextLength > 0
+                ? _applicationIdTextBox.Text
+                : _applicationIdPrefix;
 
             Result = new FormResult(
                 keyTypeInfo: _keyTypeInfo,
                 userVerificationRequired: _requireUserVerificationCheckBox.Checked,
                 userName: userName,
                 userId: userId,
-                application: application,
+                applicationId: applicationId,
                 comment: _commentTextBox.Text);
 
             DialogResult = DialogResult.OK;
@@ -159,13 +159,13 @@ namespace SKSshAgent
         {
             internal const int UserIdLength = 32;  // Including NUL terminator.
 
-            internal FormResult(SshKeyTypeInfo keyTypeInfo, bool userVerificationRequired, string userName, byte[] userId, string application, string comment)
+            internal FormResult(SshKeyTypeInfo keyTypeInfo, bool userVerificationRequired, string userName, byte[] userId, string applicationId, string comment)
             {
                 KeyTypeInfo = keyTypeInfo;
                 UserVerificationRequired = userVerificationRequired;
                 UserName = userName;
                 UserId = userId;
-                Application = application;
+                ApplicationId = applicationId;
                 Comment = comment;
             }
 
@@ -177,7 +177,7 @@ namespace SKSshAgent
 
             public byte[] UserId { get; } = new byte[UserIdLength];
 
-            public string Application { get; private set; }
+            public string ApplicationId { get; private set; }
 
             public string Comment { get; private set; }
         }
