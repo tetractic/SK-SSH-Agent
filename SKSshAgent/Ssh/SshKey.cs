@@ -32,36 +32,6 @@ namespace SKSshAgent.Ssh
 
         public SshKeyTypeInfo KeyTypeInfo { get; }
 
-        public byte[] GetSha256Fingerprint()
-        {
-            var buffer = new ArrayBufferWriter<byte>();
-            var writer = new SshWireWriter(buffer);
-            WritePublicKeyTo(ref writer);
-            writer.Flush();
-            return SHA256.HashData(buffer.WrittenSpan);
-        }
-
-        public byte[] GetMd5Fingerprint()
-        {
-            var buffer = new ArrayBufferWriter<byte>();
-            var writer = new SshWireWriter(buffer);
-            WritePublicKeyTo(ref writer);
-            writer.Flush();
-            return MD5.HashData(buffer.WrittenSpan);
-        }
-
-        public virtual string GetOpenSshKeyAuthorization(string comment)
-        {
-            var buffer = new ArrayBufferWriter<byte>();
-            var writer = new SshWireWriter(buffer);
-            WritePublicKeyTo(ref writer);
-            writer.Flush();
-
-            string base64Blob = Convert.ToBase64String(buffer.WrittenSpan);
-
-            return $"{KeyTypeInfo.Name} {base64Blob} {comment}";
-        }
-
         /// <exception cref="InvalidDataException"/>
         /// <exception cref="SshWireContentException"/>
         /// <exception cref="NotSupportedException"/>
@@ -188,10 +158,6 @@ namespace SKSshAgent.Ssh
             };
         }
 
-        public abstract void WritePublicKeyTo(ref SshWireWriter writer);
-
-        public abstract void WritePrivateKeyTo(ref SshWireWriter writer);
-
         public char[] FormatOpenSshPublicKey(string comment)
         {
             var buffer = new ArrayBufferWriter<byte>();
@@ -266,6 +232,40 @@ namespace SKSshAgent.Ssh
             writer.Flush();
 
             return PemEncoding.Write(_openSshPrivateKeyLabel, buffer.WrittenSpan);
+        }
+
+        public abstract void WritePublicKeyTo(ref SshWireWriter writer);
+
+        public abstract void WritePrivateKeyTo(ref SshWireWriter writer);
+
+        public byte[] GetSha256Fingerprint()
+        {
+            var buffer = new ArrayBufferWriter<byte>();
+            var writer = new SshWireWriter(buffer);
+            WritePublicKeyTo(ref writer);
+            writer.Flush();
+            return SHA256.HashData(buffer.WrittenSpan);
+        }
+
+        public byte[] GetMd5Fingerprint()
+        {
+            var buffer = new ArrayBufferWriter<byte>();
+            var writer = new SshWireWriter(buffer);
+            WritePublicKeyTo(ref writer);
+            writer.Flush();
+            return MD5.HashData(buffer.WrittenSpan);
+        }
+
+        public virtual string GetOpenSshKeyAuthorization(string comment)
+        {
+            var buffer = new ArrayBufferWriter<byte>();
+            var writer = new SshWireWriter(buffer);
+            WritePublicKeyTo(ref writer);
+            writer.Flush();
+
+            string base64Blob = Convert.ToBase64String(buffer.WrittenSpan);
+
+            return $"{KeyTypeInfo.Name} {base64Blob} {comment}";
         }
 
         public abstract bool Equals(SshKey? other, bool publicOnly);
