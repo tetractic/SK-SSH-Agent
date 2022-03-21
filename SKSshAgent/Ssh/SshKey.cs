@@ -111,8 +111,9 @@ namespace SKSshAgent.Ssh
 
             string comment = privateReader.ReadString();
 
-            if (reader.BytesRemaining != 0)
-                throw new InvalidDataException("Excess data.");
+            for (byte i = 1; privateReader.BytesRemaining > 0; ++i)
+                if (privateReader.ReadByte() != i)
+                    throw new InvalidDataException("Invalid padding.");
 
             if (!publicKey.Equals(privateKey, publicOnly: true))
                 throw new InvalidDataException("Mismatched public and private keys.");
@@ -226,6 +227,12 @@ namespace SKSshAgent.Ssh
             WritePrivateKeyTo(ref privateWriter);
             privateWriter.WriteString(comment);
             privateWriter.Flush();
+
+            for (byte i = 1; innerBuffer.WrittenCount % 8 != 0; ++i)
+            {
+                innerBuffer.GetSpan(1)[0] = i;
+                innerBuffer.Advance(1);
+            }
 
             writer.WriteByteString(innerBuffer.WrittenSpan);
 
