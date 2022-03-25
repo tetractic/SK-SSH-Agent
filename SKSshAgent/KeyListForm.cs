@@ -186,38 +186,134 @@ namespace SKSshAgent
             _ = LoadKeyFromFileCore(filePath, async: true);
         }
 
-        private void HandleGenerateInSecurityKeyMenuItemClicked(object sender, EventArgs e)
+        private async void HandleGenerateInSecurityKeyMenuItemClicked(object sender, EventArgs e)
         {
             _statusLabel.Text = string.Empty;
 
             if (!CheckWebAuthnVersion(WEBAUTHN_API_VERSION_1))
                 return;
 
-            if (_makeCredentialWorker.IsBusy)
-            {
-                _ = MessageBox.Show(this, "Key generation is currently in progress.", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
             var optionsForm = new SKKeyGenerationOptionsForm();
             if (optionsForm.ShowDialog(this) != DialogResult.OK)
                 return;
             var options = optionsForm.Result!;
 
-            _statusLabel.Text = "Initiating key generation...";
+            string rpId = options.ApplicationId;
+            byte[] userId = options.UserId;
+            string userName = options.UserName;
+            var keyTypeInfo = options.KeyTypeInfo;
 
             var flags = OpenSshSKFlags.UserPresenceRequired;
             if (options.UserVerificationRequired)
                 flags |= OpenSshSKFlags.UserVerificationRequired;
 
-            _makeCredentialWorker.RunWorkerAsync(new MakeCredentialParams(
-                hWnd: new HWND(Handle),
-                rpId: options.ApplicationId,
-                userId: options.UserId,
-                userName: options.UserName,
-                keyTypeInfo: options.KeyTypeInfo,
-                flags: flags,
-                comment: options.Comment));
+            byte[] challenge = new byte[64];
+            using (var rng = RandomNumberGenerator.Create())
+                rng.GetBytes(challenge);
+
+            string comment = options.Comment;
+
+            _statusLabel.Text = "Initiating key generation...";
+
+            SshKey key;
+            try
+            {
+                var hWnd = new HWND(Handle);
+                var result = await Task.Run(() => WebAuthnApi.MakeCredential(hWnd, rpId, userId, userName, keyTypeInfo, flags, challenge, CancellationToken.None)).ConfigureAwait(true);
+
+                var attestedCredentialData = result.AuthenticatorData.AttestedCredentialData;
+                if (attestedCredentialData == null)
+                    throw new InvalidDataException("Security key response did not contain a credential.");
+
+                var webAuthnKey = attestedCredentialData.CredentialPublicKey;
+
+                // OpenSSH clears the UserVerificationRequired flag if authenticator info options
+                // includes "uv", but we don't have access to authenticator info.  And we don't want
+                // to clear it anyway since it's how we decide whether to require user verification
+                // from the authenticator.
+
+                switch (webAuthnKey.KeyType)
+                {
+                    case CoseKeyType.EC2:
+                    {
+                        var webAuthnEC2Key = (CoseEC2Key)webAuthnKey;
+
+                        var application = Encoding.UTF8.GetBytes(rpId).ToImmutableArray();
+                        var keyHandle = attestedCredentialData.CredentialId;
+                        key = webAuthnEC2Key.ToOpenSshKey(application, flags, keyHandle);
+                        break;
+                    }
+                    default:
+                        throw new UnreachableException();
+                }
+
+                string userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                string sshDirectoryPath = Path.Combine(userProfilePath, ".ssh");
+
+                if (!Directory.Exists(sshDirectoryPath))
+                {
+                    try
+                    {
+                        _ = Directory.CreateDirectory(sshDirectoryPath);
+                    }
+                    catch (Exception ex)
+                        when (ex is ArgumentException ||
+                              ex is PathTooLongException ||
+                              ex is DirectoryNotFoundException ||
+                              ex is UnauthorizedAccessException ||
+                              ex is IOException)
+                    {
+                        // Nothing to be done about it.
+                    }
+                }
+
+                var dialog = new SaveFileDialog()
+                {
+                    FileName = GetDefaultKeyFileName(keyTypeInfo),
+                    Filter = "OpenSSH Private Key|*.*",
+                    InitialDirectory = sshDirectoryPath,
+                    OverwritePrompt = true,
+                };
+                var saveResult = dialog.ShowDialog(this);
+                if (saveResult != DialogResult.OK)
+                    return;
+
+                using (var fileStream = new FileStream(dialog.FileName, FileMode.Create, FileAccess.Write))
+                using (var fileWriter = new StreamWriter(fileStream))
+                    await fileWriter.WriteAsync(key.FormatOpenSshPrivateKey(comment)).ConfigureAwait(true);
+
+                using (var fileStream = new FileStream(dialog.FileName + ".pub", FileMode.Create, FileAccess.Write))
+                using (var fileWriter = new StreamWriter(fileStream))
+                    await fileWriter.WriteAsync(key.FormatOpenSshPublicKey(comment)).ConfigureAwait(true);
+            }
+            catch (OperationCanceledException)
+            {
+                _statusLabel.Text = "Key generation was canceled.";
+
+                return;
+            }
+            catch (Exception ex)
+            {
+                _statusLabel.Text = "Key generation failed.";
+
+                _ = MessageBox.Show(this, ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            _statusLabel.Text = "Key generation succeeded.";
+
+            var queryResult = MessageBox.Show(this, "Load the generated key?", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (queryResult == DialogResult.Yes)
+                _ = KeyList.Instance.AddKey(key, comment);
+
+            static string GetDefaultKeyFileName(SshKeyTypeInfo keyTypeInfo)
+            {
+                return keyTypeInfo.Type switch
+                {
+                    SshKeyType.OpenSshEcdsaSK => "id_ecdsa_sk",
+                    _ => throw new UnreachableException(),
+                };
+            }
         }
 
         private void HandleExitMenuItemClicked(object sender, EventArgs e)
@@ -382,159 +478,6 @@ namespace SKSshAgent
             }
 
             Activate();
-        }
-
-        private void HandleMakeCredentialWorkerWork(object sender, DoWorkEventArgs e)
-        {
-            var @params = (MakeCredentialParams)e.Argument!;
-            HWND hWnd = @params.HWnd;
-            string rpId = @params.RPId;
-            byte[] userId = @params.UserId;
-            string userName = @params.UserName;
-            var keyTypeInfo = @params.KeyTypeInfo;
-            var flags = @params.Flags;
-            string comment = @params.Comment;
-
-            byte[] challenge = new byte[64];
-            using (var rng = RandomNumberGenerator.Create())
-                rng.GetBytes(challenge);
-
-            var result = WebAuthnApi.MakeCredential(hWnd, rpId, userId, userName, keyTypeInfo, flags, challenge, CancellationToken.None);
-
-            var attestedCredentialData = result.AuthenticatorData.AttestedCredentialData;
-            if (attestedCredentialData == null)
-                throw new InvalidDataException("Security key response did not contain a credential.");
-
-            var webAuthnKey = attestedCredentialData.CredentialPublicKey;
-
-            // OpenSSH clears the UserVerificationRequired flag if authenticator info options
-            // includes "uv", but we don't have access to authenticator info.  And we don't want
-            // to clear it anyway since it's how we decide whether to require user verification
-            // from the authenticator.
-
-            SshKey sshKey;
-            switch (webAuthnKey.KeyType)
-            {
-                case CoseKeyType.EC2:
-                {
-                    var webAuthnEC2Key = (CoseEC2Key)webAuthnKey;
-
-                    var application = Encoding.UTF8.GetBytes(rpId).ToImmutableArray();
-                    var keyHandle = attestedCredentialData.CredentialId;
-                    sshKey = webAuthnEC2Key.ToOpenSshKey(application, flags, keyHandle);
-                    break;
-                }
-                default:
-                    throw new UnreachableException();
-            }
-
-            string userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            string sshDirectoryPath = Path.Combine(userProfilePath, ".ssh");
-
-            if (!Directory.Exists(sshDirectoryPath))
-            {
-                try
-                {
-                    _ = Directory.CreateDirectory(sshDirectoryPath);
-                }
-                catch (Exception ex)
-                    when (ex is ArgumentException ||
-                          ex is PathTooLongException ||
-                          ex is DirectoryNotFoundException ||
-                          ex is UnauthorizedAccessException ||
-                          ex is IOException)
-                {
-                    // Nothing to be done about it.
-                }
-            }
-
-            var dialog = new SaveFileDialog()
-            {
-                FileName = GetDefaultKeyFileName(keyTypeInfo),
-                Filter = "OpenSSH Private Key|*.*",
-                InitialDirectory = sshDirectoryPath,
-                OverwritePrompt = true,
-            };
-            var saveResult = Invoke(() => dialog.ShowDialog(this));
-            if (saveResult != DialogResult.OK)
-                return;
-
-            using (var fileStream = new FileStream(dialog.FileName, FileMode.Create, FileAccess.Write))
-            using (var fileWriter = new StreamWriter(fileStream))
-                fileWriter.Write(sshKey.FormatOpenSshPrivateKey(comment));
-
-            using (var fileStream = new FileStream(dialog.FileName + ".pub", FileMode.Create, FileAccess.Write))
-            using (var fileWriter = new StreamWriter(fileStream))
-                fileWriter.Write(sshKey.FormatOpenSshPublicKey(comment));
-
-            e.Result = new MakeCredentialResults(sshKey, comment);
-
-            static string GetDefaultKeyFileName(SshKeyTypeInfo keyTypeInfo)
-            {
-                return keyTypeInfo.Type switch
-                {
-                    SshKeyType.OpenSshEcdsaSK => "id_ecdsa_sk",
-                    _ => throw new UnreachableException(),
-                };
-            }
-        }
-
-        private void HandleMakeCredentialWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (e.Cancelled || e.Error is OperationCanceledException)
-            {
-                _statusLabel.Text = "Key generation was canceled.";
-            }
-            else if (e.Error != null)
-            {
-                _statusLabel.Text = "Key generation failed.";
-
-                _ = MessageBox.Show(this, e.Error.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            else
-            {
-                _statusLabel.Text = "Key generation succeeded.";
-
-                var results = (MakeCredentialResults)e.Result!;
-
-                var queryResult = MessageBox.Show(this, "Load the generated key?", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                if (queryResult == DialogResult.Yes)
-                    _ = KeyList.Instance.AddKey(results.Key, results.Comment);
-            }
-        }
-
-        private sealed class MakeCredentialParams
-        {
-            public MakeCredentialParams(HWND hWnd, string rpId, byte[] userId, string userName, SshKeyTypeInfo keyTypeInfo, OpenSshSKFlags flags, string comment)
-            {
-                HWnd = hWnd;
-                RPId = rpId;
-                UserId = userId;
-                UserName = userName;
-                KeyTypeInfo = keyTypeInfo;
-                Flags = flags;
-                Comment = comment;
-            }
-
-            public HWND HWnd { get; }
-            public string RPId { get; }
-            public byte[] UserId { get; }
-            public string UserName { get; }
-            public SshKeyTypeInfo KeyTypeInfo { get; }
-            public OpenSshSKFlags Flags { get; }
-            public string Comment { get; internal set; }
-        }
-
-        private sealed class MakeCredentialResults
-        {
-            public MakeCredentialResults(SshKey key, string comment)
-            {
-                Key = key;
-                Comment = comment;
-            }
-
-            public SshKey Key { get; }
-            public string Comment { get; }
         }
 
         private sealed class KeyListItem : ListViewItem

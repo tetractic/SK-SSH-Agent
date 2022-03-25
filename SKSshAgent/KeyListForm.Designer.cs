@@ -63,7 +63,6 @@ namespace SKSshAgent
             this._loadFileNotifyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._showNotifyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._exitNotifyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this._makeCredentialWorker = new System.ComponentModel.BackgroundWorker();
             _keyMenuSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             _keyMenuSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             _notifyIconContextMenuSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -344,12 +343,6 @@ namespace SKSshAgent
             this._exitNotifyMenuItem.Text = "Exit";
             this._exitNotifyMenuItem.Click += new System.EventHandler(this.HandleExitMenuItemClicked);
             // 
-            // _makeCredentialWorker
-            // 
-            this._makeCredentialWorker.WorkerSupportsCancellation = true;
-            this._makeCredentialWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.HandleMakeCredentialWorkerWork);
-            this._makeCredentialWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.HandleMakeCredentialWorkerCompleted);
-            // 
             // KeyListForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -406,6 +399,5 @@ namespace SKSshAgent
         private ToolStripMenuItem _loadFileNotifyMenuItem;
         private ToolStripMenuItem _showNotifyMenuItem;
         private ToolStripMenuItem _exitNotifyMenuItem;
-        private System.ComponentModel.BackgroundWorker _makeCredentialWorker;
     }
 }
