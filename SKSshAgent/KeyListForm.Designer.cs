@@ -305,7 +305,7 @@ namespace SKSshAgent
             // _notifyIcon
             // 
             this._notifyIcon.ContextMenuStrip = this._notifyIconContextMenu;
-            this._notifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("_notifyIcon.Icon")));
+            this._notifyIcon.Icon = global::SKSshAgent.Properties.Resources.application_key_icon;
             this._notifyIcon.Text = "SK SSH Agent";
             this._notifyIcon.Visible = true;
             this._notifyIcon.Click += new System.EventHandler(this.HandleNotifyIconClicked);
@@ -358,7 +358,7 @@ namespace SKSshAgent
             this.Controls.Add(this._statusStrip);
             this.Controls.Add(this._menuStrip);
             this.Controls.Add(this._keyListView);
-            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Icon = global::SKSshAgent.Properties.Resources.application_key_icon;
             this.MainMenuStrip = this._menuStrip;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
