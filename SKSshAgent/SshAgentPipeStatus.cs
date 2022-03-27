@@ -6,7 +6,7 @@
 
 namespace SKSshAgent
 {
-    public enum SshAgentPipeStatus
+    internal enum SshAgentPipeStatus
     {
         NotStarted = 0,
         Starting,

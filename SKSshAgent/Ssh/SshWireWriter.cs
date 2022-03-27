@@ -69,6 +69,17 @@ namespace SKSshAgent.Ssh
         }
 
         /// <exception cref="InvalidOperationException"/>
+        public void WriteBytes(ReadOnlySpan<byte> bytes)
+        {
+            int length = bytes.Length;
+
+            EnsureCapacity(length);
+
+            bytes.CopyTo(_span);
+            Advance(length);
+        }
+
+        /// <exception cref="InvalidOperationException"/>
         public void WriteUInt32(uint value)
         {
             EnsureCapacity(4);

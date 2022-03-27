@@ -26,20 +26,38 @@ namespace SKSshAgent
 
         public event ChangedEventHandler? Changed;
 
-        public bool AddKey(SshKey key, string comment)
+        public bool AddOrUpgradeKey(SshKey key, string comment)
         {
             for (var items = _items; ;)
             {
-                foreach (var item in items)
-                    if (item.Key.Equals(key, publicOnly: true))
-                        return false;
+                ImmutableArray<(SshKey Key, string Comment)> newItems;
+                for (int i = 0; ; i++)
+                {
+                    if (i == items.Length)
+                    {
+                        newItems = items.Add((key, comment));
+                        break;
+                    }
 
-                var newItems = items.Add((key, comment));
+                    var item = items[i];
+
+                    if (item.Key.Equals(key, publicOnly: true))
+                    {
+                        if (!item.Key.HasDecryptedPrivateKey && key.HasDecryptedPrivateKey)
+                        {
+                            newItems = items.SetItem(i, (key, comment));
+                            break;
+                        }
+
+                        return false;
+                    }
+                }
 
                 var oldItems = ImmutableInterlocked.InterlockedCompareExchange(ref _items, newItems, items);
                 if (oldItems == items)
                 {
                     Changed?.Invoke(this);
+
                     return true;
                 }
 
@@ -57,7 +75,9 @@ namespace SKSshAgent
                     if (i == items.Length)
                         return false;
 
-                    if (items[i].Key.Equals(key, publicOnly: true))
+                    var item = items[i];
+
+                    if (item.Key.Equals(key, publicOnly: true))
                     {
                         newItems = items.RemoveAt(i);
                         break;
@@ -68,6 +88,7 @@ namespace SKSshAgent
                 if (oldItems == items)
                 {
                     Changed?.Invoke(this);
+
                     return true;
                 }
 

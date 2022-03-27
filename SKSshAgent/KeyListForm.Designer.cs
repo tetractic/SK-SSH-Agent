@@ -34,20 +34,22 @@ namespace SKSshAgent
             System.Windows.Forms.ToolStripSeparator _keyMenuSeparator1;
             System.Windows.Forms.ToolStripSeparator _keyMenuSeparator2;
             System.Windows.Forms.ToolStripSeparator _notifyIconContextMenuSeparator1;
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KeyListForm));
             this._keyListTypeColumnHeader = new System.Windows.Forms.ColumnHeader();
-            this._keyListHashColumnHeader = new System.Windows.Forms.ColumnHeader();
+            this._keyListFingerprintColumnHeader = new System.Windows.Forms.ColumnHeader();
             this._keyListCommentColumnHeader = new System.Windows.Forms.ColumnHeader();
             this._keyListView = new System.Windows.Forms.ListView();
             this._keyListContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this._decryptContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._copyOpenSshKeyAuthorizationContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._copyOpenSshPublicKeyContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._removeKeyContextMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this._keyListImageList = new System.Windows.Forms.ImageList(this.components);
             this._keyMenu = new System.Windows.Forms.ToolStripMenuItem();
             this._loadFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._generateInSecurityKeyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._editMenu = new System.Windows.Forms.ToolStripMenuItem();
+            this._decryptMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._copyOpenSshKeyAuthorizationMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._copyOpenSshPublicKeyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._removeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -92,10 +94,10 @@ namespace SKSshAgent
             this._keyListTypeColumnHeader.Text = "Type";
             this._keyListTypeColumnHeader.Width = 180;
             // 
-            // _keyListHashColumnHeader
+            // _keyListFingerprintColumnHeader
             // 
-            this._keyListHashColumnHeader.Text = "Hash";
-            this._keyListHashColumnHeader.Width = 360;
+            this._keyListFingerprintColumnHeader.Text = "Fingerprint";
+            this._keyListFingerprintColumnHeader.Width = 360;
             // 
             // _keyListCommentColumnHeader
             // 
@@ -109,7 +111,7 @@ namespace SKSshAgent
             | System.Windows.Forms.AnchorStyles.Right)));
             this._keyListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this._keyListTypeColumnHeader,
-            this._keyListHashColumnHeader,
+            this._keyListFingerprintColumnHeader,
             this._keyListCommentColumnHeader});
             this._keyListView.ContextMenuStrip = this._keyListContextMenu;
             this._keyListView.FullRowSelect = true;
@@ -117,6 +119,7 @@ namespace SKSshAgent
             this._keyListView.Location = new System.Drawing.Point(-1, 22);
             this._keyListView.Name = "_keyListView";
             this._keyListView.Size = new System.Drawing.Size(786, 317);
+            this._keyListView.SmallImageList = this._keyListImageList;
             this._keyListView.TabIndex = 1;
             this._keyListView.UseCompatibleStateImageBehavior = false;
             this._keyListView.View = System.Windows.Forms.View.Details;
@@ -125,12 +128,21 @@ namespace SKSshAgent
             // _keyListContextMenu
             // 
             this._keyListContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this._decryptContextMenuItem,
             this._copyOpenSshKeyAuthorizationContextMenuItem,
             this._copyOpenSshPublicKeyContextMenuItem,
             this._removeKeyContextMenuItem});
             this._keyListContextMenu.Name = "_keyListContextMenuStrip";
-            this._keyListContextMenu.Size = new System.Drawing.Size(253, 70);
+            this._keyListContextMenu.Size = new System.Drawing.Size(253, 114);
             this._keyListContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.HandleKeyListContextMenuOpening);
+            // 
+            // _decryptContextMenuItem
+            // 
+            this._decryptContextMenuItem.Image = global::SKSshAgent.Properties.Resources.lock_go;
+            this._decryptContextMenuItem.Name = "_decryptContextMenuItem";
+            this._decryptContextMenuItem.Size = new System.Drawing.Size(252, 22);
+            this._decryptContextMenuItem.Text = "&Decrypt";
+            this._decryptContextMenuItem.Click += new System.EventHandler(this.HandleDecryptMenuItemClicked);
             // 
             // _copyOpenSshKeyAuthorizationContextMenuItem
             // 
@@ -155,6 +167,12 @@ namespace SKSshAgent
             this._removeKeyContextMenuItem.Size = new System.Drawing.Size(252, 22);
             this._removeKeyContextMenuItem.Text = "&Remove";
             this._removeKeyContextMenuItem.Click += new System.EventHandler(this.HandleRemoveMenuItemClicked);
+            // 
+            // _keyListImageList
+            // 
+            this._keyListImageList.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
+            this._keyListImageList.ImageSize = new System.Drawing.Size(16, 16);
+            this._keyListImageList.TransparentColor = System.Drawing.Color.Transparent;
             // 
             // _keyMenu
             // 
@@ -197,12 +215,21 @@ namespace SKSshAgent
             // _editMenu
             // 
             this._editMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this._decryptMenuItem,
             this._copyOpenSshKeyAuthorizationMenuItem,
             this._copyOpenSshPublicKeyMenuItem,
             this._removeMenuItem});
             this._editMenu.Name = "_editMenu";
             this._editMenu.Size = new System.Drawing.Size(39, 22);
             this._editMenu.Text = "&Edit";
+            // 
+            // _decryptMenuItem
+            // 
+            this._decryptMenuItem.Image = global::SKSshAgent.Properties.Resources.lock_go;
+            this._decryptMenuItem.Name = "_decryptMenuItem";
+            this._decryptMenuItem.Size = new System.Drawing.Size(294, 22);
+            this._decryptMenuItem.Text = "&Decrypt";
+            this._decryptMenuItem.Click += new System.EventHandler(this.HandleDecryptMenuItemClicked);
             // 
             // _copyOpenSshKeyAuthorizationMenuItem
             // 
@@ -371,7 +398,7 @@ namespace SKSshAgent
 
         #endregion
         private ColumnHeader _keyListTypeColumnHeader;
-        private ColumnHeader _keyListHashColumnHeader;
+        private ColumnHeader _keyListFingerprintColumnHeader;
         private ColumnHeader _keyListCommentColumnHeader;
         private ListView _keyListView;
         private ToolStripMenuItem _keyMenu;
@@ -379,13 +406,16 @@ namespace SKSshAgent
         private ToolStripMenuItem _generateInSecurityKeyMenuItem;
         private ToolStripMenuItem _exitMenuItem;
         private ToolStripMenuItem _editMenu;
+        private ToolStripMenuItem _decryptMenuItem;
         private ToolStripMenuItem _copyOpenSshKeyAuthorizationMenuItem;
         private ToolStripMenuItem _copyOpenSshPublicKeyMenuItem;
         private ToolStripMenuItem _removeMenuItem;
         private ToolStripMenuItem _helpMenu;
         private ToolStripMenuItem _aboutMenuItem;
         private MenuStrip _menuStrip;
+        private ImageList _keyListImageList;
         private ContextMenuStrip _keyListContextMenu;
+        private ToolStripMenuItem _decryptContextMenuItem;
         private ToolStripMenuItem _copyOpenSshKeyAuthorizationContextMenuItem;
         private ToolStripMenuItem _copyOpenSshPublicKeyContextMenuItem;
         private ToolStripMenuItem _removeKeyContextMenuItem;

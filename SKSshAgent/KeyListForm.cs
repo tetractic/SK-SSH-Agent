@@ -41,6 +41,9 @@ namespace SKSshAgent
             InitializeComponent();
 
             HandleCreated += HandleHandleCreated;
+
+            _keyListImageList.Images.Add(Resources.key);
+            _keyListImageList.Images.Add(Resources._lock);
         }
 
         public bool AllowVislble { get; set; }
@@ -118,6 +121,60 @@ namespace SKSshAgent
 
         internal void LoadKeyFromFile(string filePath) => LoadKeyFromFileCore(filePath, async: false).GetAwaiter().GetResult();
 
+        internal async Task<SshKey?> DecryptPrivateKeyAsync(SshKey key, bool agent = false)
+        {
+            while (true)
+            {
+                var form = new KeyDecryptionForm();
+                form.Fingerprint = "SHA256:" + Convert.ToBase64String(key.GetSha256Fingerprint()).TrimEnd('=');
+                if (agent)
+                {
+                    form.ShowIcon = true;
+                    form.StartPosition = FormStartPosition.CenterScreen;
+                    form.TopMost = true;
+                    form.Text += " — " + Text;
+                }
+                if (form.ShowDialog(this) != DialogResult.OK)
+                    return null;
+
+                byte[] password = form.Result!;
+
+                try
+                {
+                    // Decryption could take a while by design, so let's not do it on the UI thread.
+                    var result = await Task.Run<(SshKey Key, string Comment)?>(() =>
+                    {
+                        return key.TryDecryptPrivateKey(password, out var privateKey, out string? privateComment)
+                            ? (privateKey, privateComment)
+                            : null;
+                    }).ConfigureAwait(true);
+
+                    if (result is (SshKey privateKey, string privateComment))
+                    {
+                        _ = KeyList.Instance.AddOrUpgradeKey(privateKey, privateComment);
+
+                        return privateKey;
+                    }
+                }
+                catch (Exception ex)
+                    when (ex is SshWireContentException ||
+                          ex is InvalidDataException ||
+                          ex is NotSupportedException ||
+                          ex is CryptographicException)
+                {
+                    _ = MessageBox.Show(this, ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                    return null;
+                }
+                finally
+                {
+                    Array.Clear(password);
+                }
+
+                _ = MessageBox.Show(this, "Incorrect password.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
         private async Task LoadKeyFromFileCore(string filePath, bool async)
         {
             try
@@ -150,7 +207,7 @@ namespace SKSshAgent
                         throw new UnreachableException();
                 }
 
-                _statusLabel.Text = KeyList.Instance.AddKey(key, comment)
+                _statusLabel.Text = KeyList.Instance.AddOrUpgradeKey(key, comment)
                     ? "Loaded key from file."
                     : "Key was already loaded.";
             }
@@ -167,12 +224,12 @@ namespace SKSshAgent
             KeyList.Instance.Changed += HandleKeyListChanged;
             HandleKeyListChanged(KeyList.Instance);
 
-            _openSshPipe = new OpenSshPipe(new HWND(Handle));
+            _openSshPipe = new OpenSshPipe(this);
             _openSshPipe.StatusChanged += HandlePipeStatusChanged;
             HandlePipeStatusChanged(_openSshPipe, _openSshPipe.Status);
             _openSshPipeStartTask = Task.Run(() => _openSshPipe.StartAsync(CancellationToken.None));
 
-            _pageantPipe = new PageantPipe(new HWND(Handle));
+            _pageantPipe = new PageantPipe(this);
             _pageantPipe.StatusChanged += HandlePipeStatusChanged;
             HandlePipeStatusChanged(_pageantPipe, _pageantPipe.Status);
             _pageantPipeStartTask = Task.Run(() => _pageantPipe.StartAsync(CancellationToken.None));
@@ -308,7 +365,18 @@ namespace SKSshAgent
 
                 using (var fileStream = new FileStream(dialog.FileName, FileMode.Create, FileAccess.Write))
                 using (var fileWriter = new StreamWriter(fileStream))
-                    await fileWriter.WriteAsync(key.FormatOpenSshPrivateKey(comment)).ConfigureAwait(true);
+                {
+                    var kdfInfo = options.KdfInfo;
+                    byte[] password = options.Password;
+                    uint kdfRounds = options.KdfRounds;
+                    var cipherInfo = options.CipherInfo;
+
+                    char[] formattedPrivateKey = cipherInfo == SshCipherInfo.None
+                        ? key.FormatOpenSshPrivateKey(comment)
+                        : key.FormatOpenSshPrivateKey(comment, password, kdfInfo, kdfRounds, cipherInfo);
+
+                    await fileWriter.WriteAsync(formattedPrivateKey).ConfigureAwait(true);
+                }
 
                 using (var fileStream = new FileStream(dialog.FileName + ".pub", FileMode.Create, FileAccess.Write))
                 using (var fileWriter = new StreamWriter(fileStream))
@@ -332,7 +400,7 @@ namespace SKSshAgent
 
             var queryResult = MessageBox.Show(this, "Load the generated key?", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (queryResult == DialogResult.Yes)
-                _ = KeyList.Instance.AddKey(key, comment);
+                _ = KeyList.Instance.AddOrUpgradeKey(key, comment);
 
             static string GetDefaultKeyFileName(SshKeyTypeInfo keyTypeInfo)
             {
@@ -351,14 +419,40 @@ namespace SKSshAgent
             Close();
         }
 
+        private async void HandleDecryptMenuItemClicked(object sender, EventArgs e)
+        {
+            foreach (KeyListItem item in _keyListView.SelectedItems)
+            {
+                if (item.Key.EncryptedPrivateKey != null &&
+                    await DecryptPrivateKeyAsync(item.Key).ConfigureAwait(true) is null)
+                {
+                    break;
+                }
+            }
+        }
+
         private void HandleCopyOpenSshKeyAuthorizationMenuItemClicked(object sender, EventArgs e)
         {
+            bool warnAboutMissingOptions = false;
+
             string text = "";
             foreach (KeyListItem item in _keyListView.SelectedItems)
             {
+                var key = item.Key;
+
+                if (!key.HasDecryptedPrivateKey)
+                {
+                    switch (key.KeyTypeInfo.Type)
+                    {
+                        case SshKeyType.OpenSshEcdsaSK:
+                            warnAboutMissingOptions = true;
+                            break;
+                    }
+                }
+
                 if (text.Length > 0)
                     text += "\n";
-                text += item.Key.GetOpenSshKeyAuthorization(item.Comment);
+                text += key.GetOpenSshKeyAuthorization(item.Comment);
             }
 
             try
@@ -369,6 +463,9 @@ namespace SKSshAgent
             {
                 _ = MessageBox.Show(this, "The clipboard is in use by another application.", Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+
+            if (warnAboutMissingOptions)
+                _ = MessageBox.Show(this, "The copied key authorization may be missing options that are necessary for it to work as intended.  Key authorization options cannot be determined while a key is encrypted.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private void HandleCopyOpenSshPublicKeyMenuItemClicked(object sender, EventArgs e)
@@ -408,13 +505,25 @@ namespace SKSshAgent
             _copyOpenSshKeyAuthorizationMenuItem.Enabled = hasSelection;
             _copyOpenSshPublicKeyMenuItem.Enabled = hasSelection;
             _removeMenuItem.Enabled = hasSelection;
+
+            bool hasEncryptedSelection = false;
+            foreach (KeyListItem item in _keyListView.SelectedItems)
+            {
+                if (item.Key.EncryptedPrivateKey != null)
+                {
+                    hasEncryptedSelection = true;
+                    break;
+                }
+            }
+            _decryptMenuItem.Enabled = hasEncryptedSelection;
+            _decryptContextMenuItem.Enabled = hasEncryptedSelection;
         }
 
         private void HandleKeyListChanged(KeyList keyList)
         {
             Invoke(() =>
             {
-                var selectedKeys = new HashSet<SshKey>();
+                var selectedKeys = new HashSet<SshKey>(SshPublicKeyEqualityComparer.Instance);
                 foreach (KeyListItem item in _keyListView.SelectedItems)
                     _ = selectedKeys.Add(item.Key);
 
@@ -514,6 +623,10 @@ namespace SKSshAgent
             {
                 Key = key;
                 Comment = comment;
+
+                bool isEncrypted = key.EncryptedPrivateKey != null;
+
+                ImageIndex = isEncrypted ? 1 : 0;
 
                 Text = key.KeyTypeInfo.Name;
                 _ = SubItems.Add("SHA256:" + Convert.ToBase64String(Key.GetSha256Fingerprint()).TrimEnd('='));

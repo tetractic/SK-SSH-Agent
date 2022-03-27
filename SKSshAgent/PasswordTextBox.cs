@@ -4,15 +4,17 @@
 // General Public License version 3 as published by the Free Software
 // Foundation.
 
+using System.Windows.Forms;
+
 namespace SKSshAgent
 {
-    internal sealed class OpenSshPipe : SshAgentPipe
+    internal class PasswordTextBox : TextBox
     {
-        public OpenSshPipe(KeyListForm form)
-            : base(form)
+        public PasswordTextBox()
         {
+            UseSystemPasswordChar = true;
         }
 
-        public override string PipeName => @"openssh-ssh-agent";
+        // TODO: Encrypt text or at least store it in a pinned array that can be cleared.
     }
 }

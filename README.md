@@ -50,7 +50,6 @@ Authentication works as it normally would with Pageant or OpenSSH agent.
  * The `no-touch-required` option is not supported because the [Windows WebAuthn APIs](https://docs.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/webauthnapis) do not support it.
  * The `resident` option is not supported.
  * Generating/loading key types other than `sk-ecdsa-sha2-nistp256@openssh.com` is not implemented.
- * Generating/loading encrypted private key files is not yet implemented.  (Note that the private key file contains only a key handle used by the security key to recall the private key.)
 
 ## Differences from OpenSSH
 

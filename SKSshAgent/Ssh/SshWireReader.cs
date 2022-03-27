@@ -37,6 +37,20 @@ namespace SKSshAgent.Ssh
             return value;
         }
 
+        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="SshWireContentException"/>
+        public ReadOnlySpan<byte> ReadBytes(int length)
+        {
+            if (length < 0)
+                throw new ArgumentOutOfRangeException(nameof(length));
+
+            EnsureLength(length);
+
+            var value = _span.Slice(0, length);
+            _span = _span.Slice(length);
+            return value;
+        }
+
         /// <exception cref="SshWireContentException"/>
         public uint ReadUInt32()
         {

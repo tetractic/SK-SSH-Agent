@@ -2,6 +2,15 @@
 # Usage: <memberId>[ <accessor>] (-/+)<exceptionTypeId>
 # See ECMA-334, 5th Ed. § D.4.2 "ID string format" for a description of the ID format.
 
+M:System.Security.Cryptography.AesGcm.#ctor(System.ReadOnlySpan{System.Byte}) $transitive -T:System.Security.Cryptography.CryptographicException
+
+M:System.Array.Copy(System.Array,System.Array,System.Int32) -T:System.ArrayTypeMismatchException
+M:System.Array.Copy(System.Array,System.Array,System.Int32) -T:System.RankException
 P:System.Array.Length get -T:System.OverflowException
+M:System.Buffers.IBufferWriter`1.Advance(System.Int32) +T:System.ArgumentOutOfRangeException
+M:System.Buffers.IBufferWriter`1.Advance(System.Int32) +T:System.InvalidOperationException
+M:System.Buffers.IBufferWriter`1.GetMemory(System.Int32) +T:System.ArgumentOutOfRangeException
+M:System.Buffers.IBufferWriter`1.GetSpan(System.Int32) +T:System.ArgumentOutOfRangeException
 M:System.Convert.ToBase64String(System.ReadOnlySpan{System.Byte},System.Base64FormattingOptions) -T:System.OutOfMemoryException
 M:System.String.Join``1(System.Char,System.Collections.Generic.IEnumerable{``0}) -T:System.OutOfMemoryException
+M:System.Windows.Forms.Clipboard.SetText(System.String) -T:System.Threading.ThreadStateException

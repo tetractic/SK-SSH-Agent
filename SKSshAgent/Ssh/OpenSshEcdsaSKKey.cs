@@ -5,8 +5,10 @@
 // Foundation.
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -21,7 +23,24 @@ namespace SKSshAgent.Ssh
         /// <exception cref="ArgumentNullException"/>
         /// <exception cref="ArgumentException"/>
         public OpenSshEcdsaSKKey(SshKeyTypeInfo keyTypeInfo, BigInteger x, BigInteger y, ImmutableArray<byte> application)
-            : base(keyTypeInfo)
+            : this(keyTypeInfo, x, y, application, hasDecryptedPrivateKey: false)
+        {
+        }
+
+        /// <exception cref="ArgumentException"/>
+        /// <exception cref="ArgumentNullException"/>
+        public OpenSshEcdsaSKKey(SshKeyTypeInfo keyTypeInfo, BigInteger x, BigInteger y, ImmutableArray<byte> application, OpenSshSKFlags flags, ImmutableArray<byte> keyHandle)
+            : this(keyTypeInfo, x, y, application, hasDecryptedPrivateKey: true)
+        {
+            if (keyHandle == null)
+                throw new ArgumentNullException(nameof(keyHandle));
+
+            _flags = flags;
+            _keyHandle = keyHandle;
+        }
+
+        private OpenSshEcdsaSKKey(SshKeyTypeInfo keyTypeInfo, BigInteger x, BigInteger y, ImmutableArray<byte> application, bool hasDecryptedPrivateKey)
+            : base(keyTypeInfo, hasDecryptedPrivateKey)
         {
             if (keyTypeInfo.Type != SshKeyType.OpenSshEcdsaSK)
                 throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
@@ -37,18 +56,12 @@ namespace SKSshAgent.Ssh
             Application = application;
         }
 
-        /// <exception cref="ArgumentException"/>
-        /// <exception cref="ArgumentNullException"/>
-        public OpenSshEcdsaSKKey(SshKeyTypeInfo keyTypeInfo, BigInteger x, BigInteger y, ImmutableArray<byte> application, OpenSshSKFlags flags, ImmutableArray<byte> keyHandle)
-            : this(keyTypeInfo, x, y, application)
+        private OpenSshEcdsaSKKey(OpenSshEcdsaSKKey key, SshEncryptedPrivateKey encryptedPrivateKey)
+            : base(key.KeyTypeInfo, encryptedPrivateKey)
         {
-            if (keyHandle == null)
-                throw new ArgumentNullException(nameof(keyHandle));
-
-            HasPrivateKey = true;
-
-            _flags = flags;
-            _keyHandle = keyHandle;
+            X = key.X;
+            Y = key.Y;
+            Application = key.Application;
         }
 
         public BigInteger X { get; }
@@ -56,8 +69,6 @@ namespace SKSshAgent.Ssh
         public BigInteger Y { get; }
 
         public ImmutableArray<byte> Application { get; }
-
-        public bool HasPrivateKey { get; }
 
         // TODO: Private parts should be protected using CryptProtectMemory.  (Though they are not particularly sensitive for an SK key.)
 
@@ -72,7 +83,7 @@ namespace SKSshAgent.Ssh
             string result = base.GetOpenSshKeyAuthorization(comment);
 
             var options = ImmutableArray<string>.Empty;
-            if (HasPrivateKey)
+            if (HasDecryptedPrivateKey)
             {
                 if ((Flags & OpenSshSKFlags.UserPresenceRequired) == 0)
                     options = options.Add("no-touch-required");
@@ -80,7 +91,7 @@ namespace SKSshAgent.Ssh
                     options = options.Add("verify-required");
             }
 
-            return options.Length > 0 
+            return options.Length > 0
                 ? string.Join(',', options) + " " + result
                 : result;
         }
@@ -111,9 +122,7 @@ namespace SKSshAgent.Ssh
             writer.WriteByteString(Span<byte>.Empty);
         }
 
-        public override bool Equals(SshKey? other, bool publicOnly) => Equals(other as OpenSshEcdsaSKKey, publicOnly);
-
-        public bool Equals(OpenSshEcdsaSKKey? other, bool publicOnly)
+        public bool Equals([NotNullWhen(true)] OpenSshEcdsaSKKey? other, bool publicOnly)
         {
             if (other == null || !PublicEquals(other))
                 return false;
@@ -121,10 +130,9 @@ namespace SKSshAgent.Ssh
             if (publicOnly)
                 return true;
 
-            if (HasPrivateKey != other.HasPrivateKey)
-                return false;
-
-            return !HasPrivateKey || PrivateEquals(other);
+            return (HasDecryptedPrivateKey == other.HasDecryptedPrivateKey) &&
+                   (!HasDecryptedPrivateKey || PrivateEquals(other)) &&
+                   EqualityComparer<SshEncryptedPrivateKey>.Default.Equals(EncryptedPrivateKey, other.EncryptedPrivateKey);
 
             bool PublicEquals(OpenSshEcdsaSKKey other)
             {
@@ -139,6 +147,25 @@ namespace SKSshAgent.Ssh
                        KeyHandle.SequenceEqual(other.KeyHandle);
             }
         }
+
+        public override bool Equals([NotNullWhen(true)] SshKey? other, bool publicOnly) => Equals(other as OpenSshEcdsaSKKey, publicOnly);
+
+        public override int GetHashCode(bool publicOnly)
+        {
+            var hashCode = new HashCode();
+            hashCode.Add(X);
+            hashCode.Add(Y);
+            hashCode.AddBytes(Application.AsSpan());
+            if (!publicOnly)
+            {
+                hashCode.Add(_flags);
+                hashCode.AddBytes(_keyHandle.AsSpan());
+                hashCode.Add(EncryptedPrivateKey);
+            }
+            return hashCode.ToHashCode();
+        }
+
+        protected override SshKey WithEncryptedPrivateKey(SshEncryptedPrivateKey encryptedPrivateKey) => new OpenSshEcdsaSKKey(this, encryptedPrivateKey);
 
         /// <exception cref="SshWireContentException"/>
         /// <exception cref="InvalidDataException"/>
@@ -223,8 +250,8 @@ namespace SKSshAgent.Ssh
         /// <exception cref="InvalidOperationException"/>
         private T GetPrivateKeyField<T>(in T field)
         {
-            if (!HasPrivateKey)
-                throw new InvalidOperationException("Private key is not present.");
+            if (!HasDecryptedPrivateKey)
+                throw new InvalidOperationException("Private key is not present or is not decrypted.");
 
             return field;
         }

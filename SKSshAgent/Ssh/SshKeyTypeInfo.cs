@@ -20,7 +20,7 @@ namespace SKSshAgent.Ssh
             curve: ECCurve.NamedCurves.nistP256,
             keySizeBits: 256);
 
-        public static ImmutableArray<SshKeyTypeInfo> KeyTypeInfos = ImmutableArray.Create(new[]
+        public static readonly ImmutableArray<SshKeyTypeInfo> KeyTypeInfos = ImmutableArray.Create(new[]
         {
             SKEcdsaSha2NistP256,
         });
@@ -46,7 +46,7 @@ namespace SKSshAgent.Ssh
 
         public string? CurveName { get; }
 
-        internal static bool TryGetKeyTypeInfoByName(string name, [MaybeNullWhen(false)] out SshKeyTypeInfo keyTypeInfo)
+        public static bool TryGetKeyTypeInfoByName(string name, [MaybeNullWhen(false)] out SshKeyTypeInfo keyTypeInfo)
         {
             foreach (var entry in KeyTypeInfos)
             {

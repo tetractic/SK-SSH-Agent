@@ -9,7 +9,6 @@ using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
-using Windows.Win32.Foundation;
 using static Windows.Win32.PInvoke;
 
 namespace SKSshAgent
@@ -18,8 +17,8 @@ namespace SKSshAgent
     {
         private static readonly string _pipeName = GetPipeName();
 
-        public PageantPipe(HWND hWnd)
-            : base(hWnd)
+        public PageantPipe(KeyListForm form)
+            : base(form)
         {
         }
 

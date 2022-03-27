@@ -6,8 +6,8 @@
 
 using System;
 using System.Buffers;
-using System.Buffers.Binary;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -15,22 +15,39 @@ using System.Text;
 namespace SKSshAgent.Ssh
 {
     // https://www.openssh.com/specs.html
-    internal abstract class SshKey
+    internal abstract class SshKey : IEquatable<SshKey?>
     {
         private const string _openSshPrivateKeyLabel = "OPENSSH PRIVATE KEY";
 
         private static readonly ReadOnlyMemory<byte> _openSshKeyV1 = Encoding.ASCII.GetBytes("openssh-key-v1\0");
 
         /// <exception cref="ArgumentNullException"/>
-        protected SshKey(SshKeyTypeInfo keyTypeInfo)
+        protected SshKey(SshKeyTypeInfo keyTypeInfo, bool hasDecryptedPrivateKey)
         {
             if (keyTypeInfo is null)
                 throw new ArgumentNullException(nameof(keyTypeInfo));
 
             KeyTypeInfo = keyTypeInfo;
+            HasDecryptedPrivateKey = hasDecryptedPrivateKey;
+        }
+
+        /// <exception cref="ArgumentNullException"/>
+        protected SshKey(SshKeyTypeInfo keyTypeInfo, SshEncryptedPrivateKey encryptedPrivateKey)
+        {
+            if (keyTypeInfo is null)
+                throw new ArgumentNullException(nameof(keyTypeInfo));
+            if (encryptedPrivateKey is null)
+                throw new ArgumentNullException(nameof(encryptedPrivateKey));
+
+            KeyTypeInfo = keyTypeInfo;
+            EncryptedPrivateKey = encryptedPrivateKey;
         }
 
         public SshKeyTypeInfo KeyTypeInfo { get; }
+
+        public bool HasDecryptedPrivateKey { get; }
+
+        public SshEncryptedPrivateKey? EncryptedPrivateKey { get; }
 
         /// <exception cref="InvalidDataException"/>
         /// <exception cref="SshWireContentException"/>
@@ -73,14 +90,14 @@ namespace SKSshAgent.Ssh
             var reader = new SshWireReader(keyData);
 
             string cipherName = reader.ReadString();
-            if (cipherName != "none")
-                throw new NotSupportedException("Encrypted keys are not supported.");
+            if (!SshCipherInfo.TryGetCipherInfoByName(cipherName, out var cipherInfo))
+                throw new NotSupportedException("Unrecognized private key encryption cipher.");
 
             string kdfName = reader.ReadString();
-            if (kdfName != "none")
-                throw new NotSupportedException("Encrypted keys are not supported.");
+            if (!SshKdfInfo.TryGetKdfInfoByName(kdfName, out var kdfInfo))
+                throw new NotSupportedException("Unrecognized private key encryption KDF.");
 
-            _ = reader.ReadByteString();  // KDF options
+            var kdfOptions = reader.ReadByteString();
 
             uint keyCount = reader.ReadUInt32();
             if (keyCount != 1)
@@ -93,32 +110,41 @@ namespace SKSshAgent.Ssh
             if (publicReader.BytesRemaining != 0)
                 throw new InvalidDataException("Excess data in public key.");
 
-            var privateKeys = reader.ReadByteString();
+            int ciphertextLength = (int)reader.ReadUInt32();
+            if (ciphertextLength < 0 || ciphertextLength > int.MaxValue - cipherInfo.TagLength)
+                throw new SshWireContentException("Excessively long byte string.");
+
+            var encryptedPrivateKeys = reader.ReadBytes(ciphertextLength + cipherInfo.TagLength);
 
             if (reader.BytesRemaining != 0)
                 throw new InvalidDataException("Excess data.");
 
-            // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/PROTOCOL.key#L36-L49
+            if ((cipherInfo == SshCipherInfo.None) != (kdfInfo == SshKdfInfo.None))
+                throw new InvalidDataException("Incompatible cipher and KDF.");
 
-            var privateReader = new SshWireReader(privateKeys);
+            if (encryptedPrivateKeys.Length < cipherInfo.TagLength ||
+                (encryptedPrivateKeys.Length - cipherInfo.TagLength) % cipherInfo.BlockLength != 0)
+            {
+                throw new InvalidDataException("Invalid private key data length.");
+            }
 
-            uint checkValue1 = privateReader.ReadUInt32();
-            uint checkValue2 = privateReader.ReadUInt32();
-            if (checkValue1 != checkValue2)
-                throw new InvalidDataException("Mismatched check values.");
+            var encryptedPrivateKey = new OpenSshEncryptedPrivateKey(
+                kdfInfo: kdfInfo,
+                kdfOptions: kdfOptions.ToImmutableArray(),
+                cipherInfo: cipherInfo,
+                data: encryptedPrivateKeys.ToImmutableArray());
 
-            var privateKey = ReadPrivateKey(ref privateReader);
+            if (cipherInfo == SshCipherInfo.None)
+            {
+                if (!encryptedPrivateKey.TryDecrypt(default, out var privateKey, out string? comment))
+                    throw new UnreachableException();
 
-            string comment = privateReader.ReadString();
-
-            for (byte i = 1; privateReader.BytesRemaining > 0; ++i)
-                if (privateReader.ReadByte() != i)
-                    throw new InvalidDataException("Invalid padding.");
-
-            if (!publicKey.Equals(privateKey, publicOnly: true))
-                throw new InvalidDataException("Mismatched public and private keys.");
-
-            return (privateKey, comment);
+                return (privateKey, comment);
+            }
+            else
+            {
+                return (publicKey.WithEncryptedPrivateKey(encryptedPrivateKey), string.Empty);
+            }
         }
 
         /// <exception cref="SshWireContentException"/>
@@ -190,63 +216,64 @@ namespace SKSshAgent.Ssh
             return result;
         }
 
+        /// <exception cref="CryptographicException"/>
         public char[] FormatOpenSshPrivateKey(string comment)
         {
-            // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/sshkey.c#L3910
+            return FormatOpenSshPrivateKeyCore(comment, default, SshKdfInfo.None, default, SshCipherInfo.None);
+        }
 
-            var buffer = new ArrayBufferWriter<byte>();
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentException"/>
+        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="InvalidOperationException"/>
+        /// <exception cref="CryptographicException"/>
+        public char[] FormatOpenSshPrivateKey(string comment, ReadOnlySpan<byte> password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
+        {
+            if (comment is null)
+                throw new ArgumentNullException(nameof(comment));
+            if (password.Length == 0 && kdfInfo != SshKdfInfo.None)
+                throw new ArgumentException("Invalid password.", nameof(password));
+            if (kdfInfo is null)
+                throw new ArgumentNullException(nameof(kdfInfo));
+            if (kdfRounds < 1 && kdfInfo != SshKdfInfo.None)
+                throw new ArgumentOutOfRangeException(nameof(kdfRounds));
+            if (cipherInfo is null)
+                throw new ArgumentNullException(nameof(cipherInfo));
+            if ((kdfInfo == SshKdfInfo.None) != (cipherInfo == SshCipherInfo.None))
+                throw new ArgumentException("Incompatible KDF and cipher.");
 
-            var magicValue = _openSshKeyV1.Span;
-            magicValue.CopyTo(buffer.GetSpan(magicValue.Length));
-            buffer.Advance(magicValue.Length);
+            if (!HasDecryptedPrivateKey)
+                throw new InvalidOperationException("The private key is not present or is not decrypted.");
 
-            var writer = new SshWireWriter(buffer);
-
-            writer.WriteString("none");  // cipher name
-            writer.WriteString("none");  // KDF
-            writer.WriteByteString(Span<byte>.Empty);  // KDF options
-            writer.WriteUInt32(1);  // key count
-
-            var innerBuffer = new ArrayBufferWriter<byte>();
-            var publicWriter = new SshWireWriter(innerBuffer);
-            WritePublicKeyTo(ref publicWriter);
-            publicWriter.Flush();
-
-            writer.WriteByteString(innerBuffer.WrittenSpan);
-
-            innerBuffer.Clear();
-            var privateWriter = new SshWireWriter(innerBuffer);
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                Span<byte> checkBytes = stackalloc byte[4];
-                rng.GetBytes(checkBytes);
-                uint checkValue = BinaryPrimitives.ReadUInt32LittleEndian(checkBytes);
-                privateWriter.WriteUInt32(checkValue);
-                privateWriter.WriteUInt32(checkValue);
-            }
-            WritePrivateKeyTo(ref privateWriter);
-            privateWriter.WriteString(comment);
-            privateWriter.Flush();
-
-            for (byte i = 1; innerBuffer.WrittenCount % 8 != 0; ++i)
-            {
-                innerBuffer.GetSpan(1)[0] = i;
-                innerBuffer.Advance(1);
-            }
-
-            writer.WriteByteString(innerBuffer.WrittenSpan);
-
-            writer.Flush();
-
-            char[] result = PemEncoding.Write(_openSshPrivateKeyLabel, buffer.WrittenSpan);
-            Array.Resize(ref result, result.Length + 1);
-            result[result.Length - 1] = '\n';
-            return result;
+            return FormatOpenSshPrivateKeyCore(comment, password, kdfInfo, kdfRounds, cipherInfo);
         }
 
         public abstract void WritePublicKeyTo(ref SshWireWriter writer);
 
         public abstract void WritePrivateKeyTo(ref SshWireWriter writer);
+
+        /// <exception cref="ArgumentException"/>
+        /// <exception cref="InvalidOperationException"/>
+        /// <exception cref="SshWireContentException"/>
+        /// <exception cref="InvalidDataException"/>
+        /// <exception cref="NotSupportedException"/>
+        /// <exception cref="CryptographicException"/>
+        public bool TryDecryptPrivateKey(ReadOnlySpan<byte> password, [MaybeNullWhen(false)] out SshKey privateKey, [MaybeNullWhen(false)] out string comment)
+        {
+            if (password.Length == 0)
+                throw new ArgumentException("Invalid password.", nameof(password));
+
+            if (EncryptedPrivateKey == null)
+                throw new InvalidOperationException("The private key is not present or is not decrypted.");
+
+            if (!EncryptedPrivateKey.TryDecrypt(password, out privateKey, out comment))
+                return false;
+
+            if (!Equals(privateKey, publicOnly: true))
+                throw new InvalidDataException("Mismatched public and private keys.");
+
+            return true;
+        }
 
         public byte[] GetSha256Fingerprint()
         {
@@ -278,6 +305,59 @@ namespace SKSshAgent.Ssh
             return $"{KeyTypeInfo.Name} {base64Blob} {comment}";
         }
 
-        public abstract bool Equals(SshKey? other, bool publicOnly);
+        public abstract bool Equals([NotNullWhen(true)] SshKey? other, bool publicOnly);
+
+        public bool Equals([NotNullWhen(true)] SshKey? other) => Equals(other, publicOnly: false);
+
+        public sealed override bool Equals([NotNullWhen(true)] object? obj) => Equals(obj as SshKey, publicOnly: false);
+
+        public abstract int GetHashCode(bool publicOnly);
+
+        public sealed override int GetHashCode() => GetHashCode(publicOnly: false);
+
+        protected abstract SshKey WithEncryptedPrivateKey(SshEncryptedPrivateKey encryptedPrivateKey);
+
+        /// <exception cref="CryptographicException"/>
+        private char[] FormatOpenSshPrivateKeyCore(string comment, ReadOnlySpan<byte> password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
+        {
+            // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/sshkey.c#L3910
+
+            var buffer = new ArrayBufferWriter<byte>();
+
+            var magicValue = _openSshKeyV1.Span;
+            magicValue.CopyTo(buffer.GetSpan(magicValue.Length));
+            buffer.Advance(magicValue.Length);
+
+            var writer = new SshWireWriter(buffer);
+
+            writer.WriteString(cipherInfo.Name);
+
+            writer.WriteString(kdfInfo.Name);
+
+            var encryptedPrivateKey = OpenSshEncryptedPrivateKey.Encrypt(this, comment, password, kdfInfo, kdfRounds, cipherInfo);
+
+            writer.WriteByteString(encryptedPrivateKey.KdfOptions.AsSpan());
+
+            writer.WriteUInt32(1);  // key count
+
+            var publicBuffer = new ArrayBufferWriter<byte>();
+            var publicWriter = new SshWireWriter(publicBuffer);
+            WritePublicKeyTo(ref publicWriter);
+            publicWriter.Flush();
+
+            writer.WriteByteString(publicBuffer.WrittenSpan);
+
+            int ciphertextLength = encryptedPrivateKey.Data.Length - cipherInfo.TagLength;
+            writer.WriteUInt32((uint)ciphertextLength);
+
+            writer.WriteBytes(encryptedPrivateKey.Data.AsSpan());
+
+            writer.Flush();
+
+            char[] result = PemEncoding.Write(_openSshPrivateKeyLabel, buffer.WrittenSpan);
+            Array.Resize(ref result, result.Length + 1);
+            result[result.Length - 1] = '\n';
+            return result;
+        }
     }
 }

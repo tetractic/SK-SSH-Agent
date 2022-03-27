@@ -11,6 +11,7 @@ using System.Buffers;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Pipes;
 using System.Text;
@@ -25,7 +26,7 @@ namespace SKSshAgent
     {
         private const int _maxMessageLength = 256 * 1024;
 
-        private readonly HWND _hWnd;
+        private readonly KeyListForm _form;
 
         private readonly CancellationTokenSource _cts = new();
 
@@ -41,9 +42,9 @@ namespace SKSshAgent
 
         private bool _acceptCompleted;
 
-        public SshAgentPipe(HWND hWnd)
+        public SshAgentPipe(KeyListForm form)
         {
-            _hWnd = hWnd;
+            _form = form;
         }
 
         public event StatusChangedEventHandler? StatusChanged;
@@ -226,7 +227,7 @@ namespace SKSshAgent
                             return;
                         buffer.Advance(length);
 
-                        HandleMessage(buffer, cancellationToken);
+                        await HandleMessageAsync(buffer, cancellationToken).ConfigureAwait(false);
 
                         BinaryPrimitives.WriteInt32BigEndian(lengthBuffer, buffer.WrittenCount);
 
@@ -258,7 +259,7 @@ namespace SKSshAgent
             }
         }
 
-        private void HandleMessage(ArrayBufferWriter<byte> buffer, CancellationToken cancellationToken)
+        private async Task HandleMessageAsync(ArrayBufferWriter<byte> buffer, CancellationToken cancellationToken)
         {
             // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/ssh-agent.c#L1603
 
@@ -273,7 +274,7 @@ namespace SKSshAgent
                 }
                 case MessageType.SSH_AGENTC_SIGN_REQUEST:
                 {
-                    HandleSignRequest(buffer, cancellationToken);
+                    await HandleSignRequestAsync(buffer, cancellationToken).ConfigureAwait(false);
                     break;
                 }
                 default:
@@ -319,38 +320,17 @@ namespace SKSshAgent
             writer.Flush();
         }
 
-        private void HandleSignRequest(ArrayBufferWriter<byte> buffer, CancellationToken cancellationToken)
+        private async Task HandleSignRequestAsync(ArrayBufferWriter<byte> buffer, CancellationToken cancellationToken)
         {
             // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/ssh-agent.c#L722
 
             var contents = buffer.WrittenMemory.Slice(1);
 
             SshKey? key;
-            ReadOnlySpan<byte> data;
+            byte[]? data;
             SignatureFlags signatureFlags;
 
-            try
-            {
-                var reader = new SshWireReader(contents.Span);
-
-                ReadOnlySpan<byte> keyBytes;
-                if (!reader.TryReadByteString(out keyBytes) ||
-                    !reader.TryReadByteString(out data) ||
-                    !reader.TryReadUInt32(out uint tempSignatureFlags))
-                {
-                    WriteSimpleResponse(buffer, MessageType.SSH_AGENT_FAILURE);
-                    return;
-                }
-
-                var keyReader = new SshWireReader(keyBytes);
-                key = SshKey.ReadPublicKey(ref keyReader);
-
-                signatureFlags = (SignatureFlags)tempSignatureFlags;
-            }
-            catch (Exception ex)
-                when (ex is SshWireContentException ||
-                      ex is InvalidDataException ||
-                      ex is NotSupportedException)
+            if (!TryParseRequest(contents, out key, out data, out signatureFlags))
             {
                 WriteSimpleResponse(buffer, MessageType.SSH_AGENT_FAILURE);
                 return;
@@ -361,6 +341,18 @@ namespace SKSshAgent
             {
                 WriteSimpleResponse(buffer, MessageType.SSH_AGENT_FAILURE);
                 return;
+            }
+
+            if (key.EncryptedPrivateKey != null)
+            {
+                var privateKey = await _form.InvokeAsync(() => _form.DecryptPrivateKeyAsync(key, agent: true)).ConfigureAwait(false);
+                if (privateKey == null)
+                {
+                    WriteSimpleResponse(buffer, MessageType.SSH_AGENT_FAILURE);
+                    return;
+                }
+
+                key = privateKey;
             }
 
             SshSignature signature;
@@ -381,7 +373,7 @@ namespace SKSshAgent
                     string rpId = Encoding.UTF8.GetString(openSshEcdsaSKKey.Application.AsSpan());
                     var keyHandle = openSshEcdsaSKKey.KeyHandle;
                     var keyFlags = openSshEcdsaSKKey.Flags;
-                    byte[] challenge = data.ToArray();
+                    byte[] challenge = data;
 
                     // For "webauthn" key types (ex. "webauthn-sk-ecdsa-sha2-nistp256@openssh.com"),
                     // challenge would be constructed per [1].
@@ -389,7 +381,8 @@ namespace SKSshAgent
 
                     try
                     {
-                        var result = WebAuthnApi.GetAssertion(_hWnd, webAuthnKey, rpId, keyHandle.AsSpan(), keyFlags, challenge, cancellationToken);
+                        var hWnd = await _form.InvokeAsync(() => new HWND(_form.Handle)).ConfigureAwait(false);
+                        var result = WebAuthnApi.GetAssertion(hWnd, webAuthnKey, rpId, keyHandle.AsSpan(), keyFlags, challenge, cancellationToken);
                         var webAuthnSignature = result.Signature;
                         byte flags = (byte)result.AuthenticatorData.Flags;
                         uint counter = result.AuthenticatorData.SignCount;
@@ -407,7 +400,9 @@ namespace SKSshAgent
                                 throw new UnreachableException();
                         }
                     }
-                    catch (InvalidDataException)
+                    catch (Exception ex)
+                        when (ex is InvalidDataException ||
+                              ex is OperationCanceledException)
                     {
                         WriteSimpleResponse(buffer, MessageType.SSH_AGENT_FAILURE);
                         return;
@@ -419,19 +414,62 @@ namespace SKSshAgent
                     throw new UnreachableException();
             }
 
-            buffer.Clear();
+            WriteResponse(buffer, signature);
 
-            buffer.GetSpan(1)[0] = (byte)MessageType.SSH_AGENT_SIGN_RESPONSE;
-            buffer.Advance(1);
+            static bool TryParseRequest(ReadOnlyMemory<byte> contents, [MaybeNullWhen(false)] out SshKey key, [MaybeNullWhen(false)] out byte[] data, out SignatureFlags signatureFlags)
+            {
+                try
+                {
+                    var reader = new SshWireReader(contents.Span);
 
-            var signatureBuffer = new ArrayBufferWriter<byte>();
-            var signatureWriter = new SshWireWriter(signatureBuffer);
-            signature.WriteTo(ref signatureWriter);
-            signatureWriter.Flush();
+                    ReadOnlySpan<byte> keyBytes;
+                    if (!reader.TryReadByteString(out keyBytes) ||
+                        !reader.TryReadByteString(out var tempData) ||
+                        !reader.TryReadUInt32(out uint tempSignatureFlags))
+                    {
+                        key = default;
+                        data = default;
+                        signatureFlags = default;
+                        return false;
+                    }
 
-            var writer = new SshWireWriter(buffer);
-            writer.WriteByteString(signatureBuffer.WrittenSpan);
-            writer.Flush();
+                    var keyReader = new SshWireReader(keyBytes);
+                    key = SshKey.ReadPublicKey(ref keyReader);
+
+                    data = tempData.ToArray();
+
+                    signatureFlags = (SignatureFlags)tempSignatureFlags;
+
+                    return true;
+                }
+                catch (Exception ex)
+                    when (ex is SshWireContentException ||
+                          ex is InvalidDataException ||
+                          ex is NotSupportedException)
+                {
+                    key = default;
+                    data = default;
+                    signatureFlags = default;
+                    return false;
+                }
+            }
+
+            static void WriteResponse(ArrayBufferWriter<byte> buffer, SshSignature signature)
+            {
+                buffer.Clear();
+
+                buffer.GetSpan(1)[0] = (byte)MessageType.SSH_AGENT_SIGN_RESPONSE;
+                buffer.Advance(1);
+
+                var signatureBuffer = new ArrayBufferWriter<byte>();
+                var signatureWriter = new SshWireWriter(signatureBuffer);
+                signature.WriteTo(ref signatureWriter);
+                signatureWriter.Flush();
+
+                var writer = new SshWireWriter(buffer);
+                writer.WriteByteString(signatureBuffer.WrittenSpan);
+                writer.Flush();
+            }
         }
 
         public delegate void StatusChangedEventHandler(SshAgentPipe pipe, SshAgentPipeStatus status);

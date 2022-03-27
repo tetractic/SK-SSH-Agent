@@ -14,22 +14,23 @@ namespace SKSshAgent
 {
     internal partial class SKKeyGenerationOptionsForm : Form
     {
-        private SshKeyTypeInfo _keyTypeInfo;
-
         private const string _applicationIdPrefix = "ssh:";
 
         private string _previousApplicationIdText = string.Empty;
+
+        private SshKdfInfo _kdfInfo;
+
+        private uint _kdfRounds;
+
+        private SshCipherInfo _cipherInfo;
 
         public SKKeyGenerationOptionsForm()
         {
             InitializeComponent();
 
-            _ = _typeComboBox.Items.Add(SshKeyTypeInfo.SKEcdsaSha2NistP256);
+            _ = _keyTypeComboBox.Items.Add(SshKeyTypeInfo.SKEcdsaSha2NistP256);
 
-            _keyTypeInfo = SshKeyTypeInfo.SKEcdsaSha2NistP256;
-            _typeComboBox.SelectedItem = _keyTypeInfo;
-
-            HandleTypeComboBoxSelectedIndexChanged(_typeComboBox, new EventArgs());
+            _keyTypeComboBox.SelectedItem = SshKeyTypeInfo.SKEcdsaSha2NistP256;
 
             string comment = Environment.UserName;
             try
@@ -41,14 +42,17 @@ namespace SKSshAgent
                 // Nothing to be done about it.
             }
             _commentTextBox.Text = comment;
+
+            _kdfInfo = SshKdfInfo.Bcrypt;
+
+            _kdfRounds = 16;
+
+            _cipherInfo = OpenSshAesGcmCipher.IsSupported
+                ? SshCipherInfo.OpenSshAes256Gcm
+                : SshCipherInfo.Aes256Ctr;
         }
 
         public FormResult? Result { get; private set; }
-
-        private void HandleTypeComboBoxSelectedIndexChanged(object sender, EventArgs e)
-        {
-            _keyTypeInfo = (SshKeyTypeInfo)_typeComboBox.SelectedItem;
-        }
 
         private void HandleApplicationIdTextBoxEnter(object sender, EventArgs e)
         {
@@ -109,8 +113,34 @@ namespace SKSshAgent
             }
         }
 
+        private void HandleEncryptCheckBoxCheckedChanged(object sender, EventArgs e)
+        {
+            bool encrypt = _encryptCheckBox.Checked;
+            _passwordTextBox.Enabled = encrypt;
+            _confirmPasswordTextBox.Enabled = encrypt;
+            _encryptionOptionsButton.Enabled = encrypt;
+        }
+
+        private void HandleEncryptionOptionsButtonClicked(object sender, EventArgs e)
+        {
+            var dialog = new KeyEncryptionOptionsForm()
+            {
+                KdfInfo = _kdfInfo,
+                KdfRounds = _kdfRounds,
+                CipherInfo = _cipherInfo,
+            };
+            if (dialog.ShowDialog(this) != DialogResult.OK)
+                return;
+
+            _kdfInfo = dialog.KdfInfo;
+            _kdfRounds = dialog.KdfRounds;
+            _cipherInfo = dialog.CipherInfo;
+        }
+
         private void HandleGenerateButonClicked(object sender, EventArgs e)
         {
+            var keyTypeInfo = (SshKeyTypeInfo)_keyTypeComboBox.SelectedItem;
+
             string userName = _userIdTextBox.Text;
 
             byte[] userId = new byte[FormResult.UserIdLength];
@@ -131,13 +161,47 @@ namespace SKSshAgent
                 ? _applicationIdTextBox.Text
                 : _applicationIdPrefix;
 
+            SshKdfInfo kdfInfo = SshKdfInfo.None;
+            uint kdfRounds = 0;
+            SshCipherInfo cipherInfo = SshCipherInfo.None;
+            byte[] password = Array.Empty<byte>();
+
+            if (_encryptCheckBox.Checked)
+            {
+                kdfInfo = _kdfInfo;
+                kdfRounds = _kdfRounds;
+                cipherInfo = _cipherInfo;
+
+                if (_passwordTextBox.Text != _confirmPasswordTextBox.Text)
+                {
+                    _ = _passwordTextBox.Focus();
+
+                    _ = MessageBox.Show(this, "Password confirmation does not match.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (_passwordTextBox.TextLength == 0)
+                {
+                    _ = _passwordTextBox.Focus();
+
+                    _ = MessageBox.Show(this, "Password cannot be empty.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                password = Encoding.UTF8.GetBytes(_passwordTextBox.Text);
+            }
+
             Result = new FormResult(
-                keyTypeInfo: _keyTypeInfo,
+                keyTypeInfo: keyTypeInfo,
                 userVerificationRequired: _requireUserVerificationCheckBox.Checked,
                 userName: userName,
                 userId: userId,
                 applicationId: applicationId,
-                comment: _commentTextBox.Text);
+                comment: _commentTextBox.Text,
+                kdfInfo: kdfInfo,
+                kdfRounds: kdfRounds,
+                cipherInfo: cipherInfo,
+                password: password);
 
             DialogResult = DialogResult.OK;
         }
@@ -161,7 +225,7 @@ namespace SKSshAgent
         {
             internal const int UserIdLength = 32;  // Including NUL terminator.
 
-            internal FormResult(SshKeyTypeInfo keyTypeInfo, bool userVerificationRequired, string userName, byte[] userId, string applicationId, string comment)
+            internal FormResult(SshKeyTypeInfo keyTypeInfo, bool userVerificationRequired, string userName, byte[] userId, string applicationId, string comment, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo, byte[] password)
             {
                 KeyTypeInfo = keyTypeInfo;
                 UserVerificationRequired = userVerificationRequired;
@@ -169,19 +233,31 @@ namespace SKSshAgent
                 UserId = userId;
                 ApplicationId = applicationId;
                 Comment = comment;
+                KdfInfo = kdfInfo;
+                KdfRounds = kdfRounds;
+                CipherInfo = cipherInfo;
+                Password = password;
             }
 
-            public SshKeyTypeInfo KeyTypeInfo { get; private set; }
+            public SshKeyTypeInfo KeyTypeInfo { get; }
 
-            public bool UserVerificationRequired { get; private set; }
+            public bool UserVerificationRequired { get; }
 
-            public string UserName { get; private set; }
+            public string UserName { get; }
 
             public byte[] UserId { get; } = new byte[UserIdLength];
 
-            public string ApplicationId { get; private set; }
+            public string ApplicationId { get; }
 
-            public string Comment { get; private set; }
+            public string Comment { get; }
+
+            public SshKdfInfo KdfInfo { get; }
+
+            public uint KdfRounds { get; }
+
+            public SshCipherInfo CipherInfo { get; }
+
+            public byte[] Password { get; }
         }
     }
 }
