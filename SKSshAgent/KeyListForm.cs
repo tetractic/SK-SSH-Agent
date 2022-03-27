@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -421,7 +422,7 @@ namespace SKSshAgent
 
         private async void HandleDecryptMenuItemClicked(object sender, EventArgs e)
         {
-            foreach (KeyListItem item in _keyListView.SelectedItems)
+            foreach (KeyListViewItem item in _keyListView.SelectedItems)
             {
                 if (item.Key.EncryptedPrivateKey != null &&
                     await DecryptPrivateKeyAsync(item.Key).ConfigureAwait(true) is null)
@@ -436,7 +437,7 @@ namespace SKSshAgent
             bool warnAboutMissingOptions = false;
 
             string text = "";
-            foreach (KeyListItem item in _keyListView.SelectedItems)
+            foreach (KeyListViewItem item in _keyListView.SelectedItems)
             {
                 var key = item.Key;
 
@@ -471,7 +472,7 @@ namespace SKSshAgent
         private void HandleCopyOpenSshPublicKeyMenuItemClicked(object sender, EventArgs e)
         {
             string text = "";
-            foreach (KeyListItem item in _keyListView.SelectedItems)
+            foreach (KeyListViewItem item in _keyListView.SelectedItems)
             {
                 if (text.Length > 0)
                     text += "\n";
@@ -490,7 +491,7 @@ namespace SKSshAgent
 
         private void HandleRemoveMenuItemClicked(object sender, EventArgs e)
         {
-            foreach (KeyListItem item in _keyListView.SelectedItems)
+            foreach (KeyListViewItem item in _keyListView.SelectedItems)
                 _ = KeyList.Instance.RemoveKey(item.Key);
         }
 
@@ -507,7 +508,7 @@ namespace SKSshAgent
             _removeMenuItem.Enabled = hasSelection;
 
             bool hasEncryptedSelection = false;
-            foreach (KeyListItem item in _keyListView.SelectedItems)
+            foreach (KeyListViewItem item in _keyListView.SelectedItems)
             {
                 if (item.Key.EncryptedPrivateKey != null)
                 {
@@ -523,16 +524,47 @@ namespace SKSshAgent
         {
             Invoke(() =>
             {
-                var selectedKeys = new HashSet<SshKey>(SshPublicKeyEqualityComparer.Instance);
-                foreach (KeyListItem item in _keyListView.SelectedItems)
-                    _ = selectedKeys.Add(item.Key);
+                var keyListItems = keyList.GetAllKeys();
+
+                var keySet = new HashSet<SshKey>(SshPublicKeyEqualityComparer.Instance);
+                foreach (var item in keyListItems)
+                    _ = keySet.Add(item.Key);
+
+                ListViewItem? focusedItem = _keyListView.FocusedItem;
+                bool focus = focusedItem != null;
+                if (focus)
+                {
+                    int focusedIndex = _keyListView.Items.IndexOf(focusedItem);
+                    if (focusedIndex >= 0)
+                        focusedItem = Refocus(keySet, focusedIndex);
+                }
+
+                var listViewItems = new Dictionary<SshKey, KeyListViewItem>(SshPublicKeyEqualityComparer.Instance);
+                foreach (KeyListViewItem item in _keyListView.Items)
+                    listViewItems.Add(item.Key, item);
 
                 _keyListView.Items.Clear();
-                foreach (var item in keyList.GetAllKeys())
+                foreach (var item in keyListItems)
                 {
-                    var listItem = _keyListView.Items.Add(new KeyListItem(item.Key, item.Comment));
-                    if (selectedKeys.Contains(item.Key))
-                        _ = _keyListView.SelectedIndices.Add(listItem.Index);
+                    KeyListViewItem? listViewItem;
+                    if (listViewItems.TryGetValue(item.Key, out listViewItem))
+                    {
+                        listViewItem.Key = item.Key;
+                        listViewItem.Comment = item.Comment;
+                    }
+                    else
+                    {
+                        listViewItem = new KeyListViewItem(item.Key, item.Comment);
+                    }
+                    _ = _keyListView.Items.Add(listViewItem);
+                }
+
+                if (focus)
+                {
+                    if (focusedItem == null && _keyListView.Items.Count > 0)
+                        focusedItem = _keyListView.Items[0];
+
+                    _keyListView.FocusedItem = focusedItem;
                 }
 
                 if (_keyListViewColumnHeaderHeight == null && _keyListView.Items.Count > 0)
@@ -540,6 +572,25 @@ namespace SKSshAgent
 
                 HandleKeyListViewSelectedIndexChanged(_keyListView, new EventArgs());
             });
+
+            ListViewItem? Refocus(HashSet<SshKey> keySet, int focusedIndex)
+            {
+                for (int i = focusedIndex; i < _keyListView.Items.Count; ++i)
+                {
+                    var item = (KeyListViewItem)_keyListView.Items[i];
+                    if (keySet.Contains(item.Key))
+                        return item;
+                }
+
+                for (int i = focusedIndex - 1; i >= 0; --i)
+                {
+                    var item = (KeyListViewItem)_keyListView.Items[i];
+                    if (keySet.Contains(item.Key))
+                        return item;
+                }
+
+                return null;
+            }
         }
 
         private void HandlePipeStatusChanged(SshAgentPipe pipe, SshAgentPipeStatus status)
@@ -617,25 +668,47 @@ namespace SKSshAgent
             Activate();
         }
 
-        private sealed class KeyListItem : ListViewItem
+        private sealed class KeyListViewItem : ListViewItem
         {
-            public KeyListItem(SshKey key, string comment)
+            private SshKey _key;
+            private string _comment;
+
+            public KeyListViewItem(SshKey key, string comment)
             {
+                _ = SubItems.Add(string.Empty);
+                _ = SubItems.Add(string.Empty);
+
                 Key = key;
                 Comment = comment;
-
-                bool isEncrypted = key.EncryptedPrivateKey != null;
-
-                ImageIndex = isEncrypted ? 1 : 0;
-
-                Text = key.KeyTypeInfo.Name;
-                _ = SubItems.Add("SHA256:" + Convert.ToBase64String(Key.GetSha256Fingerprint()).TrimEnd('='));
-                _ = SubItems.Add(comment);
             }
 
-            public SshKey Key { get; }
+            public SshKey Key
+            {
+                get => _key;
+                [MemberNotNull(nameof(_key))]
+                set
+                {
+                    _key = value;
 
-            public string Comment { get; }
+                    bool isEncrypted = _key.EncryptedPrivateKey != null;
+
+                    ImageIndex = isEncrypted ? 1 : 0;
+                    Text = _key.KeyTypeInfo.Name;
+                    SubItems[1].Text = "SHA256:" + Convert.ToBase64String(Key.GetSha256Fingerprint()).TrimEnd('=');
+                }
+            }
+
+            public string Comment
+            {
+                get => _comment;
+                [MemberNotNull(nameof(_comment))]
+                set
+                {
+                    _comment = value;
+
+                    SubItems[2].Text = _comment;
+                }
+            }
         }
     }
 }
