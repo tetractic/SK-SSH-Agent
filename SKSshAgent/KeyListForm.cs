@@ -32,6 +32,8 @@ namespace SKSshAgent
         private PageantPipe? _pageantPipe;
         private Task? _pageantPipeStartTask;
 
+        private Task? _closingTask;
+
         private int? _keyListViewColumnHeaderHeight;
 
         public KeyListForm()
@@ -65,6 +67,32 @@ namespace SKSshAgent
                 e.Cancel = true;
 
                 Hide();
+            }
+
+            if (!e.Cancel)
+            {
+                if (_closingTask == null)
+                {
+                    _statusLabel.Text = "Shutting down...";
+
+                    Enabled = false;
+
+                    // There is a bit of async work that must be done before the form can close.
+                    _closingTask = Task.Run(HandleClosingAsync);
+
+                    // Afterward, the form can actually close.
+                    _ = _closingTask.ContinueWith(task => Invoke(() => Close()));
+
+                    e.Cancel = true;
+                }
+                else if (!_closingTask.IsCompleted)
+                {
+                    e.Cancel = true;
+                }
+                else
+                {
+                    _closingTask.GetAwaiter().GetResult();
+                }
             }
 
             base.OnFormClosing(e);
@@ -150,15 +178,15 @@ namespace SKSshAgent
             _pageantPipeStartTask = Task.Run(() => _pageantPipe.StartAsync(CancellationToken.None));
         }
 
-        private void HandleFormClosed(object sender, FormClosedEventArgs e)
+        private async Task HandleClosingAsync()
         {
-            _openSshPipeStartTask!.GetAwaiter().GetResult();
-            _openSshPipe!.StatusChanged -= HandlePipeStatusChanged;
-            _openSshPipe.StopAsync().GetAwaiter().GetResult();
+            await _openSshPipeStartTask!.ConfigureAwait(false);
+            await _openSshPipe!.StopAsync().ConfigureAwait(false);
+            _openSshPipe.StatusChanged -= HandlePipeStatusChanged;
 
-            _pageantPipeStartTask!.GetAwaiter().GetResult();
-            _pageantPipe!.StatusChanged -= HandlePipeStatusChanged;
-            _pageantPipe.StopAsync().GetAwaiter().GetResult();
+            await _pageantPipeStartTask!.ConfigureAwait(false);
+            await _pageantPipe!.StopAsync().ConfigureAwait(false);
+            _pageantPipe.StatusChanged -= HandlePipeStatusChanged;
         }
 
         private void HandleLoadFileMenuItemClicked(object sender, EventArgs e)

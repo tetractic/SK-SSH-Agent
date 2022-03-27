@@ -359,7 +359,6 @@ namespace SKSshAgent
             this.Name = "KeyListForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "SK SSH Agent";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.HandleFormClosed);
             this._keyListContextMenu.ResumeLayout(false);
             this._menuStrip.ResumeLayout(false);
             this._menuStrip.PerformLayout();
