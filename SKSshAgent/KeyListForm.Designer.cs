@@ -109,6 +109,7 @@ namespace SKSshAgent
             this._keyListView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this._keyListView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this._keyListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this._keyListTypeColumnHeader,
             this._keyListFingerprintColumnHeader,
@@ -116,11 +117,12 @@ namespace SKSshAgent
             this._keyListView.ContextMenuStrip = this._keyListContextMenu;
             this._keyListView.FullRowSelect = true;
             this._keyListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
-            this._keyListView.Location = new System.Drawing.Point(-1, 22);
+            this._keyListView.Location = new System.Drawing.Point(0, 23);
+            this._keyListView.Margin = new System.Windows.Forms.Padding(0, 1, 0, 1);
             this._keyListView.Name = "_keyListView";
-            this._keyListView.Size = new System.Drawing.Size(786, 317);
+            this._keyListView.Size = new System.Drawing.Size(784, 315);
             this._keyListView.SmallImageList = this._keyListImageList;
-            this._keyListView.TabIndex = 1;
+            this._keyListView.TabIndex = 0;
             this._keyListView.UseCompatibleStateImageBehavior = false;
             this._keyListView.View = System.Windows.Forms.View.Details;
             this._keyListView.SelectedIndexChanged += new System.EventHandler(this.HandleKeyListViewSelectedIndexChanged);
@@ -133,7 +135,7 @@ namespace SKSshAgent
             this._copyOpenSshPublicKeyContextMenuItem,
             this._removeKeyContextMenuItem});
             this._keyListContextMenu.Name = "_keyListContextMenuStrip";
-            this._keyListContextMenu.Size = new System.Drawing.Size(253, 114);
+            this._keyListContextMenu.Size = new System.Drawing.Size(253, 92);
             this._keyListContextMenu.Opening += new System.ComponentModel.CancelEventHandler(this.HandleKeyListContextMenuOpening);
             // 
             // _decryptContextMenuItem
@@ -289,7 +291,7 @@ namespace SKSshAgent
             this._menuStrip.Name = "_menuStrip";
             this._menuStrip.Padding = new System.Windows.Forms.Padding(0);
             this._menuStrip.Size = new System.Drawing.Size(784, 22);
-            this._menuStrip.TabIndex = 0;
+            this._menuStrip.TabIndex = 1;
             // 
             // _statusLabel
             // 
@@ -374,10 +376,11 @@ namespace SKSshAgent
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.ControlDark;
             this.ClientSize = new System.Drawing.Size(784, 361);
+            this.Controls.Add(this._keyListView);
             this.Controls.Add(this._statusStrip);
             this.Controls.Add(this._menuStrip);
-            this.Controls.Add(this._keyListView);
             this.Icon = global::SKSshAgent.Properties.Resources.application_key_icon;
             this.MainMenuStrip = this._menuStrip;
             this.MaximizeBox = false;
