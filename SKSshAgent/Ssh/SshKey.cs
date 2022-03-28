@@ -238,7 +238,10 @@ namespace SKSshAgent.Ssh
 
             writer.Flush();
 
-            return PemEncoding.Write(_openSshPrivateKeyLabel, buffer.WrittenSpan);
+            char[] result = PemEncoding.Write(_openSshPrivateKeyLabel, buffer.WrittenSpan);
+            Array.Resize(ref result, result.Length + 1);
+            result[result.Length - 1] = '\n';
+            return result;
         }
 
         public abstract void WritePublicKeyTo(ref SshWireWriter writer);
