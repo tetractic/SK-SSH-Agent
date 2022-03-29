@@ -12,7 +12,7 @@
 
   <PropertyGroup>
     <Product>SK SSH Agent</Product>
-    <FileVersion>1.1</FileVersion>
+    <FileVersion>1.2</FileVersion>
     <InformationalVersion>$(FileVersion)</InformationalVersion>
     <Copyright>© 2022 Carl Reinke</Copyright>
   </PropertyGroup>
