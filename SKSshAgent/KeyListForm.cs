@@ -169,7 +169,7 @@ namespace SKSshAgent
                 }
                 finally
                 {
-                    Array.Clear(password);
+                    CryptographicOperations.ZeroMemory(password);
                 }
 
                 _ = MessageBox.Show(this, "Incorrect password.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);

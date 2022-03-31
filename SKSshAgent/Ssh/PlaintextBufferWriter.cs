@@ -6,6 +6,7 @@
 
 using System;
 using System.Buffers;
+using System.Security.Cryptography;
 
 namespace SKSshAgent.Ssh
 {
@@ -28,7 +29,7 @@ namespace SKSshAgent.Ssh
 
         public void Dispose()
         {
-            Array.Clear(_buffer, 0, _length);
+            CryptographicOperations.ZeroMemory(_buffer.AsSpan(0, _length));
         }
 
         /// <exception cref="ArgumentOutOfRangeException"/>
@@ -73,7 +74,7 @@ namespace SKSshAgent.Ssh
             byte[] newBuffer = GC.AllocateUninitializedArray<byte>((int)newCapacity, pinned: true);
             Array.Copy(_buffer, newBuffer, _length);
             Array.Clear(newBuffer, _length, newBuffer.Length - _length);
-            Array.Clear(_buffer, 0, _length);
+            CryptographicOperations.ZeroMemory(_buffer.AsSpan(0, _length));
             _buffer = newBuffer;
         }
     }

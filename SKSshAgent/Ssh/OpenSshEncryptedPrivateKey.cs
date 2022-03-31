@@ -274,8 +274,8 @@ namespace SKSshAgent.Ssh
             }
             finally
             {
-                Array.Clear(plaintext);
-                keyAndIV.Clear();
+                CryptographicOperations.ZeroMemory(plaintext);
+                CryptographicOperations.ZeroMemory(keyAndIV);
             }
         }
 

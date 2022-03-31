@@ -52,6 +52,7 @@
 
 using System;
 using System.Buffers.Binary;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
 namespace SKSshAgent.Ssh
@@ -428,11 +429,11 @@ namespace SKSshAgent.Ssh
             finally
             {
                 /* zap */
-                Array.Clear(countSalt);
-                @out.Clear();
-                tmpOut.Clear();
-                sha512Password.Clear();
-                sha512Salt.Clear();
+                CryptographicOperations.ZeroMemory(countSalt);
+                CryptographicOperations.ZeroMemory(@out);
+                CryptographicOperations.ZeroMemory(tmpOut);
+                CryptographicOperations.ZeroMemory(sha512Password);
+                CryptographicOperations.ZeroMemory(sha512Salt);
             }
         }
 
@@ -473,9 +474,9 @@ namespace SKSshAgent.Ssh
             finally
             {
                 /* zap */
-                cData.Clear();
-                p.Clear();
-                s.Clear();
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsBytes(cData));
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsBytes(p));
+                CryptographicOperations.ZeroMemory(MemoryMarshal.AsBytes(s));
             }
         }
 

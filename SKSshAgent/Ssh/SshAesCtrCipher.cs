@@ -49,7 +49,7 @@ namespace SKSshAgent.Ssh
             }
             finally
             {
-                Array.Clear(keyArray);
+                CryptographicOperations.ZeroMemory(keyArray);
             }
 
             _counter = GC.AllocateArray<ulong>(2, pinned: true);
@@ -61,8 +61,8 @@ namespace SKSshAgent.Ssh
         public void Dispose()
         {
             _encryptor.Dispose();
-            Array.Clear(_counter);
-            Array.Clear(_block);
+            CryptographicOperations.ZeroMemory(MemoryMarshal.AsBytes(_counter.AsSpan()));
+            CryptographicOperations.ZeroMemory(_block);
         }
 
         /// <exception cref="ArgumentException"/>
