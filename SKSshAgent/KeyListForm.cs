@@ -436,9 +436,8 @@ namespace SKSshAgent
             using (var fileStream = new FileStream(dialog.FileName, FileMode.Create, FileAccess.Write))
             using (var fileWriter = new StreamWriter(fileStream))
             {
-                char[] formattedPrivateKey = cipherInfo == SshCipherInfo.None
-                    ? key.FormatOpenSshPrivateKey(comment)
-                    : key.FormatOpenSshPrivateKey(comment, password, kdfInfo, kdfRounds, cipherInfo);
+                // Encryption could take a while by design, so let's not do it on the UI thread.
+                char[] formattedPrivateKey = await Task.Run(() => key.FormatOpenSshPrivateKey(comment, password, kdfInfo, kdfRounds, cipherInfo)).ConfigureAwait(true);
 
                 await fileWriter.WriteAsync(formattedPrivateKey).ConfigureAwait(true);
             }
