@@ -56,7 +56,7 @@ namespace SKSshAgent.Ssh
         /// <exception cref="ArgumentNullException"/>
         /// <exception cref="ArgumentException"/>
         /// <exception cref="CryptographicException"/>
-        public static OpenSshEncryptedPrivateKey Encrypt(SshKey privateKey, string comment, ReadOnlySpan<byte> password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
+        public static OpenSshEncryptedPrivateKey Encrypt(SshKey privateKey, string comment, ShieldedImmutableBuffer password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
         {
             if (privateKey is null)
                 throw new ArgumentNullException(nameof(privateKey));
@@ -64,7 +64,7 @@ namespace SKSshAgent.Ssh
                 throw new ArgumentException("Private key is not present or is not decrypted.", nameof(privateKey));
             if (comment is null)
                 throw new ArgumentNullException(nameof(comment));
-            if (password.Length == 0 && kdfInfo != SshKdfInfo.None)
+            if (password.IsEmpty && kdfInfo != SshKdfInfo.None)
                 throw new ArgumentException("Invalid password.", nameof(password));
             if (kdfInfo is null)
                 throw new ArgumentNullException(nameof(kdfInfo));
@@ -115,7 +115,8 @@ namespace SKSshAgent.Ssh
                     using (var rng = RandomNumberGenerator.Create())
                         rng.GetBytes(salt);
 
-                    BcryptPbkdf.DeriveKey(password, salt, keyAndIV, kdfRounds);
+                    using (var passwordUnshieldScope = password.Unshield())
+                        BcryptPbkdf.DeriveKey(passwordUnshieldScope.UnshieldedSpan, salt, keyAndIV, kdfRounds);
 
                     WriteBcryptOptions(kdfOptionsBuffer, salt, kdfRounds);
                 }
@@ -176,9 +177,9 @@ namespace SKSshAgent.Ssh
         /// <exception cref="InvalidDataException"/>
         /// <exception cref="NotSupportedException"/>
         /// <exception cref="CryptographicException"/>
-        public override bool TryDecrypt(ReadOnlySpan<byte> password, [MaybeNullWhen(false)] out SshKey privateKey, [MaybeNullWhen(false)] out string comment)
+        public override bool TryDecrypt(ShieldedImmutableBuffer password, [MaybeNullWhen(false)] out SshKey privateKey, [MaybeNullWhen(false)] out string comment)
         {
-            if (password.Length == 0 && KdfInfo != SshKdfInfo.None)
+            if (password.IsEmpty && KdfInfo != SshKdfInfo.None)
                 throw new ArgumentException("Invalid password.", nameof(password));
 
             Span<byte> keyAndIV = stackalloc byte[CipherInfo.KeyLength + CipherInfo.IVLength];
@@ -205,7 +206,8 @@ namespace SKSshAgent.Ssh
                     if (rounds < 1)
                         throw new InvalidDataException("Invalid number of KDF rounds.");
 
-                    BcryptPbkdf.DeriveKey(password, salt, keyAndIV, rounds);
+                    using (var passwordUnshieldScope = password.Unshield())
+                        BcryptPbkdf.DeriveKey(passwordUnshieldScope.UnshieldedSpan, salt, keyAndIV, rounds);
                 }
                 else
                     throw new UnreachableException();

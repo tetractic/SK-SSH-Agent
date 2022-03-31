@@ -161,7 +161,7 @@ namespace SKSshAgent
                 ? _applicationIdTextBox.Text
                 : _applicationIdPrefix;
 
-            byte[] password = Array.Empty<byte>();
+            ShieldedImmutableBuffer password = ShieldedImmutableBuffer.Empty;
             SshKdfInfo kdfInfo = SshKdfInfo.None;
             uint kdfRounds = 0;
             SshCipherInfo cipherInfo = SshCipherInfo.None;
@@ -184,7 +184,8 @@ namespace SKSshAgent
                     return;
                 }
 
-                password = Encoding.UTF8.GetBytes(_passwordTextBox.Text);
+                int passwordLength = Encoding.UTF8.GetByteCount(_passwordTextBox.Text);
+                password = ShieldedImmutableBuffer.Create(passwordLength, _passwordTextBox.Text.AsSpan(), (source, buffer) => Encoding.UTF8.GetBytes(source, buffer));
 
                 kdfInfo = _kdfInfo;
                 kdfRounds = _kdfRounds;
@@ -225,7 +226,7 @@ namespace SKSshAgent
         {
             internal const int UserIdLength = 32;  // Including NUL terminator.
 
-            internal FormResult(SshKeyTypeInfo keyTypeInfo, bool userVerificationRequired, string userName, byte[] userId, string applicationId, string comment, byte[] password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
+            internal FormResult(SshKeyTypeInfo keyTypeInfo, bool userVerificationRequired, string userName, byte[] userId, string applicationId, string comment, ShieldedImmutableBuffer password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
             {
                 KeyTypeInfo = keyTypeInfo;
                 UserVerificationRequired = userVerificationRequired;
@@ -251,7 +252,7 @@ namespace SKSshAgent
 
             public string Comment { get; }
 
-            public byte[] Password { get; }
+            public ShieldedImmutableBuffer Password { get; }
 
             public SshKdfInfo KdfInfo { get; }
 

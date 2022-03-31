@@ -138,7 +138,7 @@ namespace SKSshAgent
                 if (form.ShowDialog(this) != DialogResult.OK)
                     return null;
 
-                byte[] password = form.Result!;
+                var password = form.Result;
 
                 try
                 {
@@ -166,10 +166,6 @@ namespace SKSshAgent
                     _ = MessageBox.Show(this, ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                     return null;
-                }
-                finally
-                {
-                    CryptographicOperations.ZeroMemory(password);
                 }
 
                 _ = MessageBox.Show(this, "Incorrect password.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -404,7 +400,7 @@ namespace SKSshAgent
                 _ = KeyList.Instance.AddOrUpgradeKey(key, comment);
         }
 
-        private async Task<bool> TrySaveKeyFileAsync(SshKey key, string comment, byte[] password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
+        private async Task<bool> TrySaveKeyFileAsync(SshKey key, string comment, ShieldedImmutableBuffer password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
         {
             string userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             string sshDirectoryPath = Path.Combine(userProfilePath, ".ssh");

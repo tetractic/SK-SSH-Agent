@@ -177,7 +177,7 @@ qtBTHGBj9rPm365ej86j0bNdxxnpfRrX1O20D6+LrZ9KwAwcntE=
 
             Assert.Equal(testCase.CipherInfo, encryptedPrivateKey.CipherInfo);
 
-            byte[] password = Encoding.UTF8.GetBytes("test");
+            var password = ShieldedImmutableBuffer.Create(Encoding.UTF8.GetBytes("test"));
 
             bool result = encryptedPrivateKey.TryDecrypt(password, out var decryptedPrivateKey, out string? decryptedComment);
 
@@ -218,7 +218,7 @@ qtBTHGBj9rPm365ej86j0bNdxxnpfRrX1O20D6+LrZ9KwAwcntE=
             var key = _openSshGeneratedUnencryptedKeyAndComment.Key;
             string comment = _openSshGeneratedUnencryptedKeyAndComment.Comment;
 
-            byte[] password = Encoding.UTF8.GetBytes("test");
+            var password = ShieldedImmutableBuffer.Create(Encoding.UTF8.GetBytes("test"));
 
             var encryptedPrivateKey = OpenSshEncryptedPrivateKey.Encrypt(key, comment, password, kdfInfo, kdfRounds, cipherInfo);
 

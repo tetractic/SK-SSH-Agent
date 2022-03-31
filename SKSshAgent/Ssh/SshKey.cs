@@ -229,11 +229,11 @@ namespace SKSshAgent.Ssh
         /// <exception cref="ArgumentOutOfRangeException"/>
         /// <exception cref="InvalidOperationException"/>
         /// <exception cref="CryptographicException"/>
-        public char[] FormatOpenSshPrivateKey(string comment, ReadOnlySpan<byte> password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
+        public char[] FormatOpenSshPrivateKey(string comment, ShieldedImmutableBuffer password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
         {
             if (comment is null)
                 throw new ArgumentNullException(nameof(comment));
-            if (password.Length == 0 && kdfInfo != SshKdfInfo.None)
+            if (password.IsEmpty && kdfInfo != SshKdfInfo.None)
                 throw new ArgumentException("Invalid password.", nameof(password));
             if (kdfInfo is null)
                 throw new ArgumentNullException(nameof(kdfInfo));
@@ -260,9 +260,9 @@ namespace SKSshAgent.Ssh
         /// <exception cref="InvalidDataException"/>
         /// <exception cref="NotSupportedException"/>
         /// <exception cref="CryptographicException"/>
-        public bool TryDecryptPrivateKey(ReadOnlySpan<byte> password, [MaybeNullWhen(false)] out SshKey privateKey, [MaybeNullWhen(false)] out string comment)
+        public bool TryDecryptPrivateKey(ShieldedImmutableBuffer password, [MaybeNullWhen(false)] out SshKey privateKey, [MaybeNullWhen(false)] out string comment)
         {
-            if (password.Length == 0)
+            if (password.IsEmpty)
                 throw new ArgumentException("Invalid password.", nameof(password));
 
             if (EncryptedPrivateKey == null)
@@ -320,7 +320,7 @@ namespace SKSshAgent.Ssh
         protected abstract SshKey WithEncryptedPrivateKey(SshEncryptedPrivateKey encryptedPrivateKey);
 
         /// <exception cref="CryptographicException"/>
-        private char[] FormatOpenSshPrivateKeyCore(string comment, ReadOnlySpan<byte> password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
+        private char[] FormatOpenSshPrivateKeyCore(string comment, ShieldedImmutableBuffer password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
         {
             // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/sshkey.c#L3910
 

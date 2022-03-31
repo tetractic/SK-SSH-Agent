@@ -17,6 +17,7 @@ namespace SKSshAgent
             InitializeComponent();
         }
 
+        /// <exception cref="ArgumentNullException" accessor="set"/>
         public string Fingerprint
         {
             get => _fingerprintTextBox.Text;
@@ -29,7 +30,7 @@ namespace SKSshAgent
             }
         }
 
-        public byte[]? Result { get; private set; }
+        public ShieldedImmutableBuffer Result { get; private set; }
 
         private void HandleDecryptButtonClicked(object sender, EventArgs e)
         {
@@ -41,7 +42,8 @@ namespace SKSshAgent
                 return;
             }
 
-            Result = Encoding.UTF8.GetBytes(_passwordTextBox.Text);
+            int passwordLength = Encoding.UTF8.GetByteCount(_passwordTextBox.Text);
+            Result = ShieldedImmutableBuffer.Create(passwordLength, _passwordTextBox.Text.AsSpan(), (source, buffer) => Encoding.UTF8.GetBytes(source, buffer));
 
             DialogResult = DialogResult.OK;
         }

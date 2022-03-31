@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using static Windows.Win32.PInvoke;
 
-namespace SKSshAgent.Ssh
+namespace SKSshAgent
 {
     internal readonly struct ShieldedImmutableBuffer : IEquatable<ShieldedImmutableBuffer>
     {
@@ -22,6 +22,12 @@ namespace SKSshAgent.Ssh
         {
             _encryptedBuffer = encryptedBuffer;
         }
+
+        public bool IsEmpty => _encryptedBuffer == null;
+
+        public ReadOnlyMemory<byte> ShieldedMemory => _encryptedBuffer.AsMemory();
+
+        public ReadOnlySpan<byte> ShieldedSpan => _encryptedBuffer.AsSpan();
 
         public static bool operator ==(ShieldedImmutableBuffer left, ShieldedImmutableBuffer right) => left.Equals(right);
 
@@ -39,10 +45,17 @@ namespace SKSshAgent.Ssh
 
         /// <exception cref="ArgumentNullException"/>
         /// <exception cref="CryptographicException"/>
-        public static ShieldedImmutableBuffer Create(int length, ReadOnlySpan<byte> source, CreateFromSourceAction action)
+        public static ShieldedImmutableBuffer Create<T>(int length, ReadOnlySpan<T> source, CreateFromSourceAction<T> action)
         {
             if (action is null)
                 throw new ArgumentNullException(nameof(action));
+
+            if (length == 0)
+            {
+                action(source, Span<byte>.Empty);
+
+                return Empty;
+            }
 
             uint encryptedBufferLength = (uint)length + 4;
             const uint blockSize = CRYPTPROTECTMEMORY_BLOCK_SIZE;
@@ -79,10 +92,6 @@ namespace SKSshAgent.Ssh
         /// <exception cref="CryptographicException"/>
         public UnshieldScope Unshield() => new(_encryptedBuffer ?? Array.Empty<byte>());
 
-        public ReadOnlyMemory<byte> ShieldedMemory => _encryptedBuffer.AsMemory();
-
-        public ReadOnlySpan<byte> ShieldedSpan => _encryptedBuffer.AsSpan();
-
         public bool Equals(ShieldedImmutableBuffer other)
         {
             return _encryptedBuffer == other._encryptedBuffer;
@@ -99,7 +108,7 @@ namespace SKSshAgent.Ssh
             return _encryptedBuffer?.GetHashCode() ?? 0;
         }
 
-        public delegate void CreateFromSourceAction(ReadOnlySpan<byte> source, Span<byte> buffer);
+        public delegate void CreateFromSourceAction<T>(ReadOnlySpan<T> source, Span<byte> buffer);
 
         public struct UnshieldScope : IDisposable
         {

@@ -17,7 +17,7 @@ namespace SKSshAgent.Ssh
         /// <exception cref="InvalidDataException"/>
         /// <exception cref="NotSupportedException"/>
         /// <exception cref="System.Security.Cryptography.CryptographicException"/>
-        public abstract bool TryDecrypt(ReadOnlySpan<byte> password, [MaybeNullWhen(false)] out SshKey privateKey, [MaybeNullWhen(false)] out string comment);
+        public abstract bool TryDecrypt(ShieldedImmutableBuffer password, [MaybeNullWhen(false)] out SshKey privateKey, [MaybeNullWhen(false)] out string comment);
 
         public abstract bool Equals([NotNullWhen(true)] SshEncryptedPrivateKey? other);
 
