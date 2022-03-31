@@ -70,7 +70,7 @@ namespace SKSshAgent.WebAuthn
                 if (offset != sequenceEnd)
                     throw new InvalidDataException("Excess data in ASN.1 sequence.");
 
-                int fieldSizeBits = curve.GetKeySizeBits();
+                int fieldSizeBits = curve.GetFieldSizeBits();
 
                 if (r < 0 || s < 0 || r.GetBitLength() > fieldSizeBits || s.GetBitLength() > fieldSizeBits)
                     throw new InvalidDataException("Invalid elliptic curve field elements.");

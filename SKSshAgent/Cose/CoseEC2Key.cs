@@ -42,19 +42,19 @@ namespace SKSshAgent.Cose
                 default:
                     throw new ArgumentOutOfRangeException(nameof(algorithm));
             }
-            int keySizeBits = curve.GetKeySizeBits();
-            int keySizeBytes = Sec1.SizeBitsToLength(keySizeBits);
+            int fieldSizeBits = curve.GetFieldSizeBits();
+            int fieldElementLength = Sec1.SizeBitsToLength(fieldSizeBits);
             if (x == null)
                 throw new ArgumentNullException(nameof(x));
-            if (x.Length != keySizeBytes)
-                throw new ArgumentException("Invalid size for field element.", nameof(x));
-            if (Sec1.GetBitLength(x.AsSpan()) > keySizeBits)
+            if (x.Length != fieldElementLength)
+                throw new ArgumentException("Invalid size for EC field element.", nameof(x));
+            if (Sec1.GetBitLength(x.AsSpan()) > fieldSizeBits)
                 throw new ArgumentOutOfRangeException(nameof(x));
             if (y == null)
                 throw new ArgumentNullException(nameof(y));
-            if (y.Length != keySizeBytes)
-                throw new ArgumentException("Invalid size for field element.", nameof(y));
-            if (Sec1.GetBitLength(y.AsSpan()) > keySizeBits)
+            if (y.Length != fieldElementLength)
+                throw new ArgumentException("Invalid size for EC field element.", nameof(y));
+            if (Sec1.GetBitLength(y.AsSpan()) > fieldSizeBits)
                 throw new ArgumentOutOfRangeException(nameof(y));
 
             _ecParameters = CreateParameters(curve, x.ToArray(), y.ToArray());

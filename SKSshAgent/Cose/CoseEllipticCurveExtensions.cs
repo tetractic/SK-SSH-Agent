@@ -11,7 +11,7 @@ namespace SKSshAgent.Cose
     internal static class CoseEllipticCurveExtensions
     {
         /// <exception cref="ArgumentOutOfRangeException"/>
-        public static int GetKeySizeBits(this CoseEllipticCurve curve)
+        public static int GetFieldSizeBits(this CoseEllipticCurve curve)
         {
             return curve switch
             {

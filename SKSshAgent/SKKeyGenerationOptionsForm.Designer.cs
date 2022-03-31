@@ -39,7 +39,7 @@ namespace SKSshAgent
             this._toolTip = new System.Windows.Forms.ToolTip(this.components);
             this._requireUserVerificationInfoIcon = new System.Windows.Forms.PictureBox();
             this._applicationIdInfoIcon = new System.Windows.Forms.PictureBox();
-            this._typeLabel = new System.Windows.Forms.Label();
+            this._keyTypeLabel = new System.Windows.Forms.Label();
             this._keyTypeComboBox = new System.Windows.Forms.ComboBox();
             this._requireUserVerificationCheckBox = new System.Windows.Forms.CheckBox();
             this._userIdLabel = new System.Windows.Forms.Label();
@@ -92,15 +92,15 @@ namespace SKSshAgent
             this._applicationIdInfoIcon.MouseEnter += new System.EventHandler(this.ShowToolTip);
             this._applicationIdInfoIcon.MouseLeave += new System.EventHandler(this.HideToolTip);
             // 
-            // _typeLabel
+            // _keyTypeLabel
             // 
-            this._typeLabel.AutoSize = true;
-            this._typeLabel.Location = new System.Drawing.Point(63, 15);
-            this._typeLabel.Name = "_typeLabel";
-            this._typeLabel.Size = new System.Drawing.Size(34, 15);
-            this._typeLabel.TabIndex = 0;
-            this._typeLabel.Text = "&Type:";
-            this._typeLabel.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this._keyTypeLabel.AutoSize = true;
+            this._keyTypeLabel.Location = new System.Drawing.Point(41, 15);
+            this._keyTypeLabel.Name = "_keyTypeLabel";
+            this._keyTypeLabel.Size = new System.Drawing.Size(56, 15);
+            this._keyTypeLabel.TabIndex = 0;
+            this._keyTypeLabel.Text = "Key &Type:";
+            this._keyTypeLabel.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // _keyTypeComboBox
             // 
@@ -163,7 +163,7 @@ namespace SKSshAgent
             this._applicationIdTextBox.TabIndex = 6;
             this._applicationIdTextBox.TextChanged += new System.EventHandler(this.HandleApplicationIdTextBoxTextChanged);
             this._applicationIdTextBox.Enter += new System.EventHandler(this.HandleApplicationIdTextBoxEnter);
-            this._applicationIdTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ApplicationIdTextBoxKeyDown);
+            this._applicationIdTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.HandleApplicationIdTextBoxKeyDown);
             this._applicationIdTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.HandleApplicationIdTextBoxKeyPress);
             this._applicationIdTextBox.Leave += new System.EventHandler(this.HandleApplicationIdTextBoxLeave);
             // 
@@ -300,7 +300,7 @@ namespace SKSshAgent
             this.Controls.Add(this._cancelButton);
             this.Controls.Add(this._generateButon);
             this.Controls.Add(this._keyTypeComboBox);
-            this.Controls.Add(this._typeLabel);
+            this.Controls.Add(this._keyTypeLabel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -319,7 +319,7 @@ namespace SKSshAgent
 
         #endregion
         private System.Windows.Forms.ToolTip _toolTip;
-        private System.Windows.Forms.Label _typeLabel;
+        private System.Windows.Forms.Label _keyTypeLabel;
         private System.Windows.Forms.ComboBox _keyTypeComboBox;
         private System.Windows.Forms.CheckBox _requireUserVerificationCheckBox;
         private System.Windows.Forms.PictureBox _requireUserVerificationInfoIcon;

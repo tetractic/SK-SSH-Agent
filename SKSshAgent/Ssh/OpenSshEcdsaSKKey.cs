@@ -143,8 +143,8 @@ namespace SKSshAgent.Ssh
 
             bool PrivateEquals(OpenSshEcdsaSKKey other)
             {
-                return Flags == other.Flags &&
-                       KeyHandle.SequenceEqual(other.KeyHandle);
+                return _flags == other._flags &&
+                       _keyHandle.SequenceEqual(other._keyHandle);
             }
         }
 
@@ -213,17 +213,17 @@ namespace SKSshAgent.Ssh
             // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/sshbuf-getput-crypto.c#L74
             // https://www.secg.org/sec1-v2.pdf#subsubsection.2.3.4
 
-            int fieldSizeBytes = Sec1.SizeBitsToLength(fieldSizeBits);
+            int fieldElementLength = Sec1.SizeBitsToLength(fieldSizeBits);
 
             var ecPointBuffer = reader.ReadByteString();
 
-            int ecPointLength = 1 + 2 * fieldSizeBytes;
+            int ecPointLength = 1 + 2 * fieldElementLength;
 
             if (ecPointBuffer.Length != ecPointLength || ecPointBuffer[0] != 4)
                 throw new InvalidDataException("Invalid EC point data.");
 
-            var x = Sec1.BytesToFieldElement(ecPointBuffer.Slice(1, fieldSizeBytes), fieldSizeBits);
-            var y = Sec1.BytesToFieldElement(ecPointBuffer.Slice(1 + fieldSizeBytes, fieldSizeBytes), fieldSizeBits);
+            var x = Sec1.BytesToFieldElement(ecPointBuffer.Slice(1, fieldElementLength), fieldSizeBits);
+            var y = Sec1.BytesToFieldElement(ecPointBuffer.Slice(1 + fieldElementLength, fieldElementLength), fieldSizeBits);
             return (x, y);
         }
 
@@ -232,16 +232,16 @@ namespace SKSshAgent.Ssh
             // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/sshbuf-getput-crypto.c#L154
             // https://www.secg.org/sec1-v2.pdf#subsubsection.2.3.3
 
-            int fieldSizeBytes = Sec1.SizeBitsToLength(fieldSizeBits);
+            int fieldElementLength = Sec1.SizeBitsToLength(fieldSizeBits);
 
-            int ecPointLength = 1 + 2 * fieldSizeBytes;
+            int ecPointLength = 1 + 2 * fieldElementLength;
 
             byte[] ecPointBuffer = new byte[ecPointLength];
 
             ecPointBuffer[0] = 4;
             bool xCompletelyWritten = Sec1.TryWriteFieldElementBytes(x, fieldSizeBits, ecPointBuffer.AsSpan(1), out _);
             Debug.Assert(xCompletelyWritten);
-            bool yCompletelyWritten = Sec1.TryWriteFieldElementBytes(y, fieldSizeBits, ecPointBuffer.AsSpan(1 + fieldSizeBytes), out _);
+            bool yCompletelyWritten = Sec1.TryWriteFieldElementBytes(y, fieldSizeBits, ecPointBuffer.AsSpan(1 + fieldElementLength), out _);
             Debug.Assert(yCompletelyWritten);
 
             writer.WriteByteString(ecPointBuffer);

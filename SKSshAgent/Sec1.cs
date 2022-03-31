@@ -33,19 +33,19 @@ namespace SKSshAgent
         {
             // https://www.secg.org/sec1-v2.pdf#subsubsection.2.3.5
 
-            int fieldSizeBytes = SizeBitsToLength(fieldSizeBits);
+            int fieldElementLength = SizeBitsToLength(fieldSizeBits);
 
-            if (bytes.Length < fieldSizeBytes)
+            if (bytes.Length < fieldElementLength)
             {
                 fieldElement = default;
                 bytesConsumed = 0;
                 return false;
             }
 
-            bytes = bytes.Slice(0, fieldSizeBytes);
+            bytes = bytes.Slice(0, fieldElementLength);
 
             fieldElement = ReadFieldElementCore(bytes, fieldSizeBits);
-            bytesConsumed = fieldSizeBytes;
+            bytesConsumed = fieldElementLength;
             return true;
         }
 
@@ -57,17 +57,17 @@ namespace SKSshAgent
             if (fieldElement < 0 || fieldElement.GetBitLength() > fieldSizeBits)
                 throw new ArgumentOutOfRangeException(nameof(fieldElement));
 
-            int fieldSizeBytes = SizeBitsToLength(fieldSizeBits);
+            int fieldElementLength = SizeBitsToLength(fieldSizeBits);
 
-            if (destination.Length < fieldSizeBytes)
+            if (destination.Length < fieldElementLength)
             {
                 bytesWritten = 0;
                 return false;
             }
             else
             {
-                WriteFieldElementBytesCore(fieldElement, fieldSizeBytes, destination);
-                bytesWritten = fieldSizeBytes;
+                WriteFieldElementBytesCore(fieldElement, fieldElementLength, destination);
+                bytesWritten = fieldElementLength;
                 return true;
             }
         }
@@ -78,9 +78,9 @@ namespace SKSshAgent
         {
             // https://www.secg.org/sec1-v2.pdf#subsubsection.2.3.5
 
-            int fieldSizeBytes = SizeBitsToLength(fieldSizeBits);
+            int fieldElementLength = SizeBitsToLength(fieldSizeBits);
 
-            if (bytes.Length != fieldSizeBytes)
+            if (bytes.Length != fieldElementLength)
                 throw new ArgumentException("Invalid size for EC field element.", nameof(bytes));
 
             return ReadFieldElementCore(bytes, fieldSizeBits);
@@ -94,10 +94,10 @@ namespace SKSshAgent
             if (fieldElement < 0 || fieldElement.GetBitLength() > fieldSizeBits)
                 throw new ArgumentOutOfRangeException(nameof(fieldElement));
 
-            int fieldSizeBytes = SizeBitsToLength(fieldSizeBits);
+            int fieldElementLength = SizeBitsToLength(fieldSizeBits);
 
-            byte[] bytes = new byte[fieldSizeBytes];
-            WriteFieldElementBytesCore(fieldElement, fieldSizeBytes, bytes);
+            byte[] bytes = new byte[fieldElementLength];
+            WriteFieldElementBytesCore(fieldElement, fieldElementLength, bytes);
             return bytes;
         }
 

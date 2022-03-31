@@ -87,7 +87,7 @@ namespace SKSshAgent
             _previousApplicationIdText = _applicationIdTextBox.Text;
         }
 
-        private void ApplicationIdTextBoxKeyDown(object sender, KeyEventArgs e)
+        private void HandleApplicationIdTextBoxKeyDown(object sender, KeyEventArgs e)
         {
             // Try to prevent the user from accidentally deleting the prefix.
             if (e.KeyCode == Keys.Delete &&
@@ -161,17 +161,13 @@ namespace SKSshAgent
                 ? _applicationIdTextBox.Text
                 : _applicationIdPrefix;
 
+            byte[] password = Array.Empty<byte>();
             SshKdfInfo kdfInfo = SshKdfInfo.None;
             uint kdfRounds = 0;
             SshCipherInfo cipherInfo = SshCipherInfo.None;
-            byte[] password = Array.Empty<byte>();
 
             if (_encryptCheckBox.Checked)
             {
-                kdfInfo = _kdfInfo;
-                kdfRounds = _kdfRounds;
-                cipherInfo = _cipherInfo;
-
                 if (_passwordTextBox.Text != _confirmPasswordTextBox.Text)
                 {
                     _ = _passwordTextBox.Focus();
@@ -189,6 +185,10 @@ namespace SKSshAgent
                 }
 
                 password = Encoding.UTF8.GetBytes(_passwordTextBox.Text);
+
+                kdfInfo = _kdfInfo;
+                kdfRounds = _kdfRounds;
+                cipherInfo = _cipherInfo;
             }
 
             Result = new FormResult(
@@ -198,10 +198,10 @@ namespace SKSshAgent
                 userId: userId,
                 applicationId: applicationId,
                 comment: _commentTextBox.Text,
+                password: password,
                 kdfInfo: kdfInfo,
                 kdfRounds: kdfRounds,
-                cipherInfo: cipherInfo,
-                password: password);
+                cipherInfo: cipherInfo);
 
             DialogResult = DialogResult.OK;
         }
@@ -225,7 +225,7 @@ namespace SKSshAgent
         {
             internal const int UserIdLength = 32;  // Including NUL terminator.
 
-            internal FormResult(SshKeyTypeInfo keyTypeInfo, bool userVerificationRequired, string userName, byte[] userId, string applicationId, string comment, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo, byte[] password)
+            internal FormResult(SshKeyTypeInfo keyTypeInfo, bool userVerificationRequired, string userName, byte[] userId, string applicationId, string comment, byte[] password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
             {
                 KeyTypeInfo = keyTypeInfo;
                 UserVerificationRequired = userVerificationRequired;
@@ -233,10 +233,10 @@ namespace SKSshAgent
                 UserId = userId;
                 ApplicationId = applicationId;
                 Comment = comment;
+                Password = password;
                 KdfInfo = kdfInfo;
                 KdfRounds = kdfRounds;
                 CipherInfo = cipherInfo;
-                Password = password;
             }
 
             public SshKeyTypeInfo KeyTypeInfo { get; }
@@ -251,13 +251,13 @@ namespace SKSshAgent
 
             public string Comment { get; }
 
+            public byte[] Password { get; }
+
             public SshKdfInfo KdfInfo { get; }
 
             public uint KdfRounds { get; }
 
             public SshCipherInfo CipherInfo { get; }
-
-            public byte[] Password { get; }
         }
     }
 }
