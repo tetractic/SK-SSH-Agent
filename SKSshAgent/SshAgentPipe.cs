@@ -359,6 +359,13 @@ namespace SKSshAgent
 
             switch (key.KeyTypeInfo.Type)
             {
+                case SshKeyType.Ecdsa:
+                {
+                    var ecdsaKey = (SshEcdsaKey)key;
+
+                    signature = ecdsaKey.Sign(data);
+                    break;
+                }
                 case SshKeyType.OpenSshEcdsaSK:
                 {
                     var openSshEcdsaSKKey = (OpenSshEcdsaSKKey)key;
@@ -382,7 +389,9 @@ namespace SKSshAgent
                     try
                     {
                         var hWnd = await _form.InvokeAsync(() => new HWND(_form.Handle)).ConfigureAwait(false);
-                        var result = WebAuthnApi.GetAssertion(hWnd, webAuthnKey, rpId, keyHandle.AsSpan(), keyFlags, challenge, cancellationToken);
+                        WebAuthnApi.GetAssertionResult? result;
+                        using (var keyHandleUnshieldScope = keyHandle.Unshield())
+                            result = WebAuthnApi.GetAssertion(hWnd, webAuthnKey, rpId, keyHandleUnshieldScope.UnshieldedSpan, keyFlags, challenge, cancellationToken);
                         var webAuthnSignature = result.Signature;
                         byte flags = (byte)result.AuthenticatorData.Flags;
                         uint counter = result.AuthenticatorData.SignCount;
@@ -409,7 +418,6 @@ namespace SKSshAgent
                     }
                     break;
                 }
-
                 default:
                     throw new UnreachableException();
             }

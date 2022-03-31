@@ -8,6 +8,7 @@ namespace SKSshAgent.Ssh
 {
     internal enum SshKeyType
     {
+        Ecdsa,
         OpenSshEcdsaSK,
     }
 }

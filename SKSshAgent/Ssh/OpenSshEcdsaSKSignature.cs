@@ -5,7 +5,6 @@
 // Foundation.
 
 using System;
-using System.Diagnostics;
 using System.Numerics;
 
 namespace SKSshAgent.Ssh
@@ -47,25 +46,9 @@ namespace SKSshAgent.Ssh
             // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/ssh-sk.c#L560
 
             writer.WriteString(KeyTypeInfo.Name);
-            WriteEcdsaSignature(ref writer, R, S);
+            SshEcdsaSignature.WriteEcdsaSignature(ref writer, R, S);
             writer.WriteByte(Flags);
             writer.WriteUInt32(Counter);
-        }
-
-        private static void WriteEcdsaSignature(ref SshWireWriter writer, BigInteger r, BigInteger s)
-        {
-            int rLength = r == 0 ? 0 : r.GetByteCount();
-            int sLength = s == 0 ? 0 : s.GetByteCount();
-
-            byte[] signatureBuffer = new byte[4 + rLength + 4 + sLength];
-
-            var signatureWriter = new SshWireWriter(signatureBuffer);
-            signatureWriter.WriteBigInteger(r);
-            signatureWriter.WriteBigInteger(s);
-            signatureWriter.Flush();
-            Debug.Assert(signatureWriter.BufferedLength == signatureBuffer.Length);
-
-            writer.WriteByteString(signatureBuffer);
         }
     }
 }

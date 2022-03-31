@@ -12,5 +12,7 @@ M:System.Buffers.IBufferWriter`1.Advance(System.Int32) +T:System.InvalidOperatio
 M:System.Buffers.IBufferWriter`1.GetMemory(System.Int32) +T:System.ArgumentOutOfRangeException
 M:System.Buffers.IBufferWriter`1.GetSpan(System.Int32) +T:System.ArgumentOutOfRangeException
 M:System.Convert.ToBase64String(System.ReadOnlySpan{System.Byte},System.Base64FormattingOptions) -T:System.OutOfMemoryException
+M:System.MemoryExtensions.AsMemory``1(``0[],System.Int32,System.Int32) -T:System.ArrayTypeMismatchException
+M:System.MemoryExtensions.AsSpan``1(``0[],System.Int32,System.Int32) -T:System.ArrayTypeMismatchException
 M:System.String.Join``1(System.Char,System.Collections.Generic.IEnumerable{``0}) -T:System.OutOfMemoryException
 M:System.Windows.Forms.Clipboard.SetText(System.String) -T:System.Threading.ThreadStateException

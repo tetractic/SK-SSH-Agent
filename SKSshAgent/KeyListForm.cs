@@ -199,6 +199,9 @@ namespace SKSshAgent
 
                 switch (key.KeyTypeInfo.Type)
                 {
+                    case SshKeyType.Ecdsa:
+                        break;
+
                     case SshKeyType.OpenSshEcdsaSK:
                         if (!CheckWebAuthnVersion(WEBAUTHN_API_VERSION_1))
                             return;
@@ -333,55 +336,8 @@ namespace SKSshAgent
                         throw new UnreachableException();
                 }
 
-                string userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                string sshDirectoryPath = Path.Combine(userProfilePath, ".ssh");
-
-                if (!Directory.Exists(sshDirectoryPath))
-                {
-                    try
-                    {
-                        _ = Directory.CreateDirectory(sshDirectoryPath);
-                    }
-                    catch (Exception ex)
-                        when (ex is ArgumentException ||
-                              ex is PathTooLongException ||
-                              ex is DirectoryNotFoundException ||
-                              ex is UnauthorizedAccessException ||
-                              ex is IOException)
-                    {
-                        // Nothing to be done about it.
-                    }
-                }
-
-                var dialog = new SaveFileDialog()
-                {
-                    FileName = GetDefaultKeyFileName(keyTypeInfo),
-                    Filter = "OpenSSH Private Key|*.*",
-                    InitialDirectory = sshDirectoryPath,
-                    OverwritePrompt = true,
-                };
-                var saveResult = dialog.ShowDialog(this);
-                if (saveResult != DialogResult.OK)
+                if (!await TrySaveKeyFileAsync(key, comment, options.Password, options.KdfInfo, options.KdfRounds, options.CipherInfo))
                     return;
-
-                using (var fileStream = new FileStream(dialog.FileName, FileMode.Create, FileAccess.Write))
-                using (var fileWriter = new StreamWriter(fileStream))
-                {
-                    var kdfInfo = options.KdfInfo;
-                    byte[] password = options.Password;
-                    uint kdfRounds = options.KdfRounds;
-                    var cipherInfo = options.CipherInfo;
-
-                    char[] formattedPrivateKey = cipherInfo == SshCipherInfo.None
-                        ? key.FormatOpenSshPrivateKey(comment)
-                        : key.FormatOpenSshPrivateKey(comment, password, kdfInfo, kdfRounds, cipherInfo);
-
-                    await fileWriter.WriteAsync(formattedPrivateKey).ConfigureAwait(true);
-                }
-
-                using (var fileStream = new FileStream(dialog.FileName + ".pub", FileMode.Create, FileAccess.Write))
-                using (var fileWriter = new StreamWriter(fileStream))
-                    await fileWriter.WriteAsync(key.FormatOpenSshPublicKey(comment)).ConfigureAwait(true);
             }
             catch (OperationCanceledException)
             {
@@ -402,15 +358,100 @@ namespace SKSshAgent
             var queryResult = MessageBox.Show(this, "Load the generated key?", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (queryResult == DialogResult.Yes)
                 _ = KeyList.Instance.AddOrUpgradeKey(key, comment);
+        }
 
-            static string GetDefaultKeyFileName(SshKeyTypeInfo keyTypeInfo)
+        private async void HandleGenerateMenuItemClicked(object sender, EventArgs e)
+        {
+            _statusLabel.Text = string.Empty;
+
+            var optionsForm = new KeyGenerationOptionsForm();
+            if (optionsForm.ShowDialog(this) != DialogResult.OK)
+                return;
+            var options = optionsForm.Result!;
+
+            var keyTypeInfo = options.KeyTypeInfo;
+
+            string comment = options.Comment;
+
+            SshKey key;
+            try
             {
-                return keyTypeInfo.Type switch
+                switch (keyTypeInfo.Type)
                 {
-                    SshKeyType.OpenSshEcdsaSK => "id_ecdsa_sk",
-                    _ => throw new UnreachableException(),
-                };
+                    case SshKeyType.Ecdsa:
+                        key = SshEcdsaKey.Generate(keyTypeInfo);
+                        break;
+
+                    default:
+                        throw new UnreachableException();
+                }
+
+                if (!await TrySaveKeyFileAsync(key, comment, options.Password, options.KdfInfo, options.KdfRounds, options.CipherInfo))
+                    return;
             }
+            catch (Exception ex)
+            {
+                _statusLabel.Text = "Key generation failed.";
+
+                _ = MessageBox.Show(this, ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            _statusLabel.Text = "Key generation succeeded.";
+
+            var queryResult = MessageBox.Show(this, "Load the generated key?", Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (queryResult == DialogResult.Yes)
+                _ = KeyList.Instance.AddOrUpgradeKey(key, comment);
+        }
+
+        private async Task<bool> TrySaveKeyFileAsync(SshKey key, string comment, byte[] password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
+        {
+            string userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string sshDirectoryPath = Path.Combine(userProfilePath, ".ssh");
+
+            if (!Directory.Exists(sshDirectoryPath))
+            {
+                try
+                {
+                    _ = Directory.CreateDirectory(sshDirectoryPath);
+                }
+                catch (Exception ex)
+                    when (ex is ArgumentException ||
+                          ex is PathTooLongException ||
+                          ex is DirectoryNotFoundException ||
+                          ex is UnauthorizedAccessException ||
+                          ex is IOException)
+                {
+                    // Nothing to be done about it.
+                }
+            }
+
+            var dialog = new SaveFileDialog()
+            {
+                FileName = key.KeyTypeInfo.Type.GetDefaultFileName(),
+                Filter = "OpenSSH Private Key|*.*",
+                InitialDirectory = sshDirectoryPath,
+                OverwritePrompt = true,
+            };
+            var saveResult = dialog.ShowDialog(this);
+            if (saveResult != DialogResult.OK)
+                return false;
+
+            using (var fileStream = new FileStream(dialog.FileName, FileMode.Create, FileAccess.Write))
+            using (var fileWriter = new StreamWriter(fileStream))
+            {
+                char[] formattedPrivateKey = cipherInfo == SshCipherInfo.None
+                    ? key.FormatOpenSshPrivateKey(comment)
+                    : key.FormatOpenSshPrivateKey(comment, password, kdfInfo, kdfRounds, cipherInfo);
+
+                await fileWriter.WriteAsync(formattedPrivateKey).ConfigureAwait(true);
+            }
+
+            using (var fileStream = new FileStream(dialog.FileName + ".pub", FileMode.Create, FileAccess.Write))
+            using (var fileWriter = new StreamWriter(fileStream))
+                await fileWriter.WriteAsync(key.FormatOpenSshPublicKey(comment)).ConfigureAwait(true);
+
+            return true;
         }
 
         private void HandleExitMenuItemClicked(object sender, EventArgs e)
@@ -445,9 +486,15 @@ namespace SKSshAgent
                 {
                     switch (key.KeyTypeInfo.Type)
                     {
+                        case SshKeyType.Ecdsa:
+                            break;
+
                         case SshKeyType.OpenSshEcdsaSK:
                             warnAboutMissingOptions = true;
                             break;
+
+                        default:
+                            throw new UnreachableException();
                     }
                 }
 

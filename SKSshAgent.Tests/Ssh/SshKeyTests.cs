@@ -22,7 +22,7 @@ namespace SKSshAgent.Ssh.Tests
                 BigInteger.Parse("10791305083879448925504919972385807166056302535066617515522020748831529237409"),
                 application: Convert.FromBase64String("c3NoOg==").ToImmutableArray(),
                 flags: OpenSshSKFlags.UserPresenceRequired,
-                keyHandle: Convert.FromBase64String("xe8nnmSTqdDaRSKcNNYFPEnJlL59hZ+3KQHHfPmisvUEJS1RS99rGWLIi2xMbK1q").ToImmutableArray());
+                keyHandle: ShieldedImmutableBuffer.Create(Convert.FromBase64String("xe8nnmSTqdDaRSKcNNYFPEnJlL59hZ+3KQHHfPmisvUEJS1RS99rGWLIi2xMbK1q")));
             const string comment = "test";
 
             string keyAuthorization = key.GetOpenSshKeyAuthorization(comment);
@@ -61,7 +61,7 @@ AAEGNhcmxAZXhhbXBsZS5jb20BAgME
                 BigInteger.Parse("10791305083879448925504919972385807166056302535066617515522020748831529237409"),
                 application: Convert.FromBase64String("c3NoOg==").ToImmutableArray(),
                 flags: OpenSshSKFlags.UserPresenceRequired,
-                keyHandle: Convert.FromBase64String("xe8nnmSTqdDaRSKcNNYFPEnJlL59hZ+3KQHHfPmisvUEJS1RS99rGWLIi2xMbK1q").ToImmutableArray());
+                keyHandle: ShieldedImmutableBuffer.Create(Convert.FromBase64String("xe8nnmSTqdDaRSKcNNYFPEnJlL59hZ+3KQHHfPmisvUEJS1RS99rGWLIi2xMbK1q")));
             const string comment = "test";
 
             char[] formattedKey = key.FormatOpenSshPrivateKey(comment);

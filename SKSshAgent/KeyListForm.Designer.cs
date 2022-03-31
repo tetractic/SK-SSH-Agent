@@ -47,6 +47,7 @@ namespace SKSshAgent
             this._keyMenu = new System.Windows.Forms.ToolStripMenuItem();
             this._loadFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._generateInSecurityKeyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this._generateMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._editMenu = new System.Windows.Forms.ToolStripMenuItem();
             this._decryptMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -182,6 +183,7 @@ namespace SKSshAgent
             this._loadFileMenuItem,
             _keyMenuSeparator1,
             this._generateInSecurityKeyMenuItem,
+            this._generateMenuItem,
             _keyMenuSeparator2,
             this._exitMenuItem});
             this._keyMenu.Name = "_keyMenu";
@@ -204,6 +206,14 @@ namespace SKSshAgent
             this._generateInSecurityKeyMenuItem.Size = new System.Drawing.Size(210, 22);
             this._generateInSecurityKeyMenuItem.Text = "&Generate in Security Key...";
             this._generateInSecurityKeyMenuItem.Click += new System.EventHandler(this.HandleGenerateInSecurityKeyMenuItemClicked);
+            // 
+            // _generateMenuItem
+            // 
+            this._generateMenuItem.Image = global::SKSshAgent.Properties.Resources.key_go;
+            this._generateMenuItem.Name = "_generateMenuItem";
+            this._generateMenuItem.Size = new System.Drawing.Size(210, 22);
+            this._generateMenuItem.Text = "Ge&nerate...";
+            this._generateMenuItem.Click += new System.EventHandler(this.HandleGenerateMenuItemClicked);
             // 
             // _exitMenuItem
             // 
@@ -407,6 +417,7 @@ namespace SKSshAgent
         private ToolStripMenuItem _keyMenu;
         private ToolStripMenuItem _loadFileMenuItem;
         private ToolStripMenuItem _generateInSecurityKeyMenuItem;
+        private ToolStripMenuItem _generateMenuItem;
         private ToolStripMenuItem _exitMenuItem;
         private ToolStripMenuItem _editMenu;
         private ToolStripMenuItem _decryptMenuItem;

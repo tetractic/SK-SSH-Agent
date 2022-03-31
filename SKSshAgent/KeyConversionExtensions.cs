@@ -69,7 +69,7 @@ namespace SKSshAgent
                 y: Sec1.BytesToFieldElement(ec2PublicKey.Y.AsSpan(), keyTypeInfo.KeySizeBits),
                 application: application,
                 flags: flags,
-                keyHandle: keyHandle);
+                keyHandle: ShieldedImmutableBuffer.Create(keyHandle.AsSpan()));
         }
 
         private static Dictionary<TValue, TKey> InvertDictionary<TKey, TValue>(Dictionary<TKey, TValue> dictionary)

@@ -161,6 +161,7 @@ namespace SKSshAgent.Ssh
 
             return keyTypeInfo.Type switch
             {
+                SshKeyType.Ecdsa => SshEcdsaKey.ReadPublicKey(keyTypeInfo, ref reader),
                 SshKeyType.OpenSshEcdsaSK => OpenSshEcdsaSKKey.ReadPublicKey(keyTypeInfo, ref reader),
                 _ => throw new UnreachableException(),
             };
@@ -180,6 +181,7 @@ namespace SKSshAgent.Ssh
 
             return keyTypeInfo.Type switch
             {
+                SshKeyType.Ecdsa => SshEcdsaKey.ReadPrivateKey(keyTypeInfo, ref reader),
                 SshKeyType.OpenSshEcdsaSK => OpenSshEcdsaSKKey.ReadPrivateKey(keyTypeInfo, ref reader),
                 _ => throw new UnreachableException(),
             };

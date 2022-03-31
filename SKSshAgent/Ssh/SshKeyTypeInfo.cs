@@ -12,6 +12,30 @@ namespace SKSshAgent.Ssh
 {
     internal sealed class SshKeyTypeInfo
     {
+        public static readonly SshKeyTypeInfo EcdsaSha2NistP256 = new(
+            name: "ecdsa-sha2-nistp256",
+            type: SshKeyType.Ecdsa,
+            hashAlgorithmName: HashAlgorithmName.SHA256,
+            curveName: "nistp256",
+            curve: ECCurve.NamedCurves.nistP256,
+            keySizeBits: 256);
+
+        public static readonly SshKeyTypeInfo EcdsaSha2NistP384 = new (
+            name: "ecdsa-sha2-nistp384",
+            type: SshKeyType.Ecdsa,
+            hashAlgorithmName: HashAlgorithmName.SHA384,
+            curveName: "nistp384",
+            curve: ECCurve.NamedCurves.nistP384,
+            keySizeBits: 384);
+
+        public static readonly SshKeyTypeInfo EcdsaSha2NistP521 = new(
+            name: "ecdsa-sha2-nistp521",
+            type: SshKeyType.Ecdsa,
+            hashAlgorithmName: HashAlgorithmName.SHA512,
+            curveName: "nistp521",
+            curve: ECCurve.NamedCurves.nistP521,
+            keySizeBits: 521);
+
         public static readonly SshKeyTypeInfo SKEcdsaSha2NistP256 = new(
             name: "sk-ecdsa-sha2-nistp256@openssh.com",
             type: SshKeyType.OpenSshEcdsaSK,
@@ -22,6 +46,9 @@ namespace SKSshAgent.Ssh
 
         public static readonly ImmutableArray<SshKeyTypeInfo> KeyTypeInfos = ImmutableArray.Create(new[]
         {
+            EcdsaSha2NistP256,
+            EcdsaSha2NistP384,
+            EcdsaSha2NistP521,
             SKEcdsaSha2NistP256,
         });
 
