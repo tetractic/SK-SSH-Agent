@@ -343,6 +343,8 @@ namespace SKSshAgent
                 return;
             }
 
+            bool useConfirmed = !Settings.ConfirmEachKeyUse;
+
             if (key.EncryptedPrivateKey != null)
             {
                 var privateKey = await _form.InvokeAsync(() => _form.DecryptPrivateKeyAsync(key, agent: true)).ConfigureAwait(false);
@@ -351,6 +353,8 @@ namespace SKSshAgent
                     WriteSimpleResponse(buffer, MessageType.SSH_AGENT_FAILURE);
                     return;
                 }
+
+                useConfirmed = true;
 
                 key = privateKey;
             }
@@ -362,6 +366,15 @@ namespace SKSshAgent
                 case SshKeyType.Ecdsa:
                 {
                     var ecdsaKey = (SshEcdsaKey)key;
+
+                    if (!useConfirmed)
+                        useConfirmed = await _form.InvokeAsync(() => _form.ConfirmKeyUse(key, agent: true)).ConfigureAwait(false);
+
+                    if (!useConfirmed)
+                    {
+                        WriteSimpleResponse(buffer, MessageType.SSH_AGENT_FAILURE);
+                        return;
+                    }
 
                     signature = ecdsaKey.Sign(data);
                     break;
@@ -388,6 +401,8 @@ namespace SKSshAgent
 
                     try
                     {
+                        // Key use is always confirmed by Windows WebAuthn since it doesn't support "no-touch-required".
+
                         var hWnd = await _form.InvokeAsync(() => new HWND(_form.Handle)).ConfigureAwait(false);
                         WebAuthnApi.GetAssertionResult? result;
                         using (var keyHandleUnshieldScope = keyHandle.Unshield())

@@ -32,6 +32,13 @@ namespace SKSshAgent
 
         public ShieldedImmutableBuffer Result { get; private set; }
 
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            Activate();
+        }
+
         private void HandleDecryptButtonClicked(object sender, EventArgs e)
         {
             if (_passwordTextBox.TextLength == 0)
@@ -46,13 +53,6 @@ namespace SKSshAgent
             Result = ShieldedImmutableBuffer.Create(passwordLength, _passwordTextBox.Text.AsSpan(), (source, buffer) => Encoding.UTF8.GetBytes(source, buffer));
 
             DialogResult = DialogResult.OK;
-        }
-
-        protected override void OnShown(EventArgs e)
-        {
-            base.OnShown(e);
-
-            Activate();
         }
     }
 }

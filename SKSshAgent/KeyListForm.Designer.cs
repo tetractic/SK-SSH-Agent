@@ -54,6 +54,8 @@ namespace SKSshAgent
             this._copyOpenSshKeyAuthorizationMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._copyOpenSshPublicKeyMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._removeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this._settingsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this._confirmEachKeyUseMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._helpMenu = new System.Windows.Forms.ToolStripMenuItem();
             this._aboutMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this._menuStrip = new System.Windows.Forms.MenuStrip();
@@ -273,6 +275,21 @@ namespace SKSshAgent
             this._removeMenuItem.Text = "&Remove";
             this._removeMenuItem.Click += new System.EventHandler(this.HandleRemoveMenuItemClicked);
             // 
+            // _settingsMenuItem
+            // 
+            this._settingsMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this._confirmEachKeyUseMenuItem});
+            this._settingsMenuItem.Name = "_settingsMenuItem";
+            this._settingsMenuItem.Size = new System.Drawing.Size(61, 22);
+            this._settingsMenuItem.Text = "&Settings";
+            // 
+            // _confirmEachKeyUseMenuItem
+            // 
+            this._confirmEachKeyUseMenuItem.Name = "_confirmEachKeyUseMenuItem";
+            this._confirmEachKeyUseMenuItem.Size = new System.Drawing.Size(190, 22);
+            this._confirmEachKeyUseMenuItem.Text = "&Confirm Each Key Use";
+            this._confirmEachKeyUseMenuItem.Click += new System.EventHandler(this.HandleConfirmEachKeyUseMenuItemClicked);
+            // 
             // _helpMenu
             // 
             this._helpMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -296,6 +313,7 @@ namespace SKSshAgent
             this._menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this._keyMenu,
             this._editMenu,
+            this._settingsMenuItem,
             this._helpMenu});
             this._menuStrip.Location = new System.Drawing.Point(0, 0);
             this._menuStrip.Name = "_menuStrip";
@@ -424,6 +442,8 @@ namespace SKSshAgent
         private ToolStripMenuItem _copyOpenSshKeyAuthorizationMenuItem;
         private ToolStripMenuItem _copyOpenSshPublicKeyMenuItem;
         private ToolStripMenuItem _removeMenuItem;
+        private ToolStripMenuItem _settingsMenuItem;
+        private ToolStripMenuItem _confirmEachKeyUseMenuItem;
         private ToolStripMenuItem _helpMenu;
         private ToolStripMenuItem _aboutMenuItem;
         private MenuStrip _menuStrip;

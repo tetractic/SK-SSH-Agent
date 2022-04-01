@@ -43,6 +43,8 @@ namespace SKSshAgent
 
             HandleCreated += HandleHandleCreated;
 
+            _confirmEachKeyUseMenuItem.Checked = Settings.ConfirmEachKeyUse;
+
             _keyListImageList.Images.Add(Resources.key);
             _keyListImageList.Images.Add(Resources._lock);
         }
@@ -170,6 +172,20 @@ namespace SKSshAgent
 
                 _ = MessageBox.Show(this, "Incorrect password.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+        }
+
+        internal bool ConfirmKeyUse(SshKey key, bool agent = false)
+        {
+            var form = new KeyUseConfirmationForm();
+            form.Fingerprint = "SHA256:" + Convert.ToBase64String(key.GetSha256Fingerprint()).TrimEnd('=');
+            if (agent)
+            {
+                form.ShowIcon = true;
+                form.StartPosition = FormStartPosition.CenterScreen;
+                form.TopMost = true;
+                form.Text += " — " + Text;
+            }
+            return form.ShowDialog(this) == DialogResult.OK;
         }
 
         private async Task LoadKeyFromFileCore(string filePath, bool async)
@@ -535,6 +551,14 @@ namespace SKSshAgent
         {
             foreach (KeyListViewItem item in _keyListView.SelectedItems)
                 _ = KeyList.Instance.RemoveKey(item.Key);
+        }
+
+        private void HandleConfirmEachKeyUseMenuItemClicked(object sender, EventArgs e)
+        {
+            bool @checked = !_confirmEachKeyUseMenuItem.Checked;
+            _confirmEachKeyUseMenuItem.Checked = @checked;
+
+            Settings.ConfirmEachKeyUse = @checked;
         }
 
         private void HandleAboutMenuItemClicked(object sender, EventArgs e)
