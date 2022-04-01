@@ -199,8 +199,15 @@ namespace SKSshAgent
                         }
                     }
 
-                    // Propagate exception if there was one.
-                    task.GetAwaiter().GetResult();
+                    try
+                    {
+                        // Propagate exception if there was one.
+                        task.GetAwaiter().GetResult();
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // Expected.
+                    }
                 }, CancellationToken.None);
             }
         }
@@ -347,7 +354,7 @@ namespace SKSshAgent
 
             if (key.EncryptedPrivateKey != null)
             {
-                var privateKey = await _form.InvokeAsync(() => _form.DecryptPrivateKeyAsync(key, agent: true)).ConfigureAwait(false);
+                var privateKey = await _form.InvokeAsync(() => _form.DecryptPrivateKeyAsync(key, background: true, cancellationToken)).ConfigureAwait(false);
                 if (privateKey == null)
                 {
                     WriteSimpleResponse(buffer, MessageType.SSH_AGENT_FAILURE);
@@ -368,7 +375,7 @@ namespace SKSshAgent
                     var ecdsaKey = (SshEcdsaKey)key;
 
                     if (!useConfirmed)
-                        useConfirmed = await _form.InvokeAsync(() => _form.ConfirmKeyUse(key, agent: true)).ConfigureAwait(false);
+                        useConfirmed = await _form.InvokeAsync(() => _form.ConfirmKeyUse(key, background: true, cancellationToken)).ConfigureAwait(false);
 
                     if (!useConfirmed)
                     {

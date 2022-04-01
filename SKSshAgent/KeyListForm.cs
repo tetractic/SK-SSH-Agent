@@ -124,21 +124,22 @@ namespace SKSshAgent
 
         internal void LoadKeyFromFile(string filePath) => LoadKeyFromFileCore(filePath, async: false).GetAwaiter().GetResult();
 
-        internal async Task<SshKey?> DecryptPrivateKeyAsync(SshKey key, bool agent = false)
+        internal async Task<SshKey?> DecryptPrivateKeyAsync(SshKey key, bool background = false, CancellationToken cancellationToken = default)
         {
             while (true)
             {
                 var form = new KeyDecryptionForm();
                 form.Fingerprint = "SHA256:" + Convert.ToBase64String(key.GetSha256Fingerprint()).TrimEnd('=');
-                if (agent)
+                if (background)
                 {
                     form.ShowIcon = true;
                     form.StartPosition = FormStartPosition.CenterScreen;
                     form.TopMost = true;
                     form.Text += " — " + Text;
                 }
-                if (form.ShowDialog(this) != DialogResult.OK)
-                    return null;
+                using (cancellationToken.Register(() => form.Invoke(() => form.Close())))
+                    if (form.ShowDialog(this) != DialogResult.OK)
+                        return null;
 
                 var password = form.Result;
 
@@ -174,18 +175,19 @@ namespace SKSshAgent
             }
         }
 
-        internal bool ConfirmKeyUse(SshKey key, bool agent = false)
+        internal bool ConfirmKeyUse(SshKey key, bool background = false, CancellationToken cancellationToken = default)
         {
             var form = new KeyUseConfirmationForm();
             form.Fingerprint = "SHA256:" + Convert.ToBase64String(key.GetSha256Fingerprint()).TrimEnd('=');
-            if (agent)
+            if (background)
             {
                 form.ShowIcon = true;
                 form.StartPosition = FormStartPosition.CenterScreen;
                 form.TopMost = true;
                 form.Text += " — " + Text;
             }
-            return form.ShowDialog(this) == DialogResult.OK;
+            using (cancellationToken.Register(() => form.Invoke(() => form.Close())))
+                return form.ShowDialog(this) == DialogResult.OK;
         }
 
         private async Task LoadKeyFromFileCore(string filePath, bool async)
