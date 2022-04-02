@@ -13,6 +13,7 @@ using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -47,6 +48,8 @@ namespace SKSshAgent
 
             _keyListImageList.Images.Add(Resources.key);
             _keyListImageList.Images.Add(Resources._lock);
+
+            _notifyIcon.Icon = new Icon(_notifyIcon.Icon, SystemInformation.SmallIconSize);
         }
 
         public bool AllowVislble { get; set; }
