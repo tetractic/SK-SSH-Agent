@@ -52,6 +52,7 @@
 
 using System;
 using System.Buffers.Binary;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
@@ -435,6 +436,33 @@ namespace SKSshAgent.Ssh
                 CryptographicOperations.ZeroMemory(sha512Password);
                 CryptographicOperations.ZeroMemory(sha512Salt);
             }
+        }
+
+        public static uint BenchmarkRoundsPerSecond()
+        {
+            Span<byte> bytes = stackalloc byte[16];
+
+            // Warm up.
+            DeriveKey(bytes, bytes, bytes, 2);
+
+            uint rounds = 4;
+        again:
+            long minElapsedTicks = long.MaxValue;
+            for (int i = 0; i < 4; ++i)
+            {
+                long startTimestamp = Stopwatch.GetTimestamp();
+                DeriveKey(bytes, bytes, bytes, rounds);
+                long elapsedTicks = Stopwatch.GetTimestamp() - startTimestamp;
+                if (elapsedTicks <= 0)
+                {
+                    rounds *= 2;
+                    goto again;
+                }
+                minElapsedTicks = Math.Min(minElapsedTicks, elapsedTicks);
+            }
+
+            // Round up.
+            return (uint)(Math.DivRem(rounds * Stopwatch.Frequency, minElapsedTicks, out long rem) + (rem != 0 ? 1 : 0));
         }
 
         private static void Hash(ReadOnlySpan<byte> sha512Password, ReadOnlySpan<byte> sha512Salt, Span<byte> @out)

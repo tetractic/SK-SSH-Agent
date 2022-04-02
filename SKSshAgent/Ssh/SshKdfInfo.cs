@@ -4,6 +4,7 @@
 // General Public License version 3 as published by the Free Software
 // Foundation.
 
+using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
@@ -22,6 +23,8 @@ namespace SKSshAgent.Ssh
             None,
             Bcrypt,
         });
+
+        private static uint _defaultBcryptRounds;
 
         private SshKdfInfo(string name)
         {
@@ -43,6 +46,14 @@ namespace SKSshAgent.Ssh
 
             kdfInfo = default;
             return false;
+        }
+
+        public static uint GetDefaultBcryptRounds()
+        {
+            if (_defaultBcryptRounds == 0)
+                _defaultBcryptRounds = Math.Max(16, BcryptPbkdf.BenchmarkRoundsPerSecond() / 4);
+
+            return _defaultBcryptRounds;
         }
     }
 }

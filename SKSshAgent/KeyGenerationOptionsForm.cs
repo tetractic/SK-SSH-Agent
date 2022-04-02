@@ -42,7 +42,7 @@ namespace SKSshAgent
 
             _kdfInfo = SshKdfInfo.Bcrypt;
 
-            _kdfRounds = 16;
+            _kdfRounds = SshKdfInfo.GetDefaultBcryptRounds();
 
             _cipherInfo = OpenSshAesGcmCipher.IsSupported
                 ? SshCipherInfo.OpenSshAes256Gcm
