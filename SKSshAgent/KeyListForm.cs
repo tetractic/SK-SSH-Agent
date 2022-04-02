@@ -451,7 +451,9 @@ namespace SKSshAgent
             if (saveResult != DialogResult.OK)
                 return false;
 
-            using (var fileStream = new FileStream(dialog.FileName, FileMode.Create, FileAccess.Write))
+            string filePath = dialog.FileName;
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
             using (var fileWriter = new StreamWriter(fileStream))
             {
                 // Encryption could take a while by design, so let's not do it on the UI thread.
@@ -460,7 +462,7 @@ namespace SKSshAgent
                 await fileWriter.WriteAsync(formattedPrivateKey).ConfigureAwait(true);
             }
 
-            using (var fileStream = new FileStream(dialog.FileName + ".pub", FileMode.Create, FileAccess.Write))
+            using (var fileStream = new FileStream(filePath + ".pub", FileMode.Create, FileAccess.Write))
             using (var fileWriter = new StreamWriter(fileStream))
                 await fileWriter.WriteAsync(key.FormatOpenSshPublicKey(comment)).ConfigureAwait(true);
 
