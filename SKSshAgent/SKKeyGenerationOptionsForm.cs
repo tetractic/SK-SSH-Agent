@@ -168,7 +168,10 @@ namespace SKSshAgent
 
             if (_encryptCheckBox.Checked)
             {
-                if (_passwordTextBox.Text != _confirmPasswordTextBox.Text)
+                password = _passwordTextBox.GetPassword();
+                var passwordConfirmation = _confirmPasswordTextBox.GetPassword();
+
+                if (!password.ShieldedSpan.SequenceEqual(passwordConfirmation.ShieldedSpan))
                 {
                     _ = _passwordTextBox.Focus();
 
@@ -183,9 +186,6 @@ namespace SKSshAgent
                     _ = MessageBox.Show(this, "Password cannot be empty.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-
-                int passwordLength = Encoding.UTF8.GetByteCount(_passwordTextBox.Text);
-                password = ShieldedImmutableBuffer.Create(passwordLength, _passwordTextBox.Text.AsSpan(), (source, buffer) => Encoding.UTF8.GetBytes(source, buffer));
 
                 kdfInfo = _kdfInfo;
                 kdfRounds = _kdfRounds;
@@ -203,6 +203,9 @@ namespace SKSshAgent
                 kdfInfo: kdfInfo,
                 kdfRounds: kdfRounds,
                 cipherInfo: cipherInfo);
+
+            _passwordTextBox.ZeroMemory();
+            _confirmPasswordTextBox.ZeroMemory();
 
             DialogResult = DialogResult.OK;
         }

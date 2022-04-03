@@ -69,7 +69,7 @@ namespace SKSshAgent.Ssh
             uint minCapacity = (uint)_buffer.Length + (uint)sizeHint;
             uint newCapacity = Math.Max(minCapacity, (uint)_buffer.Length * 2);
             if (newCapacity > _arrayMaxLength)
-                newCapacity = Math.Min(minCapacity, _arrayMaxLength);
+                newCapacity = Math.Max(minCapacity, _arrayMaxLength);
 
             byte[] newBuffer = GC.AllocateUninitializedArray<byte>((int)newCapacity, pinned: true);
             Array.Copy(_buffer, newBuffer, _length);

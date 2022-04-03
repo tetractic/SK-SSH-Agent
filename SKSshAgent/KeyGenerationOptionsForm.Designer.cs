@@ -220,11 +220,11 @@ namespace SKSshAgent
         private System.Windows.Forms.TextBox _commentTextBox;
         private System.Windows.Forms.CheckBox _encryptCheckBox;
         private System.Windows.Forms.GroupBox _encryptionGroupBox;
-        private System.Windows.Forms.Button _encryptionOptionsButton;
-        private System.Windows.Forms.Label _confirmPasswordLabel;
-        private PasswordTextBox _confirmPasswordTextBox;
-        private PasswordTextBox _passwordTextBox;
         private System.Windows.Forms.Label _passwordLabel;
+        private SKSshAgent.PasswordTextBox _passwordTextBox;
+        private System.Windows.Forms.Label _confirmPasswordLabel;
+        private SKSshAgent.PasswordTextBox _confirmPasswordTextBox;
+        private System.Windows.Forms.Button _encryptionOptionsButton;
         private System.Windows.Forms.Button _generateButon;
         private System.Windows.Forms.Button _cancelButton;
     }

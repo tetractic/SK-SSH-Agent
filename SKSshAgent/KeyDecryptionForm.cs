@@ -5,7 +5,6 @@
 // Foundation.
 
 using System;
-using System.Text;
 using System.Windows.Forms;
 
 namespace SKSshAgent
@@ -49,8 +48,9 @@ namespace SKSshAgent
                 return;
             }
 
-            int passwordLength = Encoding.UTF8.GetByteCount(_passwordTextBox.Text);
-            Result = ShieldedImmutableBuffer.Create(passwordLength, _passwordTextBox.Text.AsSpan(), (source, buffer) => Encoding.UTF8.GetBytes(source, buffer));
+            Result = _passwordTextBox.GetPassword();
+
+            _passwordTextBox.ZeroMemory();
 
             DialogResult = DialogResult.OK;
         }
