@@ -221,7 +221,7 @@ namespace SKSshAgent
             // 
             this._exitMenuItem.Image = global::SKSshAgent.Properties.Resources.door_open;
             this._exitMenuItem.Name = "_exitMenuItem";
-            this._exitMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
+            this._exitMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Q)));
             this._exitMenuItem.Size = new System.Drawing.Size(210, 22);
             this._exitMenuItem.Text = "E&xit";
             this._exitMenuItem.Click += new System.EventHandler(this.HandleExitMenuItemClicked);
@@ -302,7 +302,7 @@ namespace SKSshAgent
             // 
             this._aboutMenuItem.Image = global::SKSshAgent.Properties.Resources.information;
             this._aboutMenuItem.Name = "_aboutMenuItem";
-            this._aboutMenuItem.Size = new System.Drawing.Size(107, 22);
+            this._aboutMenuItem.Size = new System.Drawing.Size(180, 22);
             this._aboutMenuItem.Text = "&About";
             this._aboutMenuItem.Click += new System.EventHandler(this.HandleAboutMenuItemClicked);
             // 
