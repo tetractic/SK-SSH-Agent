@@ -90,7 +90,7 @@ namespace SKSshAgent
             // _notifyIconContextMenuSeparator1
             // 
             _notifyIconContextMenuSeparator1.Name = "_notifyIconContextMenuSeparator1";
-            _notifyIconContextMenuSeparator1.Size = new System.Drawing.Size(127, 6);
+            _notifyIconContextMenuSeparator1.Size = new System.Drawing.Size(177, 6);
             // 
             // _keyListTypeColumnHeader
             // 
@@ -302,7 +302,7 @@ namespace SKSshAgent
             // 
             this._aboutMenuItem.Image = global::SKSshAgent.Properties.Resources.information;
             this._aboutMenuItem.Name = "_aboutMenuItem";
-            this._aboutMenuItem.Size = new System.Drawing.Size(180, 22);
+            this._aboutMenuItem.Size = new System.Drawing.Size(107, 22);
             this._aboutMenuItem.Text = "&About";
             this._aboutMenuItem.Click += new System.EventHandler(this.HandleAboutMenuItemClicked);
             // 
@@ -374,13 +374,13 @@ namespace SKSshAgent
             this._showNotifyMenuItem,
             this._exitNotifyMenuItem});
             this._notifyIconContextMenu.Name = "_notifyIconContextMenu";
-            this._notifyIconContextMenu.Size = new System.Drawing.Size(131, 76);
+            this._notifyIconContextMenu.Size = new System.Drawing.Size(181, 98);
             // 
             // _loadFileNotifyMenuItem
             // 
             this._loadFileNotifyMenuItem.Image = global::SKSshAgent.Properties.Resources.folder_key;
             this._loadFileNotifyMenuItem.Name = "_loadFileNotifyMenuItem";
-            this._loadFileNotifyMenuItem.Size = new System.Drawing.Size(130, 22);
+            this._loadFileNotifyMenuItem.Size = new System.Drawing.Size(180, 22);
             this._loadFileNotifyMenuItem.Text = "&Load File...";
             this._loadFileNotifyMenuItem.Click += new System.EventHandler(this.HandleLoadFileMenuItemClicked);
             // 
@@ -388,16 +388,16 @@ namespace SKSshAgent
             // 
             this._showNotifyMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             this._showNotifyMenuItem.Name = "_showNotifyMenuItem";
-            this._showNotifyMenuItem.Size = new System.Drawing.Size(130, 22);
-            this._showNotifyMenuItem.Text = "Show";
+            this._showNotifyMenuItem.Size = new System.Drawing.Size(180, 22);
+            this._showNotifyMenuItem.Text = "&Show";
             this._showNotifyMenuItem.Click += new System.EventHandler(this.HandleShowMenuItemClicked);
             // 
             // _exitNotifyMenuItem
             // 
             this._exitNotifyMenuItem.Image = global::SKSshAgent.Properties.Resources.door_open;
             this._exitNotifyMenuItem.Name = "_exitNotifyMenuItem";
-            this._exitNotifyMenuItem.Size = new System.Drawing.Size(130, 22);
-            this._exitNotifyMenuItem.Text = "Exit";
+            this._exitNotifyMenuItem.Size = new System.Drawing.Size(180, 22);
+            this._exitNotifyMenuItem.Text = "E&xit";
             this._exitNotifyMenuItem.Click += new System.EventHandler(this.HandleExitMenuItemClicked);
             // 
             // KeyListForm
