@@ -7,8 +7,10 @@
 using System;
 using System.Buffers.Binary;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Text;
+using Windows.Win32.Security.Authentication.Identity;
 using static Windows.Win32.PInvoke;
 
 namespace SKSshAgent
@@ -26,10 +28,7 @@ namespace SKSshAgent
 
         private static string GetPipeName()
         {
-            string username = Environment.UserName;
-            int index = username.IndexOf('@');
-            if (index >= 0)
-                username = username.Substring(0, index);
+            string? username = GetPrincipalUserNameOrUserName();
 
             string suffix = "Pageant";
 
@@ -58,6 +57,56 @@ namespace SKSshAgent
             suffix = Convert.ToHexString(hash);
 
             return $"pageant.{username}.{suffix}";
+        }
+
+        private static string? GetPrincipalUserNameOrUserName()
+        {
+            if (TryGetPrincipalUserName(out string? principalUserName))
+                return principalUserName;
+
+            // Pageant only allows up to 256 characters.
+            uint length = 256;
+            Span<char> buffer = stackalloc char[(int)length];
+            unsafe
+            {
+                fixed (char* bufferPtr = buffer)
+                {
+                    if (GetUserName(bufferPtr, ref length) &&
+                        length > 0)
+                    {
+                        return new(buffer.Slice(0, (int)length - 1));
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private static bool TryGetPrincipalUserName([MaybeNullWhen(false)] out string userName)
+        {
+            uint length = 0;
+            _ = GetUserNameEx(EXTENDED_NAME_FORMAT.NameUserPrincipal, null, ref length).Value;
+
+            char[] buffer = new char[length];
+            unsafe
+            {
+                fixed (char* bufferPtr = buffer)
+                {
+                    if (GetUserNameEx(EXTENDED_NAME_FORMAT.NameUserPrincipal, bufferPtr, ref length) != 0)
+                    {
+                        userName = new(buffer, 0, (int)length);
+
+                        int index = userName.IndexOf('@');
+                        if (index >= 0)
+                            userName = userName.Substring(0, index);
+
+                        return true;
+                    }
+                }
+            }
+
+            userName = default;
+            return false;
         }
     }
 }

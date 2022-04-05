@@ -143,7 +143,6 @@ namespace SKSshAgent
 
             while (!cancellationToken.IsCancellationRequested)
             {
-
                 NamedPipeServerStream stream;
                 try
                 {
