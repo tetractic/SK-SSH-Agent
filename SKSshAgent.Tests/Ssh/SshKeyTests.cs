@@ -31,28 +31,6 @@ namespace SKSshAgent.Ssh.Tests
         }
 
         [Fact]
-        public static void ParseOpenSshPrivateKey_ValidInput_ReturnsExpectedResult()
-        {
-            const string openSshPrivateKey =
-@"-----BEGIN OPENSSH PRIVATE KEY-----
-b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAfwAAACJzay1lY2
-RzYS1zaGEyLW5pc3RwMjU2QG9wZW5zc2guY29tAAAACG5pc3RwMjU2AAAAQQTY10TFt1/l
-Vm++Uboc52bDpvmTa7bmSE+/GgtC2qjCiRfbqYfpI7H/SIRa5+PUEcy7m3r4XRr+P+Kvp5
-qTlfuhAAAABHNzaDoAAADYPXixvD14sbwAAAAic2stZWNkc2Etc2hhMi1uaXN0cDI1NkBv
-cGVuc3NoLmNvbQAAAAhuaXN0cDI1NgAAAEEE2NdExbdf5VZvvlG6HOdmw6b5k2u25khPvx
-oLQtqowokX26mH6SOx/0iEWufj1BHMu5t6+F0a/j/ir6eak5X7oQAAAARzc2g6AQAAADDF
-7yeeZJOp0NpFIpw01gU8ScmUvn2Fn7cpAcd8+aKy9QQlLVFL32sZYsiLbExsrWoAAAAAAA
-AAEGNhcmxAZXhhbXBsZS5jb20BAgME
------END OPENSSH PRIVATE KEY-----
-";
-
-            (var key, string comment) = SshKey.ParseOpenSshPrivateKey(openSshPrivateKey);
-
-            Assert.Equal("sk-ecdsa-sha2-nistp256@openssh.com", key.KeyTypeInfo.Name);
-            Assert.Equal("carl@example.com", comment);
-        }
-
-        [Fact]
         public static void FormatOpenSshPrivateKey_Always_CanBeParsedBackToOriginalKey()
         {
             var key = new OpenSshEcdsaSKKey(

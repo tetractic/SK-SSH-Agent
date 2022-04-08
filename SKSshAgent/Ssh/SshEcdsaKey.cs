@@ -215,6 +215,40 @@ namespace SKSshAgent.Ssh
             }
         }
 
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentException"/>
+        public bool Verify(ReadOnlySpan<byte> data, SshEcdsaSignature signature)
+        {
+            if (signature is null)
+                throw new ArgumentNullException(nameof(signature));
+            if (signature.KeyTypeInfo != KeyTypeInfo)
+                throw new ArgumentException("Incompatible signature.", nameof(signature));
+
+            int fieldElementLength = Sec1.SizeBitsToLength(KeyTypeInfo.KeySizeBits);
+
+            byte[] xBytes = Sec1.FieldElementToBytes(X, KeyTypeInfo.KeySizeBits);
+            byte[] yBytes = Sec1.FieldElementToBytes(Y, KeyTypeInfo.KeySizeBits);
+            var ecParameters = new ECParameters
+            {
+                Curve = KeyTypeInfo.Curve,
+                Q = new ECPoint
+                {
+                    X = xBytes,
+                    Y = yBytes,
+                },
+            };
+            using (var ecdsa = ECDsa.Create(ecParameters))
+            {
+                byte[] signatureBytes = new byte[2 * fieldElementLength];
+                bool rCompletelyWritten = Sec1.TryWriteFieldElementBytes(signature.R, KeyTypeInfo.KeySizeBits, signatureBytes.AsSpan(), out _);
+                Debug.Assert(rCompletelyWritten);
+                bool sCompletelyWritten = Sec1.TryWriteFieldElementBytes(signature.S, KeyTypeInfo.KeySizeBits, signatureBytes.AsSpan(fieldElementLength), out _);
+                Debug.Assert(sCompletelyWritten);
+
+                return ecdsa.VerifyData(data, signatureBytes, KeyTypeInfo.HashAlgorithmName);
+            }
+        }
+
         public bool Equals([NotNullWhen(true)] SshEcdsaKey? other, bool publicOnly)
         {
             if (other == null || !PublicEquals(other))

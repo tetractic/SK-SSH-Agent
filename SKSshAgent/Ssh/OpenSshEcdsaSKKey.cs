@@ -5,8 +5,10 @@
 // Foundation.
 
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Numerics;
@@ -141,6 +143,47 @@ namespace SKSshAgent.Ssh
             using (var keyHandleUnshieldScope = _keyHandle.Unshield())
                 writer.WriteByteString(keyHandleUnshieldScope.UnshieldedSpan);
             writer.WriteByteString(Span<byte>.Empty);
+        }
+
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="ArgumentException"/>
+        public bool Verify(ReadOnlySpan<byte> data, OpenSshEcdsaSKSignature signature)
+        {
+            if (signature is null)
+                throw new ArgumentNullException(nameof(signature));
+            if (signature.KeyTypeInfo != KeyTypeInfo)
+                throw new ArgumentException("Incompatible signature.", nameof(signature));
+
+            const int sha256HashLength = 32;
+            Span<byte> signedData = stackalloc byte[sha256HashLength + 1 + 4 + sha256HashLength];
+            _ = SHA256.HashData(Application.AsSpan(), signedData);
+            signedData[sha256HashLength] = signature.Flags;
+            BinaryPrimitives.WriteUInt32BigEndian(signedData.Slice(sha256HashLength + 1, 4), signature.Counter);
+            _ = SHA256.HashData(data, signedData.Slice(sha256HashLength + 1 + 4));
+
+            int fieldElementLength = Sec1.SizeBitsToLength(KeyTypeInfo.KeySizeBits);
+
+            byte[] xBytes = Sec1.FieldElementToBytes(X, KeyTypeInfo.KeySizeBits);
+            byte[] yBytes = Sec1.FieldElementToBytes(Y, KeyTypeInfo.KeySizeBits);
+            var ecParameters = new ECParameters
+            {
+                Curve = KeyTypeInfo.Curve,
+                Q = new ECPoint
+                {
+                    X = xBytes,
+                    Y = yBytes,
+                },
+            };
+            using (var ecdsa = ECDsa.Create(ecParameters))
+            {
+                byte[] signatureBytes = new byte[2 * fieldElementLength];
+                bool rCompletelyWritten = Sec1.TryWriteFieldElementBytes(signature.R, KeyTypeInfo.KeySizeBits, signatureBytes.AsSpan(), out _);
+                Debug.Assert(rCompletelyWritten);
+                bool sCompletelyWritten = Sec1.TryWriteFieldElementBytes(signature.S, KeyTypeInfo.KeySizeBits, signatureBytes.AsSpan(fieldElementLength), out _);
+                Debug.Assert(sCompletelyWritten);
+
+                return ecdsa.VerifyData(signedData, signatureBytes, KeyTypeInfo.HashAlgorithmName);
+            }
         }
 
         public bool Equals([NotNullWhen(true)] OpenSshEcdsaSKKey? other, bool publicOnly)

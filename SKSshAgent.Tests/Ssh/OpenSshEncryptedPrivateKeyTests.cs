@@ -192,7 +192,7 @@ qtBTHGBj9rPm365ej86j0bNdxxnpfRrX1O20D6+LrZ9KwAwcntE=
             internal SshCipherInfo CipherInfo;
         }
 
-        public static TheoryData<string, uint, string> Encrypt_Always_Data = new()
+        public static readonly TheoryData<string, uint, string> Encrypt_Always_Data = new()
         {
             { SshKdfInfo.None.Name, 0, SshCipherInfo.None.Name },
             { SshKdfInfo.Bcrypt.Name, 16, SshCipherInfo.Aes128Cbc.Name },
