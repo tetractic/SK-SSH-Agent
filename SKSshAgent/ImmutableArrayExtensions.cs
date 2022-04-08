@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace SKSshAgent
 {
@@ -18,5 +19,21 @@ namespace SKSshAgent
         }
 
         public static T[] ToArray<T>(this ImmutableArray<T> @this) => @this.AsSpan().ToArray();
+
+        public static ImmutableArray<T> ToImmutableArray<T>(this Memory<T> memory) => ToImmutableArray((ReadOnlyMemory<T>)memory);
+
+        public static ImmutableArray<T> ToImmutableArray<T>(this ReadOnlyMemory<T> memory)
+        {
+            var array = memory.ToArray();
+            return Unsafe.As<T[], ImmutableArray<T>>(ref array);
+        }
+
+        public static ImmutableArray<T> ToImmutableArray<T>(this Span<T> span) => ToImmutableArray((ReadOnlySpan<T>)span);
+
+        public static ImmutableArray<T> ToImmutableArray<T>(this ReadOnlySpan<T> span)
+        {
+            var array = span.ToArray();
+            return Unsafe.As<T[], ImmutableArray<T>>(ref array);
+        }
     }
 }

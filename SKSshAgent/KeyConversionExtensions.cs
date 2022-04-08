@@ -50,8 +50,8 @@ namespace SKSshAgent
             return new CoseEC2Key(
                 algorithm: info.Algorithm,
                 curve: info.Curve,
-                x: Sec1.FieldElementToImmutableBytes(ecdsaSKKey.X, keyTypeInfo.KeySizeBits),
-                y: Sec1.FieldElementToImmutableBytes(ecdsaSKKey.Y, keyTypeInfo.KeySizeBits));
+                x: ecdsaSKKey.X,
+                y: ecdsaSKKey.Y);
         }
 
         /// <exception cref="NotSupportedException"/>
@@ -65,8 +65,8 @@ namespace SKSshAgent
 
             return new OpenSshEcdsaSKKey(
                 keyTypeInfo: keyTypeInfo,
-                x: Sec1.BytesToFieldElement(ec2PublicKey.X.AsSpan(), keyTypeInfo.KeySizeBits),
-                y: Sec1.BytesToFieldElement(ec2PublicKey.Y.AsSpan(), keyTypeInfo.KeySizeBits),
+                x: ec2PublicKey.X,
+                y: ec2PublicKey.Y,
                 application: application,
                 flags: flags,
                 keyHandle: ShieldedImmutableBuffer.Create(keyHandle.AsSpan()));

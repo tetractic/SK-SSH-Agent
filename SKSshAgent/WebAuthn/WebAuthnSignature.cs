@@ -44,7 +44,7 @@ namespace SKSshAgent.WebAuthn
                     return ParseEcdsaAsn1(ec2PublicKey.Algorithm, ec2PublicKey.Curve, bytes, out bytesUsed);
                 }
                 default:
-                    throw new ArgumentException("Unrecognized elliptic curve algorithm.", nameof(publicKey));
+                    throw new ArgumentException("Unrecognized algorithm.", nameof(publicKey));
             }
         }
 
@@ -61,29 +61,54 @@ namespace SKSshAgent.WebAuthn
                 AsnDecoder.ReadSequence(span, AsnEncodingRules.DER, out offset, out length, out bytesUsed);
                 int sequenceEnd = offset + length;
 
-                var r = AsnDecoder.ReadInteger(span.Slice(offset), AsnEncodingRules.DER, out length);
+                var integerR = AsnDecoder.ReadIntegerBytes(span.Slice(offset), AsnEncodingRules.DER, out length);
                 offset += length;
 
-                var s = AsnDecoder.ReadInteger(span.Slice(offset), AsnEncodingRules.DER, out length);
+                var integerS = AsnDecoder.ReadIntegerBytes(span.Slice(offset), AsnEncodingRules.DER, out length);
                 offset += length;
 
                 if (offset != sequenceEnd)
                     throw new InvalidDataException("Excess data in ASN.1 sequence.");
 
                 int fieldSizeBits = curve.GetFieldSizeBits();
+                int fieldElementLength = MPInt.SizeBitsToLength(fieldSizeBits);
 
-                if (r < 0 || s < 0 || r.GetBitLength() > fieldSizeBits || s.GetBitLength() > fieldSizeBits)
-                    throw new InvalidDataException("Invalid elliptic curve field elements.");
+                Span<byte> r = stackalloc byte[fieldElementLength];
+                AsnIntegerToFieldElementBytes(integerR, r);
+                Span<byte> s = stackalloc byte[fieldElementLength];
+                AsnIntegerToFieldElementBytes(integerS, s);
 
-                var rBytes = Sec1.FieldElementToImmutableBytes(r, fieldSizeBits);
-                var sBytes = Sec1.FieldElementToImmutableBytes(s, fieldSizeBits);
-
-                return new CoseEcdsaSignature(algorithm, curve, rBytes, sBytes);
+                try
+                {
+                    return new CoseEcdsaSignature(algorithm, curve, r.ToImmutableArray(), s.ToImmutableArray());
+                }
+                catch (ArgumentOutOfRangeException ex)
+                    when (ex.ParamName == "r" || ex.ParamName == "s")
+                {
+                    throw new InvalidDataException("Invalid EC field element.");
+                }
             }
             catch (AsnContentException ex)
             {
                 throw new InvalidDataException("Invalid ASN.1 DER data.", ex);
             }
+        }
+
+        /// <exception cref="InvalidDataException"/>
+        private static void AsnIntegerToFieldElementBytes(ReadOnlySpan<byte> bytes, Span<byte> fieldElementBytes)
+        {
+            if (bytes.Length > 0 && (bytes[0] & 0x80) != 0)
+                throw new InvalidDataException("Invalid EC field element.");
+
+            while (bytes.Length > 0 && bytes[0] == 0)
+                bytes = bytes.Slice(1);
+
+            if (bytes.Length > fieldElementBytes.Length)
+                throw new InvalidDataException("Invalid EC field element.");
+
+            int offset = fieldElementBytes.Length - bytes.Length;
+            fieldElementBytes.Slice(0, offset).Clear();
+            bytes.CopyTo(fieldElementBytes.Slice(offset));
         }
     }
 }

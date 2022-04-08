@@ -9,7 +9,6 @@ using SKSshAgent.Ssh;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Numerics;
 
 namespace SKSshAgent
 {
@@ -30,8 +29,8 @@ namespace SKSshAgent
 
             return new OpenSshEcdsaSKSignature(
                 keyTypeInfo: keyTypeInfo,
-                r: new BigInteger(ecdsaSignature.R.AsSpan(), isUnsigned: true, isBigEndian: true),
-                s: new BigInteger(ecdsaSignature.S.AsSpan(), isUnsigned: true, isBigEndian: true),
+                r: ecdsaSignature.R,
+                s: ecdsaSignature.S,
                 flags: flags,
                 counter: counter);
         }

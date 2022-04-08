@@ -8,7 +8,6 @@ using System;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Diagnostics;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -110,23 +109,6 @@ namespace SKSshAgent.Ssh
 
             int writtenLength = Encoding.UTF8.GetBytes(value, _span.Slice(4));
             Debug.Assert(length == writtenLength);
-            Advance(4 + length);
-        }
-
-        /// <exception cref="InvalidOperationException"/>
-        public void WriteBigInteger(BigInteger value)
-        {
-            int length = value.IsZero ? 0 : value.GetByteCount();
-
-            EnsureCapacity(4 + length);
-
-            BinaryPrimitives.WriteUInt32BigEndian(_span, (uint)length);
-
-            if (length != 0)
-            {
-                bool completelyWritten = value.TryWriteBytes(_span.Slice(4), out int bytesWritten, isBigEndian: true);
-                Debug.Assert(completelyWritten && bytesWritten == length);
-            }
             Advance(4 + length);
         }
 

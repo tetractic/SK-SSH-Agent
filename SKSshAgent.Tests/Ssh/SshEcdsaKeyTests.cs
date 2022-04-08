@@ -5,7 +5,7 @@
 // Foundation.
 
 using System;
-using System.Numerics;
+using System.Collections.Immutable;
 using System.Text;
 using Xunit;
 
@@ -101,8 +101,8 @@ BjYXJsQGV4YW1wbGUuY29tAQI=
         {
             var privateKey = (SshEcdsaKey)SshKey.ParseOpenSshPrivateKey(testCase.PrivateKeyFile).Key;
 
-            Assert.Equal(ToBigInteger(testCase.KeyX), privateKey.X);
-            Assert.Equal(ToBigInteger(testCase.KeyY), privateKey.Y);
+            Assert.Equal(testCase.KeyX, privateKey.X.ToArray());
+            Assert.Equal(testCase.KeyY, privateKey.Y.ToArray());
             using (var dUnshieldScope = privateKey.D.Unshield())
                 Assert.Equal(testCase.KeyD, dUnshieldScope.UnshieldedSpan.ToArray());
         }
@@ -111,8 +111,7 @@ BjYXJsQGV4YW1wbGUuY29tAQI=
         [MemberData(nameof(TestCases))]
         public static void FormatOpenSshPublicKey_Always_ReturnsExpectedValue(TestCase testCase)
         {
-            byte[] bytes = testCase.KeyX;
-            var key = new SshEcdsaKey(testCase.KeyTypeInfo, ToBigInteger(bytes), ToBigInteger(testCase.KeyY));
+            var key = new SshEcdsaKey(testCase.KeyTypeInfo, testCase.KeyX.ToImmutableArray(), testCase.KeyY.ToImmutableArray());
 
             string publicKeyFile = new(key.FormatOpenSshPublicKey("carl@example.com"));
 
@@ -123,7 +122,7 @@ BjYXJsQGV4YW1wbGUuY29tAQI=
         [MemberData(nameof(TestCases))]
         public static void Sign_Always_CanBeVerified(TestCase testCase)
         {
-            var privateKey = new SshEcdsaKey(testCase.KeyTypeInfo, ToBigInteger(testCase.KeyX), ToBigInteger(testCase.KeyY), ShieldedImmutableBuffer.Create(testCase.KeyD));
+            var privateKey = new SshEcdsaKey(testCase.KeyTypeInfo, testCase.KeyX.ToImmutableArray(), testCase.KeyY.ToImmutableArray(), ShieldedImmutableBuffer.Create(testCase.KeyD));
 
             var signature = privateKey.Sign(_testData);
 
@@ -136,8 +135,8 @@ BjYXJsQGV4YW1wbGUuY29tAQI=
         [MemberData(nameof(TestCases))]
         public static void Verify_ValidSignature_ReturnsTrue(TestCase testCase)
         {
-            var key = new SshEcdsaKey(testCase.KeyTypeInfo, ToBigInteger(testCase.KeyX), ToBigInteger(testCase.KeyY));
-            var signature = new SshEcdsaSignature(testCase.KeyTypeInfo, ToBigInteger(testCase.SignatureR), ToBigInteger(testCase.SignatureS));
+            var key = new SshEcdsaKey(testCase.KeyTypeInfo, testCase.KeyX.ToImmutableArray(), testCase.KeyY.ToImmutableArray());
+            var signature = new SshEcdsaSignature(testCase.KeyTypeInfo, testCase.SignatureR.ToImmutableArray(), testCase.SignatureS.ToImmutableArray());
 
             bool verified = key.Verify(_testData, signature);
 
@@ -148,17 +147,15 @@ BjYXJsQGV4YW1wbGUuY29tAQI=
         [MemberData(nameof(TestCases))]
         public static void Verify_InvalidSignature_ReturnsFalse(TestCase testCase)
         {
-            var key = new SshEcdsaKey(testCase.KeyTypeInfo, ToBigInteger(testCase.KeyX), ToBigInteger(testCase.KeyY));
+            var key = new SshEcdsaKey(testCase.KeyTypeInfo, testCase.KeyX.ToImmutableArray(), testCase.KeyY.ToImmutableArray());
             byte[] r = (byte[])testCase.SignatureR.Clone();
             r[r.Length - 1] ^= 1;
-            var signature = new SshEcdsaSignature(testCase.KeyTypeInfo, ToBigInteger(r), ToBigInteger(testCase.SignatureS));
+            var signature = new SshEcdsaSignature(testCase.KeyTypeInfo, r.ToImmutableArray(), testCase.SignatureS.ToImmutableArray());
 
             bool verified = key.Verify(_testData, signature);
 
             Assert.False(verified);
         }
-
-        private static BigInteger ToBigInteger(byte[] bytes) => new(bytes, isUnsigned: true, isBigEndian: true);
 
         public struct TestCase
         {

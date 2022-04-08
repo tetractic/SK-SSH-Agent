@@ -7,7 +7,6 @@
 using System;
 using System.Buffers.Binary;
 using System.Diagnostics.CodeAnalysis;
-using System.Numerics;
 using System.Text;
 
 namespace SKSshAgent.Ssh
@@ -84,13 +83,6 @@ namespace SKSshAgent.Ssh
             return Encoding.UTF8.GetString(bytes);
         }
 
-        /// <exception cref="SshWireContentException"/>
-        public BigInteger ReadBigInteger()
-        {
-            var bytes = ReadByteString();
-            return new BigInteger(bytes, isBigEndian: true);
-        }
-
         public bool TryReadBoolean(out bool value)
         {
             bool result = TryReadByte(out byte temp);
@@ -150,19 +142,6 @@ namespace SKSshAgent.Ssh
             if (TryReadByteString(out var bytes))
             {
                 value = Encoding.UTF8.GetString(bytes);
-                return true;
-            }
-
-            value = default;
-            return false;
-        }
-
-        /// <exception cref="SshWireContentException"/>
-        public bool TryReadBigInteger(out BigInteger value)
-        {
-            if (TryReadByteString(out var bytes))
-            {
-                value = new BigInteger(bytes, isBigEndian: true);
                 return true;
             }
 

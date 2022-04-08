@@ -5,7 +5,7 @@
 // Foundation.
 
 using System;
-using System.Numerics;
+using System.Collections.Immutable;
 
 namespace SKSshAgent.Ssh
 {
@@ -14,15 +14,22 @@ namespace SKSshAgent.Ssh
     internal sealed class OpenSshEcdsaSKSignature : SshSignature
     {
         /// <exception cref="ArgumentException"/>
+        /// <exception cref="ArgumentNullException"/>
         /// <exception cref="ArgumentOutOfRangeException"/>
-        public OpenSshEcdsaSKSignature(SshKeyTypeInfo keyTypeInfo, BigInteger r, BigInteger s, byte flags, uint counter)
+        public OpenSshEcdsaSKSignature(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> r, ImmutableArray<byte> s, byte flags, uint counter)
             : base(keyTypeInfo)
         {
             if (keyTypeInfo.Type != SshKeyType.OpenSshEcdsaSK)
                 throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
-            if (r < 0 || r.GetBitLength() > keyTypeInfo.KeySizeBits)
+            int fieldSizeBits = keyTypeInfo.KeySizeBits;
+            int fieldElementLength = MPInt.SizeBitsToLength(fieldSizeBits);
+            if (r == null)
+                throw new ArgumentNullException(nameof(r));
+            if (r.Length != fieldElementLength || MPInt.GetBitLength(r.AsSpan()) > fieldSizeBits)
                 throw new ArgumentOutOfRangeException(nameof(r));
-            if (s < 0 || s.GetBitLength() > keyTypeInfo.KeySizeBits)
+            if (s == null)
+                throw new ArgumentNullException(nameof(s));
+            if (s.Length != fieldElementLength || MPInt.GetBitLength(s.AsSpan()) > fieldSizeBits)
                 throw new ArgumentOutOfRangeException(nameof(s));
 
             R = r;
@@ -31,9 +38,9 @@ namespace SKSshAgent.Ssh
             Counter = counter;
         }
 
-        public BigInteger R { get; }
+        public ImmutableArray<byte> R { get; }
 
-        public BigInteger S { get; }
+        public ImmutableArray<byte> S { get; }
 
         public byte Flags { get; }
 

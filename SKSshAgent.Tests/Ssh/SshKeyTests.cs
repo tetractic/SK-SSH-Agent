@@ -6,7 +6,6 @@
 
 using System;
 using System.Collections.Immutable;
-using System.Numerics;
 using Xunit;
 
 namespace SKSshAgent.Ssh.Tests
@@ -18,8 +17,8 @@ namespace SKSshAgent.Ssh.Tests
         {
             var key = new OpenSshEcdsaSKKey(
                 SshKeyTypeInfo.SKEcdsaSha2NistP256,
-                BigInteger.Parse("98079922062085566346477182080616450541634317430015585846706072972772164289161"),
-                BigInteger.Parse("10791305083879448925504919972385807166056302535066617515522020748831529237409"),
+                Convert.FromBase64String("2NdExbdf5VZvvlG6HOdmw6b5k2u25khPvxoLQtqowok=").ToImmutableArray(),
+                Convert.FromBase64String("F9uph+kjsf9IhFrn49QRzLubevhdGv4/4q+nmpOV+6E=").ToImmutableArray(),
                 application: Convert.FromBase64String("c3NoOg==").ToImmutableArray(),
                 flags: OpenSshSKFlags.UserPresenceRequired,
                 keyHandle: ShieldedImmutableBuffer.Create(Convert.FromBase64String("xe8nnmSTqdDaRSKcNNYFPEnJlL59hZ+3KQHHfPmisvUEJS1RS99rGWLIi2xMbK1q")));
@@ -35,8 +34,8 @@ namespace SKSshAgent.Ssh.Tests
         {
             var key = new OpenSshEcdsaSKKey(
                 SshKeyTypeInfo.SKEcdsaSha2NistP256,
-                BigInteger.Parse("98079922062085566346477182080616450541634317430015585846706072972772164289161"),
-                BigInteger.Parse("10791305083879448925504919972385807166056302535066617515522020748831529237409"),
+                Convert.FromBase64String("2NdExbdf5VZvvlG6HOdmw6b5k2u25khPvxoLQtqowok=").ToImmutableArray(),
+                Convert.FromBase64String("F9uph+kjsf9IhFrn49QRzLubevhdGv4/4q+nmpOV+6E=").ToImmutableArray(),
                 application: Convert.FromBase64String("c3NoOg==").ToImmutableArray(),
                 flags: OpenSshSKFlags.UserPresenceRequired,
                 keyHandle: ShieldedImmutableBuffer.Create(Convert.FromBase64String("xe8nnmSTqdDaRSKcNNYFPEnJlL59hZ+3KQHHfPmisvUEJS1RS99rGWLIi2xMbK1q")));

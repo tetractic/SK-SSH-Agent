@@ -18,7 +18,6 @@ namespace SKSshAgent.Cose
 
         /// <exception cref="ArgumentOutOfRangeException"/>
         /// <exception cref="ArgumentNullException"/>
-        /// <exception cref="ArgumentException"/>
         /// <exception cref="CryptographicException"/>
         public CoseEC2Key(CoseAlgorithm algorithm, CoseEllipticCurve curve, ImmutableArray<byte> x, ImmutableArray<byte> y)
             : base(CoseKeyType.EC2, algorithm)
@@ -42,18 +41,14 @@ namespace SKSshAgent.Cose
                     throw new ArgumentOutOfRangeException(nameof(algorithm));
             }
             int fieldSizeBits = curve.GetFieldSizeBits();
-            int fieldElementLength = Sec1.SizeBitsToLength(fieldSizeBits);
+            int fieldElementLength = MPInt.SizeBitsToLength(fieldSizeBits);
             if (x == null)
                 throw new ArgumentNullException(nameof(x));
-            if (x.Length != fieldElementLength)
-                throw new ArgumentException("Invalid size for EC field element.", nameof(x));
-            if (Sec1.GetBitLength(x.AsSpan()) > fieldSizeBits)
+            if (x.Length != fieldElementLength || MPInt.GetBitLength(x.AsSpan()) > fieldSizeBits)
                 throw new ArgumentOutOfRangeException(nameof(x));
             if (y == null)
                 throw new ArgumentNullException(nameof(y));
-            if (y.Length != fieldElementLength)
-                throw new ArgumentException("Invalid size for EC field element.", nameof(y));
-            if (Sec1.GetBitLength(y.AsSpan()) > fieldSizeBits)
+            if (y.Length != fieldElementLength || MPInt.GetBitLength(y.AsSpan()) > fieldSizeBits)
                 throw new ArgumentOutOfRangeException(nameof(y));
 
             _ecParameters = CreateParameters(curve, x.ToArray(), y.ToArray());

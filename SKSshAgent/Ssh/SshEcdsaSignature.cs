@@ -5,32 +5,38 @@
 // Foundation.
 
 using System;
-using System.Diagnostics;
-using System.Numerics;
+using System.Collections.Immutable;
 
 namespace SKSshAgent.Ssh
 {
     internal sealed class SshEcdsaSignature : SshSignature
     {
         /// <exception cref="ArgumentException"/>
+        /// <exception cref="ArgumentNullException"/>
         /// <exception cref="ArgumentOutOfRangeException"/>
-        public SshEcdsaSignature(SshKeyTypeInfo keyTypeInfo, BigInteger r, BigInteger s)
+        public SshEcdsaSignature(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> r, ImmutableArray<byte> s)
             : base(keyTypeInfo)
         {
             if (keyTypeInfo.Type != SshKeyType.Ecdsa)
                 throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
-            if (r < 0 || r.GetBitLength() > keyTypeInfo.KeySizeBits)
+            int fieldSizeBits = keyTypeInfo.KeySizeBits;
+            int fieldElementLength = MPInt.SizeBitsToLength(fieldSizeBits);
+            if (r == null)
+                throw new ArgumentNullException(nameof(r));
+            if (r.Length != fieldElementLength || MPInt.GetBitLength(r.AsSpan()) > fieldSizeBits)
                 throw new ArgumentOutOfRangeException(nameof(r));
-            if (s < 0 || s.GetBitLength() > keyTypeInfo.KeySizeBits)
+            if (s == null)
+                throw new ArgumentNullException(nameof(s));
+            if (s.Length != fieldElementLength || MPInt.GetBitLength(s.AsSpan()) > fieldSizeBits)
                 throw new ArgumentOutOfRangeException(nameof(s));
 
             R = r;
             S = s;
         }
 
-        public BigInteger R { get; }
+        public ImmutableArray<byte> R { get; }
 
-        public BigInteger S { get; }
+        public ImmutableArray<byte> S { get; }
 
         public override void WriteTo(ref SshWireWriter writer)
         {
@@ -40,22 +46,18 @@ namespace SKSshAgent.Ssh
             WriteEcdsaSignature(ref writer, R, S);
         }
 
-        internal static void WriteEcdsaSignature(ref SshWireWriter writer, BigInteger r, BigInteger s)
+        internal static void WriteEcdsaSignature(ref SshWireWriter writer, ImmutableArray<byte> r, ImmutableArray<byte> s)
         {
             // https://datatracker.ietf.org/doc/html/rfc5656#section-3.1.2
 
-            int rLength = r == 0 ? 0 : r.GetByteCount();
-            int sLength = s == 0 ? 0 : s.GetByteCount();
-
-            byte[] signatureBuffer = new byte[4 + rLength + 4 + sLength];
+            byte[] signatureBuffer = new byte[4 + 1 + r.Length + 4 + 1 + s.Length];
 
             var signatureWriter = new SshWireWriter(signatureBuffer);
-            signatureWriter.WriteBigInteger(r);
-            signatureWriter.WriteBigInteger(s);
+            SshEC.WriteFieldElementAsMPInt(ref signatureWriter, r.AsSpan());
+            SshEC.WriteFieldElementAsMPInt(ref signatureWriter, s.AsSpan());
             signatureWriter.Flush();
-            Debug.Assert(signatureWriter.BufferedLength == signatureBuffer.Length);
 
-            writer.WriteByteString(signatureBuffer);
+            writer.WriteByteString(signatureBuffer.AsSpan(0, signatureWriter.BufferedLength));
         }
     }
 }

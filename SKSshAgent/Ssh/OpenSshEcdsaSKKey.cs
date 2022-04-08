@@ -8,10 +8,8 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Numerics;
 using System.Security.Cryptography;
 
 namespace SKSshAgent.Ssh
@@ -24,7 +22,7 @@ namespace SKSshAgent.Ssh
         /// <exception cref="ArgumentException"/>
         /// <exception cref="ArgumentNullException"/>
         /// <exception cref="CryptographicException"/>
-        public OpenSshEcdsaSKKey(SshKeyTypeInfo keyTypeInfo, BigInteger x, BigInteger y, ImmutableArray<byte> application)
+        public OpenSshEcdsaSKKey(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> x, ImmutableArray<byte> y, ImmutableArray<byte> application)
             : this(keyTypeInfo, x, y, application, hasDecryptedPrivateKey: false)
         {
         }
@@ -32,7 +30,7 @@ namespace SKSshAgent.Ssh
         /// <exception cref="ArgumentException"/>
         /// <exception cref="ArgumentNullException"/>
         /// <exception cref="CryptographicException"/>
-        public OpenSshEcdsaSKKey(SshKeyTypeInfo keyTypeInfo, BigInteger x, BigInteger y, ImmutableArray<byte> application, OpenSshSKFlags flags, ShieldedImmutableBuffer keyHandle)
+        public OpenSshEcdsaSKKey(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> x, ImmutableArray<byte> y, ImmutableArray<byte> application, OpenSshSKFlags flags, ShieldedImmutableBuffer keyHandle)
             : this(keyTypeInfo, x, y, application, hasDecryptedPrivateKey: true)
         {
             if (keyHandle == null)
@@ -46,14 +44,20 @@ namespace SKSshAgent.Ssh
         /// <exception cref="ArgumentNullException"/>
         /// <exception cref="ArgumentOutOfRangeException"/>
         /// <exception cref="CryptographicException"/>
-        private OpenSshEcdsaSKKey(SshKeyTypeInfo keyTypeInfo, BigInteger x, BigInteger y, ImmutableArray<byte> application, bool hasDecryptedPrivateKey)
+        private OpenSshEcdsaSKKey(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> x, ImmutableArray<byte> y, ImmutableArray<byte> application, bool hasDecryptedPrivateKey)
             : base(keyTypeInfo, hasDecryptedPrivateKey)
         {
             if (keyTypeInfo.Type != SshKeyType.OpenSshEcdsaSK)
                 throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
-            if (x < 0 || x.GetBitLength() > keyTypeInfo.KeySizeBits)
+            int fieldSizeBits = keyTypeInfo.KeySizeBits;
+            int fieldElementLength = MPInt.SizeBitsToLength(fieldSizeBits);
+            if (x == null)
+                throw new ArgumentNullException(nameof(x));
+            if (x.Length != fieldElementLength || MPInt.GetBitLength(x.AsSpan()) > fieldSizeBits)
                 throw new ArgumentOutOfRangeException(nameof(x));
-            if (y < 0 || y.GetBitLength() > keyTypeInfo.KeySizeBits)
+            if (y == null)
+                throw new ArgumentNullException(nameof(y));
+            if (y.Length != fieldElementLength || MPInt.GetBitLength(y.AsSpan()) > fieldSizeBits)
                 throw new ArgumentOutOfRangeException(nameof(y));
             if (application == null)
                 throw new ArgumentNullException(nameof(application));
@@ -62,15 +66,13 @@ namespace SKSshAgent.Ssh
             Y = y;
             Application = application;
 
-            byte[] xBytes = Sec1.FieldElementToBytes(x, keyTypeInfo.KeySizeBits);
-            byte[] yBytes = Sec1.FieldElementToBytes(y, keyTypeInfo.KeySizeBits);
             var ecParameters = new ECParameters
             {
                 Curve = keyTypeInfo.Curve,
                 Q = new ECPoint
                 {
-                    X = xBytes,
-                    Y = yBytes,
+                    X = x.ToArray(),
+                    Y = y.ToArray(),
                 },
             };
             ecParameters.Validate();
@@ -84,9 +86,9 @@ namespace SKSshAgent.Ssh
             Application = key.Application;
         }
 
-        public BigInteger X { get; }
+        public ImmutableArray<byte> X { get; }
 
-        public BigInteger Y { get; }
+        public ImmutableArray<byte> Y { get; }
 
         public ImmutableArray<byte> Application { get; }
 
@@ -121,7 +123,7 @@ namespace SKSshAgent.Ssh
 
             writer.WriteString(KeyTypeInfo.Name);
             writer.WriteString(KeyTypeInfo.CurveName!);
-            SshEcdsaKey.WriteECPoint2(ref writer, KeyTypeInfo.KeySizeBits, X, Y);
+            SshEC.WriteECPoint(ref writer, KeyTypeInfo.KeySizeBits, X, Y);
             writer.WriteByteString(Application.AsSpan());
         }
 
@@ -137,7 +139,7 @@ namespace SKSshAgent.Ssh
 
             writer.WriteString(KeyTypeInfo.Name);
             writer.WriteString(KeyTypeInfo.CurveName!);
-            SshEcdsaKey.WriteECPoint2(ref writer, KeyTypeInfo.KeySizeBits, X, Y);
+            SshEC.WriteECPoint(ref writer, KeyTypeInfo.KeySizeBits, X, Y);
             writer.WriteByteString(Application.AsSpan());
             writer.WriteByte((byte)Flags);
             using (var keyHandleUnshieldScope = _keyHandle.Unshield())
@@ -161,26 +163,22 @@ namespace SKSshAgent.Ssh
             BinaryPrimitives.WriteUInt32BigEndian(signedData.Slice(sha256HashLength + 1, 4), signature.Counter);
             _ = SHA256.HashData(data, signedData.Slice(sha256HashLength + 1 + 4));
 
-            int fieldElementLength = Sec1.SizeBitsToLength(KeyTypeInfo.KeySizeBits);
+            int fieldElementLength = MPInt.SizeBitsToLength(KeyTypeInfo.KeySizeBits);
 
-            byte[] xBytes = Sec1.FieldElementToBytes(X, KeyTypeInfo.KeySizeBits);
-            byte[] yBytes = Sec1.FieldElementToBytes(Y, KeyTypeInfo.KeySizeBits);
             var ecParameters = new ECParameters
             {
                 Curve = KeyTypeInfo.Curve,
                 Q = new ECPoint
                 {
-                    X = xBytes,
-                    Y = yBytes,
+                    X = X.ToArray(),
+                    Y = Y.ToArray(),
                 },
             };
             using (var ecdsa = ECDsa.Create(ecParameters))
             {
                 byte[] signatureBytes = new byte[2 * fieldElementLength];
-                bool rCompletelyWritten = Sec1.TryWriteFieldElementBytes(signature.R, KeyTypeInfo.KeySizeBits, signatureBytes.AsSpan(), out _);
-                Debug.Assert(rCompletelyWritten);
-                bool sCompletelyWritten = Sec1.TryWriteFieldElementBytes(signature.S, KeyTypeInfo.KeySizeBits, signatureBytes.AsSpan(fieldElementLength), out _);
-                Debug.Assert(sCompletelyWritten);
+                signature.R.CopyTo(signatureBytes);
+                signature.S.CopyTo(signatureBytes, fieldElementLength);
 
                 return ecdsa.VerifyData(signedData, signatureBytes, KeyTypeInfo.HashAlgorithmName);
             }
@@ -200,8 +198,8 @@ namespace SKSshAgent.Ssh
 
             bool PublicEquals(OpenSshEcdsaSKKey other)
             {
-                return X == other.X &&
-                       Y == other.Y &&
+                return X.SequenceEqual(other.X) &&
+                       Y.SequenceEqual(other.Y) &&
                        Application.SequenceEqual(other.Application);
             }
 
@@ -240,7 +238,7 @@ namespace SKSshAgent.Ssh
             // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/sshkey.c#L2474-L2526
 
             string curveName = reader.ReadString();
-            (var x, var y) = SshEcdsaKey.ReadECPoint2(ref reader, keyTypeInfo.KeySizeBits);
+            (var x, var y) = SshEC.ReadECPoint(ref reader, keyTypeInfo.KeySizeBits);
             var application = reader.ReadByteString();
 
             if (curveName != keyTypeInfo.CurveName)
@@ -265,7 +263,7 @@ namespace SKSshAgent.Ssh
             // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/sshkey.c#L3553-L3584
 
             string curveName = reader.ReadString();
-            (var x, var y) = SshEcdsaKey.ReadECPoint2(ref reader, keyTypeInfo.KeySizeBits);
+            (var x, var y) = SshEC.ReadECPoint(ref reader, keyTypeInfo.KeySizeBits);
             var application = reader.ReadByteString();
             var flags = (OpenSshSKFlags)reader.ReadByte();
             var unshieldedKeyHandle = reader.ReadByteString();
