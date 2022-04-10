@@ -33,7 +33,7 @@ AAEGNhcmxAZXhhbXBsZS5jb20BAgME
 -----END OPENSSH PRIVATE KEY-----
 ",
                 PublicKeyFile = "sk-ecdsa-sha2-nistp256@openssh.com AAAAInNrLWVjZHNhLXNoYTItbmlzdHAyNTZAb3BlbnNzaC5jb20AAAAIbmlzdHAyNTYAAABBBBix4kZJexT86la6vLdvILaafZ/Ut5oUP+7pcfvFGA4BT19sVr5u50xhKm9Q5lGH9UjJ8Bi8WpuCgwAm+xBsBL8AAAAEc3NoOg== carl@example.com",
-                KeyTypeInfo = SshKeyTypeInfo.SKEcdsaSha2NistP256,
+                KeyTypeInfo = SshKeyTypeInfo.OpenSshSKEcdsaSha2NistP256,
                 KeyX = Convert.FromBase64String("GLHiRkl7FPzqVrq8t28gtpp9n9S3mhQ/7ulx+8UYDgE="),
                 KeyY = Convert.FromBase64String("T19sVr5u50xhKm9Q5lGH9UjJ8Bi8WpuCgwAm+xBsBL8="),
                 KeyApplication = Convert.FromBase64String("c3NoOg=="),

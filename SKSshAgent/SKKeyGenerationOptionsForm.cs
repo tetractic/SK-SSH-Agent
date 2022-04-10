@@ -28,9 +28,9 @@ namespace SKSshAgent
         {
             InitializeComponent();
 
-            _ = _keyTypeComboBox.Items.Add(SshKeyTypeInfo.SKEcdsaSha2NistP256);
+            _ = _keyTypeComboBox.Items.Add(SshKeyTypeInfo.OpenSshSKEcdsaSha2NistP256);
 
-            _keyTypeComboBox.SelectedItem = SshKeyTypeInfo.SKEcdsaSha2NistP256;
+            _keyTypeComboBox.SelectedItem = SshKeyTypeInfo.OpenSshSKEcdsaSha2NistP256;
 
             string comment = Environment.UserName;
             try
