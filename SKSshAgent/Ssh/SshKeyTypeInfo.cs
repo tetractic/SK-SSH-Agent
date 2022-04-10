@@ -36,6 +36,14 @@ namespace SKSshAgent.Ssh
             curve: ECCurve.NamedCurves.nistP521,
             keySizeBits: 521);
 
+        public static readonly SshKeyTypeInfo Ed25519 = new(
+            name: "ssh-ed25519",
+            type: SshKeyType.Ed25519,
+            hashAlgorithmName: default,
+            curveName: null,
+            curve: default,
+            keySizeBits: 512);
+
         public static readonly SshKeyTypeInfo OpenSshSKEcdsaSha2NistP256 = new(
             name: "sk-ecdsa-sha2-nistp256@openssh.com",
             type: SshKeyType.OpenSshEcdsaSK,
@@ -49,6 +57,7 @@ namespace SKSshAgent.Ssh
             EcdsaSha2NistP256,
             EcdsaSha2NistP384,
             EcdsaSha2NistP521,
+            Ed25519,
             OpenSshSKEcdsaSha2NistP256,
         });
 

@@ -16,6 +16,7 @@ namespace SKSshAgent.Ssh
             return keyType switch
             {
                 SshKeyType.Ecdsa => "id_ecdsa",
+                SshKeyType.Ed25519 => "id_ed25519",
                 SshKeyType.OpenSshEcdsaSK => "id_ecdsa_sk",
                 _ => throw new ArgumentOutOfRangeException(nameof(keyType)),
             };

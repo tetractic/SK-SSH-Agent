@@ -49,7 +49,12 @@ Authentication works as it normally would with Pageant or OpenSSH agent.
 
  * The `no-touch-required` option is not supported because the [Windows WebAuthn APIs](https://docs.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/webauthnapis) do not support it.
  * The `resident` option is not supported.
- * Generating/loading non-ECDSA key types is not implemented.
+ * Only the following key types are supported:
+   * `ecdsa-sha2-nistp256`
+   * `ecdsa-sha2-nistp384`
+   * `ecdsa-sha2-nistp521`
+   * `ssh-ed25519`
+   * `sk-ecdsa-sha2-nistp256@openssh.com`
 
 ## Differences from OpenSSH
 

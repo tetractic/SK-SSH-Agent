@@ -217,6 +217,7 @@ namespace SKSshAgent
                 switch (key.KeyTypeInfo.Type)
                 {
                     case SshKeyType.Ecdsa:
+                    case SshKeyType.Ed25519:
                         break;
 
                     case SshKeyType.OpenSshEcdsaSK:
@@ -399,6 +400,10 @@ namespace SKSshAgent
                         key = SshEcdsaKey.Generate(keyTypeInfo);
                         break;
 
+                    case SshKeyType.Ed25519:
+                        key = SshEd25519Key.Generate(keyTypeInfo);
+                        break;
+
                     default:
                         throw new UnreachableException();
                 }
@@ -505,6 +510,7 @@ namespace SKSshAgent
                     switch (key.KeyTypeInfo.Type)
                     {
                         case SshKeyType.Ecdsa:
+                        case SshKeyType.Ed25519:
                             break;
 
                         case SshKeyType.OpenSshEcdsaSK:

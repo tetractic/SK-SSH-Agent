@@ -25,6 +25,7 @@ namespace SKSshAgent
             _ = _keyTypeComboBox.Items.Add(SshKeyTypeInfo.EcdsaSha2NistP256);
             _ = _keyTypeComboBox.Items.Add(SshKeyTypeInfo.EcdsaSha2NistP384);
             _ = _keyTypeComboBox.Items.Add(SshKeyTypeInfo.EcdsaSha2NistP521);
+            _ = _keyTypeComboBox.Items.Add(SshKeyTypeInfo.Ed25519);
 
             _keyTypeComboBox.SelectedItem = SshKeyTypeInfo.EcdsaSha2NistP256;
 
