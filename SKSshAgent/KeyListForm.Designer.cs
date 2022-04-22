@@ -285,10 +285,11 @@ namespace SKSshAgent
             // 
             // _confirmEachKeyUseMenuItem
             // 
+            this._confirmEachKeyUseMenuItem.CheckOnClick = true;
             this._confirmEachKeyUseMenuItem.Name = "_confirmEachKeyUseMenuItem";
             this._confirmEachKeyUseMenuItem.Size = new System.Drawing.Size(190, 22);
             this._confirmEachKeyUseMenuItem.Text = "&Confirm Each Key Use";
-            this._confirmEachKeyUseMenuItem.Click += new System.EventHandler(this.HandleConfirmEachKeyUseMenuItemClicked);
+            this._confirmEachKeyUseMenuItem.CheckedChanged += new System.EventHandler(this.HandleConfirmEachKeyUseMenuItemCheckedChanged);
             // 
             // _helpMenu
             // 

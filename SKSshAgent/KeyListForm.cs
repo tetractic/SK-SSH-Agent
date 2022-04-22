@@ -566,12 +566,9 @@ namespace SKSshAgent
                 _ = KeyList.Instance.RemoveKey(item.Key);
         }
 
-        private void HandleConfirmEachKeyUseMenuItemClicked(object sender, EventArgs e)
+        private void HandleConfirmEachKeyUseMenuItemCheckedChanged(object sender, EventArgs e)
         {
-            bool @checked = !_confirmEachKeyUseMenuItem.Checked;
-            _confirmEachKeyUseMenuItem.Checked = @checked;
-
-            Settings.ConfirmEachKeyUse = @checked;
+            Settings.ConfirmEachKeyUse = _confirmEachKeyUseMenuItem.Checked;
         }
 
         private void HandleAboutMenuItemClicked(object sender, EventArgs e)
