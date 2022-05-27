@@ -4,7 +4,7 @@ An SSH agent that supports using FIDO/U2F security keys with PuTTY and OpenSSH f
 
 ## Features
 
- * Pageant IPC — Use security keys with PuTTY.
+ * Pageant IPC — Use security keys with PuTTY and WinSCP.
  * OpenSSH IPC — Use security keys with [OpenSSH for Windows](https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_overview).
 
 ## Requirements
@@ -15,7 +15,10 @@ You need a FIDO/U2F security key, obviously.
 
  * Windows 10 (version 1903 or newer)
  * [NET 6.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0/runtime?cid=getdotnetcore)
- * PuTTY and/or OpenSSH for Windows (version 8.6 or newer)
+ * SSH Client
+   * PuTTY (version 0.75 or newer)
+   * WinSCP (version 5.20 or newer)
+   * OpenSSH for Windows (version 8.6 or newer)
 
 Note:  Only one agent can be listening on an IPC pipe at a time.  Therefore, Pageant and/or OpenSSH agent cannot be used while SK SSH Agent is running, and vice versa.
 
