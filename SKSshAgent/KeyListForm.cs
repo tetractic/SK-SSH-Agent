@@ -52,13 +52,13 @@ namespace SKSshAgent
             _notifyIcon.Icon = new Icon(_notifyIcon.Icon, SystemInformation.SmallIconSize);
         }
 
-        public bool AllowVislble { get; set; }
+        public bool AllowVisible { get; set; }
 
         public bool AllowClose { get; set; }
 
         protected override void SetVisibleCore(bool value)
         {
-            if (!AllowVislble)
+            if (!AllowVisible)
             {
                 value = false;
 
@@ -736,7 +736,7 @@ namespace SKSshAgent
         {
             if (!Visible)
             {
-                AllowVislble = true;
+                AllowVisible = true;
 
                 Show();
             }

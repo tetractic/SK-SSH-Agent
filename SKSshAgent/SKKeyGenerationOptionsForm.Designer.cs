@@ -55,7 +55,7 @@ namespace SKSshAgent
             this._confirmPasswordLabel = new System.Windows.Forms.Label();
             this._confirmPasswordTextBox = new SKSshAgent.PasswordTextBox();
             this._encryptionOptionsButton = new System.Windows.Forms.Button();
-            this._generateButon = new System.Windows.Forms.Button();
+            this._generateButton = new System.Windows.Forms.Button();
             this._cancelButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this._requireUserVerificationInfoIcon)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this._applicationIdInfoIcon)).BeginInit();
@@ -258,16 +258,16 @@ namespace SKSshAgent
             this._encryptionOptionsButton.UseVisualStyleBackColor = true;
             this._encryptionOptionsButton.Click += new System.EventHandler(this.HandleEncryptionOptionsButtonClicked);
             // 
-            // _generateButon
+            // _generateButton
             // 
-            this._generateButon.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this._generateButon.Location = new System.Drawing.Point(216, 271);
-            this._generateButon.Name = "_generateButon";
-            this._generateButon.Size = new System.Drawing.Size(75, 23);
-            this._generateButon.TabIndex = 11;
-            this._generateButon.Text = "&Generate";
-            this._generateButon.UseVisualStyleBackColor = true;
-            this._generateButon.Click += new System.EventHandler(this.HandleGenerateButonClicked);
+            this._generateButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this._generateButton.Location = new System.Drawing.Point(216, 271);
+            this._generateButton.Name = "_generateButton";
+            this._generateButton.Size = new System.Drawing.Size(75, 23);
+            this._generateButton.TabIndex = 11;
+            this._generateButton.Text = "&Generate";
+            this._generateButton.UseVisualStyleBackColor = true;
+            this._generateButton.Click += new System.EventHandler(this.HandleGenerateButtonClicked);
             // 
             // _cancelButton
             // 
@@ -281,7 +281,7 @@ namespace SKSshAgent
             // 
             // SKKeyGenerationOptionsForm
             // 
-            this.AcceptButton = this._generateButon;
+            this.AcceptButton = this._generateButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this._cancelButton;
@@ -298,7 +298,7 @@ namespace SKSshAgent
             this.Controls.Add(this._commentLabel);
             this.Controls.Add(this._commentTextBox);
             this.Controls.Add(this._cancelButton);
-            this.Controls.Add(this._generateButon);
+            this.Controls.Add(this._generateButton);
             this.Controls.Add(this._keyTypeComboBox);
             this.Controls.Add(this._keyTypeLabel);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -337,7 +337,7 @@ namespace SKSshAgent
         private System.Windows.Forms.Label _confirmPasswordLabel;
         private SKSshAgent.PasswordTextBox _confirmPasswordTextBox;
         private System.Windows.Forms.Button _encryptionOptionsButton;
-        private System.Windows.Forms.Button _generateButon;
+        private System.Windows.Forms.Button _generateButton;
         private System.Windows.Forms.Button _cancelButton;
     }
 }

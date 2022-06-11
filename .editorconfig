@@ -215,3 +215,9 @@ dotnet_diagnostic.CA1303.severity = none
 
 # CA2016: Forward the CancellationToken parameter to methods that take one
 dotnet_diagnostic.CA2016.severity = warning
+
+[{*.csproj,*.xml}]
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true

@@ -16,6 +16,8 @@
 
 using System;
 
+#pragma warning disable CA1707 // Identifiers should not contain underscores
+
 namespace supercop.crypto_sign.ed25519.ref10
 {
     internal static partial class sc

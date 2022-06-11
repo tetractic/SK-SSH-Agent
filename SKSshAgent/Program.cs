@@ -48,7 +48,7 @@ namespace SKSshAgent
                     mainForm.LoadKeyFromFile(filePath);
 
                 if (KeyList.Instance.KeyCount == 0)
-                    mainForm.AllowVislble = true;
+                    mainForm.AllowVisible = true;
 
                 Application.Run(mainForm);
 

@@ -75,7 +75,7 @@ namespace SKSshAgent
 
         private void HandleApplicationIdTextBoxTextChanged(object sender, EventArgs e)
         {
-            if (!_applicationIdTextBox.Text.StartsWith(_applicationIdPrefix) &&
+            if (!_applicationIdTextBox.Text.StartsWith(_applicationIdPrefix, StringComparison.Ordinal) &&
                 _previousApplicationIdText.Length != 0)
             {
                 SystemSounds.Beep.Play();
@@ -137,7 +137,7 @@ namespace SKSshAgent
             _cipherInfo = dialog.CipherInfo;
         }
 
-        private void HandleGenerateButonClicked(object sender, EventArgs e)
+        private void HandleGenerateButtonClicked(object sender, EventArgs e)
         {
             var keyTypeInfo = (SshKeyTypeInfo)_keyTypeComboBox.SelectedItem;
 
@@ -154,7 +154,7 @@ namespace SKSshAgent
             }
             userId[userId.Length - 1] = 0;
 
-            if (_applicationIdTextBox.TextLength > 0 && !_applicationIdTextBox.Text.StartsWith(_applicationIdPrefix))
+            if (_applicationIdTextBox.TextLength > 0 && !_applicationIdTextBox.Text.StartsWith(_applicationIdPrefix, StringComparison.Ordinal))
                 _applicationIdTextBox.Text = string.Empty;
 
             string applicationId = _applicationIdTextBox.TextLength > 0

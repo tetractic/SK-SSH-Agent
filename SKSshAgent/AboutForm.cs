@@ -4,6 +4,7 @@
 // General Public License version 3 as published by the Free Software
 // Foundation.
 
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Reflection;
@@ -22,17 +23,17 @@ namespace SKSshAgent
             _licenseLabel.Links.Clear();
 
             const string gplLinkText = "GNU General Public License version 3";
-            int gplLinkStart = _licenseLabel.Text.IndexOf(gplLinkText);
+            int gplLinkStart = _licenseLabel.Text.IndexOf(gplLinkText, StringComparison.Ordinal);
             _licenseLabel.Links.Add(gplLinkStart, gplLinkText.Length, "https://www.gnu.org/licenses/gpl-3.0-standalone.html");
 
             _silkLicenseLinkLabel.Links.Clear();
 
             const string silkLinkText = "Silk";
-            int silkLinkStart = _silkLicenseLinkLabel.Text.IndexOf(silkLinkText);
+            int silkLinkStart = _silkLicenseLinkLabel.Text.IndexOf(silkLinkText, StringComparison.Ordinal);
             _silkLicenseLinkLabel.Links.Add(silkLinkStart, silkLinkText.Length, "http://www.famfamfam.com/lab/icons/silk/");
 
             const string ccLicenseLinkText = "Creative Commons Attribution 2.5";
-            int ccLicenseLinkStart = _silkLicenseLinkLabel.Text.IndexOf(ccLicenseLinkText);
+            int ccLicenseLinkStart = _silkLicenseLinkLabel.Text.IndexOf(ccLicenseLinkText, StringComparison.Ordinal);
             _silkLicenseLinkLabel.Links.Add(ccLicenseLinkStart, ccLicenseLinkText.Length, "https://creativecommons.org/licenses/by/2.5/");
         }
 

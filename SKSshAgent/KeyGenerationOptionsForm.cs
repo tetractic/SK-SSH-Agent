@@ -75,7 +75,7 @@ namespace SKSshAgent
             _cipherInfo = dialog.CipherInfo;
         }
 
-        private void HandleGenerateButonClicked(object sender, EventArgs e)
+        private void HandleGenerateButtonClicked(object sender, EventArgs e)
         {
             var keyTypeInfo = (SshKeyTypeInfo)_keyTypeComboBox.SelectedItem;
 

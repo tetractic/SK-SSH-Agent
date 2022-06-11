@@ -294,7 +294,9 @@ namespace SKSshAgent.Ssh
             var writer = new SshWireWriter(buffer);
             WritePublicKeyTo(ref writer);
             writer.Flush();
+#pragma warning disable CA5351 // Do Not Use Broken Cryptographic Algorithms
             return MD5.HashData(buffer.WrittenSpan);
+#pragma warning restore CA5351 // Do Not Use Broken Cryptographic Algorithms
         }
 
         public virtual string GetOpenSshKeyAuthorization(string comment)

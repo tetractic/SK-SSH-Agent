@@ -3,9 +3,15 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net6.0-windows</TargetFramework>
+
     <Features>strict</Features>
     <Deterministic>true</Deterministic>
     <Nullable>enable</Nullable>
+
+    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Resources\application_key.ico</ApplicationIcon>
   </PropertyGroup>
@@ -27,6 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <AdditionalFiles Include="CodeAnalysisDictionary.xml" />
     <AdditionalFiles Include="ExceptionAdjustments.txt" />
   </ItemGroup>
 
@@ -35,12 +42,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.1.635-beta">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="System.Formats.Cbor" Version="6.0.0" />
     <PackageReference Include="Tetractic.CodeAnalysis.ExceptionAnalyzers" Version="1.3.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Text.Analyzers" Version="3.3.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

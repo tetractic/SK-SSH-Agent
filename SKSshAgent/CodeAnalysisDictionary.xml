@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Dictionary>
+  <Words>
+    <Recognized>
+      <Word>AES</Word>
+      <Word>args</Word>
+      <Word>ASN</Word>
+      <Word>async</Word>
+      <Word>authenticator</Word>
+      <Word>authn</Word>
+      <Word>bcrypt</Word>
+      <Word>ciphertext</Word>
+      <Word>comparer</Word>
+      <Word>COSE</Word>
+      <Word>CTS</Word>
+      <Word>decrypt</Word>
+      <Word>decrypted</Word>
+      <Word>decryptor</Word>
+      <Word>dest</Word>
+      <Word>ECDSA</Word>
+      <Word>encryptor</Word>
+      <Word>func</Word>
+      <Word>GCM</Word>
+      <Word>GPL</Word>
+      <Word>GUID</Word>
+      <Word>infos</Word>
+      <Word>init</Word>
+      <Word>KDF</Word>
+      <Word>mutex</Word>
+      <Word>NIST</Word>
+      <Word>params</Word>
+      <Word>PBKDF</Word>
+      <Word>plaintext</Word>
+      <Word>ptr</Word>
+      <Word>renderer</Word>
+      <Word>RNG</Word>
+      <Word>SHA</Word>
+      <Word>src</Word>
+      <Word>TCS</Word>
+      <Word>tmp</Word>
+      <Word>unencrypted</Word>
+      <Word>unshield</Word>
+      <Word>unshielded</Word>
+      <Word>wnd</Word>
+    </Recognized>
+  </Words>
+</Dictionary>

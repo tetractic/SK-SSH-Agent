@@ -9,6 +9,9 @@
 
 using System;
 
+#pragma warning disable CA1704 // Identifiers should be spelled correctly
+#pragma warning disable CA1707 // Identifiers should not contain underscores
+
 namespace nacl.crypto_verify
 {
     internal static partial class crypto
