@@ -1,7 +1,7 @@
 ﻿// Copyright 2022 Carl Reinke
 //
 // This file is part of a program that is licensed under the terms of the GNU
-// General Public License version 3 as published by the Free Software
+// General Public License Version 3 as published by the Free Software
 // Foundation.
 
 namespace SKSshAgent
@@ -107,7 +107,7 @@ namespace SKSshAgent
             this._licenseLabel.Size = new System.Drawing.Size(400, 30);
             this._licenseLabel.TabIndex = 3;
             this._licenseLabel.TabStop = true;
-            this._licenseLabel.Text = "This program is licensed under the terms of the GNU General Public License versio" +
+            this._licenseLabel.Text = "This program is licensed under the terms of the GNU General Public License Versio" +
     "n 3 as published by the Free Software Foundation.";
             this._licenseLabel.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.HandleLinkClicked);
             // 

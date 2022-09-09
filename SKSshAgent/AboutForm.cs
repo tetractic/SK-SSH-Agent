@@ -1,7 +1,7 @@
 ﻿// Copyright 2022 Carl Reinke
 //
 // This file is part of a program that is licensed under the terms of the GNU
-// General Public License version 3 as published by the Free Software
+// General Public License Version 3 as published by the Free Software
 // Foundation.
 
 using System;
@@ -22,7 +22,7 @@ namespace SKSshAgent
 
             _licenseLabel.Links.Clear();
 
-            const string gplLinkText = "GNU General Public License version 3";
+            const string gplLinkText = "GNU General Public License Version 3";
             int gplLinkStart = _licenseLabel.Text.IndexOf(gplLinkText, StringComparison.Ordinal);
             _licenseLabel.Links.Add(gplLinkStart, gplLinkText.Length, "https://www.gnu.org/licenses/gpl-3.0-standalone.html");
 
