@@ -268,6 +268,7 @@ namespace SKSshAgent
             _pageantPipe.StatusChanged -= HandlePipeStatusChanged;
         }
 
+        // ExceptionAdjustment: M:System.Environment.GetFolderPath(System.Environment.SpecialFolder) -T:System.PlatformNotSupportedException
         private void HandleLoadFileMenuItemClicked(object sender, EventArgs e)
         {
             _statusLabel.Text = string.Empty;
@@ -426,6 +427,7 @@ namespace SKSshAgent
                 _ = KeyList.Instance.AddOrUpgradeKey(key, comment);
         }
 
+        // ExceptionAdjustment: M:System.Environment.GetFolderPath(System.Environment.SpecialFolder) -T:System.PlatformNotSupportedException
         private async Task<bool> TrySaveKeyFileAsync(SshKey key, string comment, ShieldedImmutableBuffer password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
         {
             string userProfilePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);

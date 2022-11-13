@@ -364,6 +364,8 @@ namespace SKSshAgent.Ssh
          * wise caller could do; we just do it for you.
          */
 
+        /// <exception cref="ArgumentException"/>
+        /// <exception cref="ArgumentOutOfRangeException"/>
         public static void DeriveKey(ReadOnlySpan<byte> password, ReadOnlySpan<byte> salt, Span<byte> key, uint rounds)
         {
             if (rounds < 1)

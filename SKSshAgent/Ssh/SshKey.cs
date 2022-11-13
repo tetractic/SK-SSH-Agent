@@ -254,6 +254,7 @@ namespace SKSshAgent.Ssh
 
         public abstract void WritePublicKeyTo(ref SshWireWriter writer);
 
+        /// <exception cref="InvalidOperationException"/>
         public abstract void WritePrivateKeyTo(ref SshWireWriter writer);
 
         /// <exception cref="ArgumentException"/>
