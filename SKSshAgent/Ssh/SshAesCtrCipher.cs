@@ -74,7 +74,7 @@ namespace SKSshAgent.Ssh
             if (ciphertext.Length != plaintext.Length)
                 throw new ArgumentException("Ciphertext length must match plaintext length.");
 
-            Decrypt(plaintext, ciphertext);
+            Cipher(plaintext, ciphertext);
         }
 
         /// <exception cref="ArgumentException"/>
