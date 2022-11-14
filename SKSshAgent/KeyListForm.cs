@@ -441,6 +441,7 @@ namespace SKSshAgent
                 }
                 catch (Exception ex)
                     when (ex is ArgumentException ||
+                          ex is NotSupportedException ||
                           ex is PathTooLongException ||
                           ex is DirectoryNotFoundException ||
                           ex is UnauthorizedAccessException ||
