@@ -102,7 +102,7 @@ namespace SKSshAgent
             this.Controls.Add(this._confirmButton);
             this.Controls.Add(this._cancelButton);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = global::SKSshAgent.Properties.Resources.application_key_icon;
+            this.Icon = global::SKSshAgent.Properties.Resources.console_ssh_key_icon;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "KeyUseConfirmationForm";

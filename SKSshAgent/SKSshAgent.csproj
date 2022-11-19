@@ -13,7 +13,7 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 
     <UseWindowsForms>true</UseWindowsForms>
-    <ApplicationIcon>Resources\application_key.ico</ApplicationIcon>
+    <ApplicationIcon>Resources\console_ssh_key.ico</ApplicationIcon>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Resources\application_key.ico" />
+    <Content Include="Resources\console_ssh_key.ico" />
   </ItemGroup>
 
   <ItemGroup>

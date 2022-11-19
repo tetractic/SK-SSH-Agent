@@ -116,7 +116,7 @@ namespace SKSshAgent
             this.Controls.Add(this._passwordLabel);
             this.Controls.Add(this._passwordTextBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.Icon = global::SKSshAgent.Properties.Resources.application_key_icon;
+            this.Icon = global::SKSshAgent.Properties.Resources.console_ssh_key_icon;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "KeyDecryptionForm";
