@@ -343,7 +343,7 @@ namespace SKSshAgent
 
         private void EnsureCapacity(int capacity)
         {
-            if (capacity < _buffer.Length)
+            if (capacity <= _buffer.Length)
                 return;
 
             uint minCapacity = (uint)capacity;
