@@ -23,13 +23,13 @@ namespace SKSshAgent.Cryptography
         /// <exception cref="ArgumentException"/>
         public static void GenerateKey(Span<byte> publicKey, Span<byte> secretKey)
         {
-            if (publicKey.Length < PublicKeyLength)
-                throw new ArgumentException("Insufficient length.", nameof(publicKey));
-            if (secretKey.Length < SecretKeyLength)
-                throw new ArgumentException("Insufficient length.", nameof(secretKey));
+            if (publicKey.Length != PublicKeyLength)
+                throw new ArgumentException("Invalid length.", nameof(publicKey));
+            if (secretKey.Length != SecretKeyLength)
+                throw new ArgumentException("Invalid length.", nameof(secretKey));
 
-            Span<byte> pk = publicKey.Slice(0, PublicKeyLength);
-            Span<byte> sk = secretKey.Slice(0, SecretKeyLength);
+            Span<byte> pk = publicKey;
+            Span<byte> sk = secretKey;
 
             crypto_sign_keypair(pk, sk);
 
@@ -40,17 +40,19 @@ namespace SKSshAgent.Cryptography
         /// <exception cref="ArgumentException"/>
         public static void SignData(ReadOnlySpan<byte> secretKey, ReadOnlySpan<byte> data, Span<byte> signature)
         {
-            if (secretKey.Length < SecretKeyLength)
-                throw new ArgumentException("Insufficient length.", nameof(secretKey));
-            if (signature.Length < SignatureLength)
-                throw new ArgumentException("Insufficient length.", nameof(signature));
+            if (secretKey.Length != SecretKeyLength)
+                throw new ArgumentException("Invalid length.", nameof(secretKey));
+            if (signature.Length != SignatureLength)
+                throw new ArgumentException("Invalid length.", nameof(signature));
 
             ReadOnlySpan<byte> m = data;
-            ReadOnlySpan<byte> sk = secretKey.Slice(0, SecretKeyLength);
+            ReadOnlySpan<byte> sk = secretKey;
 
-            byte[] sm = new byte[64 + data.Length];
+            byte[] sm = new byte[SignatureLength + data.Length];
             unsafe
             {
+                // Pin array so that we can zero it later and be sure that the GC did not relocate
+                // it and thereby make a copy of the data.
                 fixed (byte* smPtr = sm)
                 {
                     ExceptionDispatchInfo? exInfo = null;
@@ -80,17 +82,20 @@ namespace SKSshAgent.Cryptography
         /// <exception cref="ArgumentException"/>
         public static bool VerifyData(ReadOnlySpan<byte> publicKey, ReadOnlySpan<byte> data, ReadOnlySpan<byte> signature)
         {
-            if (publicKey.Length < PublicKeyLength)
-                throw new ArgumentException("Insufficient length.", nameof(publicKey));
-            if (signature.Length < SignatureLength)
-                throw new ArgumentException("Insufficient length.", nameof(signature));
+            if (publicKey.Length != PublicKeyLength)
+                throw new ArgumentException("Invalid length.", nameof(publicKey));
 
-            ReadOnlySpan<byte> pk = publicKey.Slice(0, PublicKeyLength);
-            ReadOnlySpan<byte> s = signature.Slice(0, SignatureLength);
+            if (signature.Length != SignatureLength)
+                return false;
 
-            byte[] sm = new byte[64 + data.Length];
+            ReadOnlySpan<byte> pk = publicKey;
+            ReadOnlySpan<byte> s = signature;
+
+            byte[] sm = new byte[SignatureLength + data.Length];
             unsafe
             {
+                // Pin array so that we can zero it later and be sure that the GC did not relocate
+                // it and thereby make a copy of the data.
                 fixed (byte* smPtr = sm)
                 {
                     bool result = default;
