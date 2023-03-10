@@ -45,6 +45,7 @@ namespace SKSshAgent
         /// <exception cref="NotSupportedException"/>
         /// <exception cref="ArgumentOutOfRangeException"/>
         /// <exception cref="OperationCanceledException"/>
+        /// <exception cref="TimeoutException"/>
         /// <exception cref="InvalidDataException"/>
         /// <exception cref="Win32Exception"/>
         public static MakeCredentialResult MakeCredential(HWND hWnd, string rpId, ReadOnlySpan<byte> userId, string userName, SshKeyTypeInfo keyTypeInfo, OpenSshSKFlags flags, ReadOnlySpan<byte> challenge, CancellationToken cancellationToken)
@@ -181,6 +182,7 @@ namespace SKSshAgent
 
         /// <exception cref="NotSupportedException"/>
         /// <exception cref="OperationCanceledException"/>
+        /// <exception cref="TimeoutException"/>
         /// <exception cref="InvalidDataException"/>
         /// <exception cref="Win32Exception"/>
         public static GetAssertionResult GetAssertion(HWND hWnd, CoseKey key, string rpId, ReadOnlySpan<byte> keyHandle, OpenSshSKFlags flags, ReadOnlySpan<byte> challenge, CancellationToken cancellationToken)
@@ -309,6 +311,7 @@ namespace SKSshAgent
 
         /// <exception cref="OperationCanceledException"/>
         /// <exception cref="NotSupportedException"/>
+        /// <exception cref="TimeoutException"/>
         /// <exception cref="Win32Exception"/>
         private static void ThrowIfError(HRESULT hr)
         {
@@ -318,6 +321,8 @@ namespace SKSshAgent
                 throw new OperationCanceledException();
             else if (hr == NTE_NOT_SUPPORTED)
                 throw new NotSupportedException("The requested operation is not supported.");
+            else if (hr == RPC_E_TIMEOUT)
+                throw new TimeoutException("The requested operation timed out.");
             else if (hr != 0)
                 throw new Win32Exception(hr, $"{hr.Value:X8}: {WebAuthNGetErrorName(hr)}");
         }
