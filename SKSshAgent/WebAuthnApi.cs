@@ -49,7 +49,7 @@ namespace SKSshAgent
         /// <exception cref="Win32Exception"/>
         public static MakeCredentialResult MakeCredential(HWND hWnd, string rpId, ReadOnlySpan<byte> userId, string userName, SshKeyTypeInfo keyTypeInfo, OpenSshSKFlags flags, ReadOnlySpan<byte> challenge, CancellationToken cancellationToken)
         {
-            if (Version < WEBAUTHN_API_VERSION_1)
+            if (!(Version >= WEBAUTHN_API_VERSION_1))
                 throw new NotSupportedException("Insufficient WebAuthn version.");
 
             int algorithm;
@@ -185,7 +185,7 @@ namespace SKSshAgent
         /// <exception cref="Win32Exception"/>
         public static GetAssertionResult GetAssertion(HWND hWnd, CoseKey key, string rpId, ReadOnlySpan<byte> keyHandle, OpenSshSKFlags flags, ReadOnlySpan<byte> challenge, CancellationToken cancellationToken)
         {
-            if (Version < WEBAUTHN_API_VERSION_1)
+            if (!(Version >= WEBAUTHN_API_VERSION_1))
                 throw new NotSupportedException("Insufficient WebAuthn version.");
 
             unsafe
