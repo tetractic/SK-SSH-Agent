@@ -54,6 +54,7 @@ namespace SKSshAgent.Ssh
 
         /// <exception cref="ArgumentNullException"/>
         /// <exception cref="ArgumentException"/>
+        /// <exception cref="ArgumentOutOfRangeException"/>
         /// <exception cref="CryptographicException"/>
         public static OpenSshEncryptedPrivateKey Encrypt(SshKey privateKey, string comment, ShieldedImmutableBuffer password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
         {

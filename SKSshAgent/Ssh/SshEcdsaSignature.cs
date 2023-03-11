@@ -13,7 +13,6 @@ namespace SKSshAgent.Ssh
     {
         /// <exception cref="ArgumentException"/>
         /// <exception cref="ArgumentNullException"/>
-        /// <exception cref="ArgumentOutOfRangeException"/>
         public SshEcdsaSignature(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> r, ImmutableArray<byte> s)
             : base(keyTypeInfo)
         {
@@ -24,11 +23,11 @@ namespace SKSshAgent.Ssh
             if (r == null)
                 throw new ArgumentNullException(nameof(r));
             if (r.Length != fieldElementLength || MPInt.GetBitLength(r.AsSpan()) > fieldSizeBits)
-                throw new ArgumentOutOfRangeException(nameof(r));
+                throw new ArgumentException("Invalid EC field element.", nameof(r));
             if (s == null)
                 throw new ArgumentNullException(nameof(s));
             if (s.Length != fieldElementLength || MPInt.GetBitLength(s.AsSpan()) > fieldSizeBits)
-                throw new ArgumentOutOfRangeException(nameof(s));
+                throw new ArgumentException("Invalid EC field element.", nameof(s));
 
             R = r;
             S = s;

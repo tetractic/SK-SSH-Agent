@@ -43,7 +43,7 @@ namespace SKSshAgent
         }
 
         /// <exception cref="NotSupportedException"/>
-        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="ArgumentException"/>
         /// <exception cref="OperationCanceledException"/>
         /// <exception cref="TimeoutException"/>
         /// <exception cref="InvalidDataException"/>
@@ -57,7 +57,7 @@ namespace SKSshAgent
             if (keyTypeInfo == SshKeyTypeInfo.OpenSshSKEcdsaSha2NistP256)
                 algorithm = WEBAUTHN_COSE_ALGORITHM_ECDSA_P256_WITH_SHA256;
             else
-                throw new ArgumentOutOfRangeException(nameof(keyTypeInfo));
+                throw new ArgumentException("Invalid key type info.", nameof(keyTypeInfo));
 
             unsafe
             {
@@ -280,15 +280,26 @@ namespace SKSshAgent
                             byte[] signedData = WebAuthnSignature.GetSignedData(challenge, authenticatorDataSpan);
 
                             bool verified;
-                            switch (key.Algorithm)
+                            switch (key.KeyType)
                             {
-                                case CoseAlgorithm.ES256:
-                                case CoseAlgorithm.ES384:
-                                case CoseAlgorithm.ES512:
+                                case CoseKeyType.EC2:
                                 {
                                     var ec2Key = (CoseEC2Key)key;
-                                    var ecdsaSignature = (CoseEcdsaSignature)signature;
-                                    verified = ec2Key.VerifyData(signedData, ecdsaSignature);
+
+                                    switch (signature.Algorithm)
+                                    {
+                                        case CoseAlgorithm.ES256:
+                                        case CoseAlgorithm.ES384:
+                                        case CoseAlgorithm.ES512:
+                                        {
+                                            var ecdsaSignature = (CoseEcdsaSignature)signature;
+
+                                            verified = ec2Key.VerifyData(signedData, ecdsaSignature);
+                                            break;
+                                        }
+                                        default:
+                                            throw new UnreachableException();
+                                    }
                                     break;
                                 }
                                 default:

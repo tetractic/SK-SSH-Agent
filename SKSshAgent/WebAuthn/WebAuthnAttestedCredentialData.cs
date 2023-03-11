@@ -40,7 +40,7 @@ namespace SKSshAgent.WebAuthn
 
             var span = bytes.Span;
             var aaGuid = span.Slice(0, 16).ToImmutableArray();
-            var credentialIdLength = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(16));
+            ushort credentialIdLength = BinaryPrimitives.ReadUInt16BigEndian(span.Slice(16));
             bytes = bytes.Slice(fixedLength);
 
             if (bytes.Length < credentialIdLength)

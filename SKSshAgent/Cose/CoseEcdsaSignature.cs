@@ -11,7 +11,7 @@ namespace SKSshAgent.Cose
 {
     internal sealed class CoseEcdsaSignature : CoseSignature
     {
-        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="ArgumentException"/>
         /// <exception cref="ArgumentNullException"/>
         public CoseEcdsaSignature(CoseAlgorithm algorithm, CoseEllipticCurve curve, ImmutableArray<byte> r, ImmutableArray<byte> s)
             : base(algorithm)
@@ -21,29 +21,29 @@ namespace SKSshAgent.Cose
                 case CoseAlgorithm.ES256:
                 case CoseAlgorithm.ES384:
                 case CoseAlgorithm.ES512:
-                    switch (curve)
-                    {
-                        case CoseEllipticCurve.P256:
-                        case CoseEllipticCurve.P384:
-                        case CoseEllipticCurve.P521:
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(curve));
-                    }
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(algorithm));
+                    throw new ArgumentException("Invalid algorithm.", nameof(algorithm));
+            }
+            switch (curve)
+            {
+                case CoseEllipticCurve.P256:
+                case CoseEllipticCurve.P384:
+                case CoseEllipticCurve.P521:
+                    break;
+                default:
+                    throw new ArgumentException("Invalid curve.", nameof(curve));
             }
             int fieldSizeBits = curve.GetFieldSizeBits();
             int fieldElementLength = MPInt.SizeBitsToLength(fieldSizeBits);
             if (r == null)
                 throw new ArgumentNullException(nameof(r));
             if (r.Length != fieldElementLength || MPInt.GetBitLength(r.AsSpan()) > fieldSizeBits)
-                throw new ArgumentOutOfRangeException(nameof(r));
+                throw new ArgumentException("Invalid EC field element.", nameof(r));
             if (s == null)
                 throw new ArgumentNullException(nameof(s));
             if (s.Length != fieldElementLength || MPInt.GetBitLength(s.AsSpan()) > fieldSizeBits)
-                throw new ArgumentOutOfRangeException(nameof(s));
+                throw new ArgumentException("Invalid EC field element.", nameof(s));
 
             Curve = curve;
             R = r;

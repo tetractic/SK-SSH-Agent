@@ -11,7 +11,7 @@ namespace SKSshAgent.Cose
 {
     internal static class CoseAlgorithmExtensions
     {
-        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="ArgumentException"/>
         public static HashAlgorithmName GetHashAlgorithmName(this CoseAlgorithm algorithm)
         {
             return algorithm switch
@@ -19,7 +19,7 @@ namespace SKSshAgent.Cose
                 CoseAlgorithm.ES256 => HashAlgorithmName.SHA256,
                 CoseAlgorithm.ES384 => HashAlgorithmName.SHA384,
                 CoseAlgorithm.ES512 => HashAlgorithmName.SHA512,
-                _ => throw new ArgumentOutOfRangeException(nameof(algorithm)),
+                _ => throw new ArgumentException("Invalid algorithm.", nameof(algorithm)),
             };
         }
     }

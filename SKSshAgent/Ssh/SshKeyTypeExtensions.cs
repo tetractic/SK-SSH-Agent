@@ -10,7 +10,7 @@ namespace SKSshAgent.Ssh
 {
     internal static class SshKeyTypeExtensions
     {
-        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="ArgumentException"/>
         public static string GetDefaultFileName(this SshKeyType keyType)
         {
             return keyType switch
@@ -18,7 +18,7 @@ namespace SKSshAgent.Ssh
                 SshKeyType.Ecdsa => "id_ecdsa",
                 SshKeyType.Ed25519 => "id_ed25519",
                 SshKeyType.OpenSshEcdsaSK => "id_ecdsa_sk",
-                _ => throw new ArgumentOutOfRangeException(nameof(keyType)),
+                _ => throw new ArgumentException("Invalid key type.", nameof(keyType)),
             };
         }
     }

@@ -42,7 +42,6 @@ namespace SKSshAgent.Ssh
 
         /// <exception cref="ArgumentException"/>
         /// <exception cref="ArgumentNullException"/>
-        /// <exception cref="ArgumentOutOfRangeException"/>
         /// <exception cref="CryptographicException"/>
         private OpenSshEcdsaSKKey(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> x, ImmutableArray<byte> y, ImmutableArray<byte> application, bool hasDecryptedPrivateKey)
             : base(keyTypeInfo, hasDecryptedPrivateKey)
@@ -54,11 +53,11 @@ namespace SKSshAgent.Ssh
             if (x == null)
                 throw new ArgumentNullException(nameof(x));
             if (x.Length != fieldElementLength || MPInt.GetBitLength(x.AsSpan()) > fieldSizeBits)
-                throw new ArgumentOutOfRangeException(nameof(x));
+                throw new ArgumentException("Invalid EC field element.", nameof(x));
             if (y == null)
                 throw new ArgumentNullException(nameof(y));
             if (y.Length != fieldElementLength || MPInt.GetBitLength(y.AsSpan()) > fieldSizeBits)
-                throw new ArgumentOutOfRangeException(nameof(y));
+                throw new ArgumentException("Invalid EC field element.", nameof(y));
             if (application == null)
                 throw new ArgumentNullException(nameof(application));
 

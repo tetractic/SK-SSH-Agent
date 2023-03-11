@@ -10,7 +10,7 @@ namespace SKSshAgent.Cose
 {
     internal static class CoseEllipticCurveExtensions
     {
-        /// <exception cref="ArgumentOutOfRangeException"/>
+        /// <exception cref="ArgumentException"/>
         public static int GetFieldSizeBits(this CoseEllipticCurve curve)
         {
             return curve switch
@@ -18,7 +18,7 @@ namespace SKSshAgent.Cose
                 CoseEllipticCurve.P256 => 256,
                 CoseEllipticCurve.P384 => 384,
                 CoseEllipticCurve.P521 => 521,
-                _ => throw new ArgumentOutOfRangeException(nameof(curve)),
+                _ => throw new ArgumentException("Invalid curve.", nameof(curve)),
             };
         }
     }

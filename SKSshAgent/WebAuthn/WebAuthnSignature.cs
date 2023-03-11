@@ -6,6 +6,7 @@
 
 using SKSshAgent.Cose;
 using System;
+using System.Diagnostics;
 using System.Formats.Asn1;
 using System.IO;
 using System.Security.Cryptography;
@@ -33,15 +34,21 @@ namespace SKSshAgent.WebAuthn
             if (publicKey is null)
                 throw new ArgumentNullException(nameof(publicKey));
 
-            switch (publicKey.Algorithm)
+            switch (publicKey.KeyType)
             {
-                case CoseAlgorithm.ES256:
-                case CoseAlgorithm.ES384:
-                case CoseAlgorithm.ES512:
+                case CoseKeyType.EC2:
                 {
                     var ec2PublicKey = (CoseEC2Key)publicKey;
 
-                    return ParseEcdsaAsn1(ec2PublicKey.Algorithm, ec2PublicKey.Curve, bytes, out bytesUsed);
+                    switch (ec2PublicKey.Algorithm)
+                    {
+                        case CoseAlgorithm.ES256:
+                        case CoseAlgorithm.ES384:
+                        case CoseAlgorithm.ES512:
+                            return ParseEcdsaAsn1(ec2PublicKey.Algorithm, ec2PublicKey.Curve, bytes, out bytesUsed);
+                        default:
+                            throw new UnreachableException();
+                    }
                 }
                 default:
                     throw new ArgumentException("Unrecognized algorithm.", nameof(publicKey));
@@ -50,6 +57,7 @@ namespace SKSshAgent.WebAuthn
 
         /// <exception cref="InvalidDataException"/>
         /// <seealso href="https://www.w3.org/TR/webauthn/#sctn-signature-attestation-types"/>
+        /// <seealso href="https://www.rfc-editor.org/rfc/rfc3279#section-2.2.3"/>
         internal static CoseEcdsaSignature ParseEcdsaAsn1(CoseAlgorithm algorithm, CoseEllipticCurve curve, ReadOnlySpan<byte> bytes, out int bytesUsed)
         {
             try
@@ -77,15 +85,12 @@ namespace SKSshAgent.WebAuthn
                 Span<byte> s = stackalloc byte[fieldElementLength];
                 AsnIntegerToFieldElementBytes(integerS, s);
 
-                try
-                {
-                    return new CoseEcdsaSignature(algorithm, curve, r.ToImmutableArray(), s.ToImmutableArray());
-                }
-                catch (ArgumentOutOfRangeException ex)
-                    when (ex.ParamName == "r" || ex.ParamName == "s")
-                {
+                if (MPInt.GetBitLength(r) > fieldSizeBits)
                     throw new InvalidDataException("Invalid EC field element.");
-                }
+                if (MPInt.GetBitLength(s) > fieldSizeBits)
+                    throw new InvalidDataException("Invalid EC field element.");
+
+                return new CoseEcdsaSignature(algorithm, curve, r.ToImmutableArray(), s.ToImmutableArray());
             }
             catch (AsnContentException ex)
             {

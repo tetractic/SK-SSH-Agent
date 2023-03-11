@@ -370,25 +370,8 @@ namespace SKSshAgent
             switch (key.KeyTypeInfo.Type)
             {
                 case SshKeyType.Ecdsa:
-                {
-                    var ecdsaKey = (SshEcdsaKey)key;
-
-                    if (!useConfirmed)
-                        useConfirmed = await _form.InvokeAsync(() => _form.ConfirmKeyUse(key, background: true, cancellationToken)).ConfigureAwait(false);
-
-                    if (!useConfirmed)
-                    {
-                        WriteSimpleResponse(buffer, MessageType.SSH_AGENT_FAILURE);
-                        return;
-                    }
-
-                    signature = ecdsaKey.Sign(data);
-                    break;
-                }
                 case SshKeyType.Ed25519:
                 {
-                    var ed25519Key = (SshEd25519Key)key;
-
                     if (!useConfirmed)
                         useConfirmed = await _form.InvokeAsync(() => _form.ConfirmKeyUse(key, background: true, cancellationToken)).ConfigureAwait(false);
 
@@ -398,7 +381,25 @@ namespace SKSshAgent
                         return;
                     }
 
-                    signature = ed25519Key.Sign(data);
+                    switch (key.KeyTypeInfo.Type)
+                    {
+                        case SshKeyType.Ecdsa:
+                        {
+                            var ecdsaKey = (SshEcdsaKey)key;
+
+                            signature = ecdsaKey.Sign(data);
+                            break;
+                        }
+                        case SshKeyType.Ed25519:
+                        {
+                            var ed25519Key = (SshEd25519Key)key;
+
+                            signature = ed25519Key.Sign(data);
+                            break;
+                        }
+                        default:
+                            throw new UnreachableException();
+                    }
                     break;
                 }
                 case SshKeyType.OpenSshEcdsaSK:
