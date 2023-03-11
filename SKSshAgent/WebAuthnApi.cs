@@ -272,7 +272,7 @@ namespace SKSshAgent
                                 throw new InvalidDataException("Excess data.");
 
                             var signatureSpan = new ReadOnlySpan<byte>(assertion->pbSignature, (int)assertion->cbSignature);
-                            var signature = WebAuthnSignature.Parse(key, signatureSpan.ToArray(), out int signatureBytesUsed);
+                            var signature = WebAuthnSignature.Parse(key, signatureSpan, out int signatureBytesUsed);
                             if (signatureBytesUsed < assertion->cbSignature)
                                 throw new InvalidDataException("Excess data.");
 

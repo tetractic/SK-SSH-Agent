@@ -28,7 +28,7 @@ namespace SKSshAgent.WebAuthn
         /// <exception cref="ArgumentException"/>
         /// <exception cref="InvalidDataException"/>
         /// <seealso href="https://www.w3.org/TR/webauthn/#sctn-signature-attestation-types"/>
-        public static CoseSignature Parse(CoseKey publicKey, ReadOnlyMemory<byte> bytes, out int bytesUsed)
+        public static CoseSignature Parse(CoseKey publicKey, ReadOnlySpan<byte> bytes, out int bytesUsed)
         {
             if (publicKey is null)
                 throw new ArgumentNullException(nameof(publicKey));
@@ -50,21 +50,20 @@ namespace SKSshAgent.WebAuthn
 
         /// <exception cref="InvalidDataException"/>
         /// <seealso href="https://www.w3.org/TR/webauthn/#sctn-signature-attestation-types"/>
-        internal static CoseEcdsaSignature ParseEcdsaAsn1(CoseAlgorithm algorithm, CoseEllipticCurve curve, ReadOnlyMemory<byte> bytes, out int bytesUsed)
+        internal static CoseEcdsaSignature ParseEcdsaAsn1(CoseAlgorithm algorithm, CoseEllipticCurve curve, ReadOnlySpan<byte> bytes, out int bytesUsed)
         {
             try
             {
                 int offset;
                 int length;
 
-                var span = bytes.Span;
-                AsnDecoder.ReadSequence(span, AsnEncodingRules.DER, out offset, out length, out bytesUsed);
+                AsnDecoder.ReadSequence(bytes, AsnEncodingRules.DER, out offset, out length, out bytesUsed);
                 int sequenceEnd = offset + length;
 
-                var integerR = AsnDecoder.ReadIntegerBytes(span.Slice(offset), AsnEncodingRules.DER, out length);
+                var integerR = AsnDecoder.ReadIntegerBytes(bytes.Slice(offset), AsnEncodingRules.DER, out length);
                 offset += length;
 
-                var integerS = AsnDecoder.ReadIntegerBytes(span.Slice(offset), AsnEncodingRules.DER, out length);
+                var integerS = AsnDecoder.ReadIntegerBytes(bytes.Slice(offset), AsnEncodingRules.DER, out length);
                 offset += length;
 
                 if (offset != sequenceEnd)
