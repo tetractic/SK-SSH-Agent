@@ -13,5 +13,6 @@ namespace SKSshAgent.Cose
         P256 = 1,
         P384 = 2,
         P521 = 3,
+        Ed25519 = 6,
     }
 }

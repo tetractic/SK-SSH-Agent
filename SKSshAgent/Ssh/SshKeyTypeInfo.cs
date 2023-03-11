@@ -52,6 +52,14 @@ namespace SKSshAgent.Ssh
             curve: ECCurve.NamedCurves.nistP256,
             keySizeBits: 256);
 
+        public static readonly SshKeyTypeInfo OpenSshSKEd25519 = new(
+            name: "sk-ssh-ed25519@openssh.com",
+            keyType: SshKeyType.OpenSshEd25519SK,
+            hashAlgorithmName: default,
+            curveName: null,
+            curve: default,
+            keySizeBits: 512);
+
         public static readonly ImmutableArray<SshKeyTypeInfo> KeyTypeInfos = ImmutableArray.Create(new[]
         {
             EcdsaSha2NistP256,
@@ -59,6 +67,7 @@ namespace SKSshAgent.Ssh
             EcdsaSha2NistP521,
             Ed25519,
             OpenSshSKEcdsaSha2NistP256,
+            OpenSshSKEd25519,
         });
 
         internal readonly ECCurve Curve;

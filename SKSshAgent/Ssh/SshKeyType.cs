@@ -11,5 +11,6 @@ namespace SKSshAgent.Ssh
         Ecdsa,
         Ed25519,
         OpenSshEcdsaSK,
+        OpenSshEd25519SK,
     }
 }

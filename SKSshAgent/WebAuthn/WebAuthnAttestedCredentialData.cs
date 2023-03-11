@@ -76,6 +76,40 @@ namespace SKSshAgent.WebAuthn
 
                 switch (keyType)
                 {
+                    case CoseKeyType.Okp:
+                    {
+                        ReadExpectedLabel(reader, 3);
+                        var algorithm = (CoseAlgorithm)ReadInt32(reader);
+
+                        switch (algorithm)
+                        {
+                            case CoseAlgorithm.EdDsa:
+                            {
+                                // https://datatracker.ietf.org/doc/html/rfc8152#section-13.2
+
+                                ReadExpectedLabel(reader, -1);
+                                var curve = (CoseEllipticCurve)ReadInt32(reader);
+
+                                // https://www.w3.org/TR/webauthn-2/#sctn-alg-identifier
+                                switch ((algorithm, curve))
+                                {
+                                    case (CoseAlgorithm.EdDsa, CoseEllipticCurve.Ed25519):
+                                        break;
+                                    default:
+                                        throw new InvalidDataException("Invalid elliptic curve for algorithm.");
+                                }
+
+                                ReadExpectedLabel(reader, -2);
+                                byte[] x = ReadByteString(reader);
+
+                                publicKey = new CoseOkpKey(algorithm, curve, x.ToImmutableArray());
+                                break;
+                            }
+                            default:
+                                throw new InvalidDataException("Unrecognized signature algorithm.");
+                        }
+                        break;
+                    }
                     case CoseKeyType.EC2:
                     {
                         ReadExpectedLabel(reader, 3);

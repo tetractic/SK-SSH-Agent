@@ -17,15 +17,10 @@ namespace SKSshAgent.Ssh
 {
     internal sealed class SshEd25519Key : SshKey
     {
-        private const int _pkLength = Ed25519.PublicKeyLength;
-
-        private const int _skLength = Ed25519.SecretKeyLength;
-
         private readonly ShieldedImmutableBuffer _sk;
 
         /// <exception cref="ArgumentException"/>
         /// <exception cref="ArgumentNullException"/>
-        /// <exception cref="ArgumentOutOfRangeException"/>
         public SshEd25519Key(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> pk)
             : this(keyTypeInfo, pk, hasDecryptedPrivateKey: false)
         {
@@ -33,7 +28,6 @@ namespace SKSshAgent.Ssh
 
         /// <exception cref="ArgumentException"/>
         /// <exception cref="ArgumentNullException"/>
-        /// <exception cref="ArgumentOutOfRangeException"/>
         /// <exception cref="CryptographicException"/>
         public SshEd25519Key(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> pk, ShieldedImmutableBuffer sk)
             : this(keyTypeInfo, pk, hasDecryptedPrivateKey: true)
@@ -42,15 +36,14 @@ namespace SKSshAgent.Ssh
                 throw new ArgumentNullException(nameof(sk));
 
             using (var skUnshieldScope = sk.Unshield())
-                if (skUnshieldScope.UnshieldedLength != _skLength)
-                    throw new ArgumentOutOfRangeException(nameof(sk), "Invalid length.");
+                if (skUnshieldScope.UnshieldedLength != Ed25519.SecretKeyLength)
+                    throw new ArgumentException("Invalid SK length.", nameof(sk));
 
             _sk = sk;
         }
 
         /// <exception cref="ArgumentException"/>
         /// <exception cref="ArgumentNullException"/>
-        /// <exception cref="ArgumentOutOfRangeException"/>
         private SshEd25519Key(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> pk, bool hasDecryptedPrivateKey)
             : base(keyTypeInfo, hasDecryptedPrivateKey)
         {
@@ -58,8 +51,8 @@ namespace SKSshAgent.Ssh
                 throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
             if (pk == null)
                 throw new ArgumentNullException(nameof(pk));
-            if (pk.Length != _pkLength)
-                throw new ArgumentOutOfRangeException(nameof(pk), "Invalid length.");
+            if (pk.Length != Ed25519.PublicKeyLength)
+                throw new ArgumentException("Invalid PK length.", nameof(pk));
 
             PK = pk;
         }
@@ -196,14 +189,10 @@ namespace SKSshAgent.Ssh
 
             var pk = reader.ReadByteString();
 
-            try
-            {
-                return new SshEd25519Key(keyTypeInfo, pk.ToImmutableArray());
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                throw new InvalidDataException("Invalid parameter.");
-            }
+            if (pk.Length != Ed25519.PublicKeyLength)
+                throw new InvalidDataException("Invalid PK length.");
+
+            return new SshEd25519Key(keyTypeInfo, pk.ToImmutableArray());
         }
 
         /// <exception cref="SshWireContentException"/>
@@ -215,16 +204,14 @@ namespace SKSshAgent.Ssh
             var pk = reader.ReadByteString();
             var unshieldedSk = reader.ReadByteString();
 
+            if (pk.Length != Ed25519.PublicKeyLength)
+                throw new InvalidDataException("Invalid PK length.");
+            if (unshieldedSk.Length != Ed25519.SecretKeyLength)
+                throw new InvalidDataException("Invalid SK length.");
+
             var sk = ShieldedImmutableBuffer.Create(unshieldedSk);
 
-            try
-            {
-                return new SshEd25519Key(keyTypeInfo, pk.ToImmutableArray(), sk);
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                throw new InvalidDataException("Invalid parameter.");
-            }
+            return new SshEd25519Key(keyTypeInfo, pk.ToImmutableArray(), sk);
         }
 
         /// <exception cref="InvalidOperationException"/>

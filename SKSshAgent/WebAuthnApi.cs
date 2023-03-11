@@ -56,6 +56,8 @@ namespace SKSshAgent
             int algorithm;
             if (keyTypeInfo == SshKeyTypeInfo.OpenSshSKEcdsaSha2NistP256)
                 algorithm = WEBAUTHN_COSE_ALGORITHM_ECDSA_P256_WITH_SHA256;
+            else if (keyTypeInfo == SshKeyTypeInfo.OpenSshSKEd25519)
+                algorithm = (int)CoseAlgorithm.EdDsa;  // Missing API definition.
             else
                 throw new ArgumentException("Invalid key type info.", nameof(keyTypeInfo));
 
@@ -282,6 +284,24 @@ namespace SKSshAgent
                             bool verified;
                             switch (key.KeyType)
                             {
+                                case CoseKeyType.Okp:
+                                {
+                                    var okpKey = (CoseOkpKey)key;
+
+                                    switch (signature.Algorithm)
+                                    {
+                                        case CoseAlgorithm.EdDsa:
+                                        {
+                                            var edDsaSignature = (CoseEdDsaSignature)signature;
+
+                                            verified = okpKey.VerifyData(signedData, edDsaSignature);
+                                            break;
+                                        }
+                                        default:
+                                            throw new UnreachableException();
+                                    }
+                                    break;
+                                }
                                 case CoseKeyType.EC2:
                                 {
                                     var ec2Key = (CoseEC2Key)key;

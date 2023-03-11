@@ -58,6 +58,7 @@ Authentication works as it normally would with Pageant or OpenSSH agent.
    * `ecdsa-sha2-nistp521`
    * `ssh-ed25519`
    * `sk-ecdsa-sha2-nistp256@openssh.com`
+   * `sk-ssh-ed25519@openssh.com`
 
 ## Differences from OpenSSH
 

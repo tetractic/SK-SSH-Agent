@@ -221,6 +221,7 @@ namespace SKSshAgent
                         break;
 
                     case SshKeyType.OpenSshEcdsaSK:
+                    case SshKeyType.OpenSshEd25519SK:
                         if (!CheckWebAuthnVersion(WEBAUTHN_API_VERSION_1))
                             return;
                         break;
@@ -340,14 +341,22 @@ namespace SKSshAgent
                 // to clear it anyway since it's how we decide whether to require user verification
                 // from the authenticator.
 
+                var application = Encoding.UTF8.GetBytes(rpId).ToImmutableArray();
+                var keyHandle = attestedCredentialData.CredentialId;
+
                 switch (webAuthnKey.KeyType)
                 {
+                    case CoseKeyType.Okp:
+                    {
+                        var webAuthnOkpKey = (CoseOkpKey)webAuthnKey;
+
+                        key = webAuthnOkpKey.ToOpenSshKey(application, flags, keyHandle);
+                        break;
+                    }
                     case CoseKeyType.EC2:
                     {
                         var webAuthnEC2Key = (CoseEC2Key)webAuthnKey;
 
-                        var application = Encoding.UTF8.GetBytes(rpId).ToImmutableArray();
-                        var keyHandle = attestedCredentialData.CredentialId;
                         key = webAuthnEC2Key.ToOpenSshKey(application, flags, keyHandle);
                         break;
                     }
@@ -517,6 +526,7 @@ namespace SKSshAgent
                             break;
 
                         case SshKeyType.OpenSshEcdsaSK:
+                        case SshKeyType.OpenSshEd25519SK:
                             warnAboutMissingOptions = true;
                             break;
 

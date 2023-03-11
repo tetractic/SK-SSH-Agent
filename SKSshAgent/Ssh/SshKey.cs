@@ -164,6 +164,7 @@ namespace SKSshAgent.Ssh
                 SshKeyType.Ecdsa => SshEcdsaKey.ReadPublicKey(keyTypeInfo, ref reader),
                 SshKeyType.Ed25519 => SshEd25519Key.ReadPublicKey(keyTypeInfo, ref reader),
                 SshKeyType.OpenSshEcdsaSK => OpenSshEcdsaSKKey.ReadPublicKey(keyTypeInfo, ref reader),
+                SshKeyType.OpenSshEd25519SK => OpenSshEd25519SKKey.ReadPublicKey(keyTypeInfo, ref reader),
                 _ => throw new UnreachableException(),
             };
         }
@@ -185,6 +186,7 @@ namespace SKSshAgent.Ssh
                 SshKeyType.Ecdsa => SshEcdsaKey.ReadPrivateKey(keyTypeInfo, ref reader),
                 SshKeyType.Ed25519 => SshEd25519Key.ReadPrivateKey(keyTypeInfo, ref reader),
                 SshKeyType.OpenSshEcdsaSK => OpenSshEcdsaSKKey.ReadPrivateKey(keyTypeInfo, ref reader),
+                SshKeyType.OpenSshEd25519SK => OpenSshEd25519SKKey.ReadPrivateKey(keyTypeInfo, ref reader),
                 _ => throw new UnreachableException(),
             };
         }

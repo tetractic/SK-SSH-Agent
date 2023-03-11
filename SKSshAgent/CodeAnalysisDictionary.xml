@@ -17,6 +17,7 @@
       <Word>decrypted</Word>
       <Word>decryptor</Word>
       <Word>dest</Word>
+      <Word>DSA</Word>
       <Word>ECDSA</Word>
       <Word>encryptor</Word>
       <Word>func</Word>
@@ -28,6 +29,7 @@
       <Word>KDF</Word>
       <Word>mutex</Word>
       <Word>NIST</Word>
+      <Word>OKP</Word>
       <Word>params</Word>
       <Word>PBKDF</Word>
       <Word>plaintext</Word>

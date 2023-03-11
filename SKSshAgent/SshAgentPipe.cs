@@ -403,9 +403,8 @@ namespace SKSshAgent
                     break;
                 }
                 case SshKeyType.OpenSshEcdsaSK:
+                case SshKeyType.OpenSshEd25519SK:
                 {
-                    var openSshEcdsaSKKey = (OpenSshEcdsaSKKey)key;
-
                     if (!(WebAuthnApi.Version >= WEBAUTHN_API_VERSION_1))
                     {
                         WriteSimpleResponse(buffer, MessageType.SSH_AGENT_FAILURE);
@@ -413,10 +412,37 @@ namespace SKSshAgent
                     }
 
                     var webAuthnKey = key.ToWebAuthnKey();
-                    string rpId = Encoding.UTF8.GetString(openSshEcdsaSKKey.Application.AsSpan());
-                    var keyHandle = openSshEcdsaSKKey.KeyHandle;
-                    var keyFlags = openSshEcdsaSKKey.Flags;
-                    byte[] challenge = data;
+
+                    string rpId;
+                    ShieldedImmutableBuffer keyHandle;
+                    OpenSshSKFlags keyFlags;
+                    byte[] challenge;
+
+                    switch (key.KeyTypeInfo.KeyType)
+                    {
+                        case SshKeyType.OpenSshEcdsaSK:
+                        {
+                            var ecdsaSKKey = (OpenSshEcdsaSKKey)key;
+
+                            rpId = Encoding.UTF8.GetString(ecdsaSKKey.Application.AsSpan());
+                            keyHandle = ecdsaSKKey.KeyHandle;
+                            keyFlags = ecdsaSKKey.Flags;
+                            challenge = data;
+                            break;
+                        }
+                        case SshKeyType.OpenSshEd25519SK:
+                        {
+                            var ed25519SKKey = (OpenSshEd25519SKKey)key;
+
+                            rpId = Encoding.UTF8.GetString(ed25519SKKey.Application.AsSpan());
+                            keyHandle = ed25519SKKey.KeyHandle;
+                            keyFlags = ed25519SKKey.Flags;
+                            challenge = data;
+                            break;
+                        }
+                        default:
+                            throw new UnreachableException();
+                    }
 
                     // For "webauthn" key types (ex. "webauthn-sk-ecdsa-sha2-nistp256@openssh.com"),
                     // challenge would be constructed per [1].
@@ -443,6 +469,13 @@ namespace SKSshAgent
                                 var webAuthnEcdsaSignature = (CoseEcdsaSignature)webAuthnSignature;
 
                                 signature = webAuthnEcdsaSignature.ToOpenSshSignature(flags, counter);
+                                break;
+                            }
+                            case CoseAlgorithm.EdDsa:
+                            {
+                                var webAuthnEdDsaSignature = (CoseEdDsaSignature)webAuthnSignature;
+
+                                signature = webAuthnEdDsaSignature.ToOpenSshSignature(flags, counter);
                                 break;
                             }
                             default:

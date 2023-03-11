@@ -5,6 +5,7 @@
 // Foundation.
 
 using SKSshAgent.Cose;
+using SKSshAgent.Cryptography;
 using System;
 using System.Diagnostics;
 using System.Formats.Asn1;
@@ -36,6 +37,18 @@ namespace SKSshAgent.WebAuthn
 
             switch (publicKey.KeyType)
             {
+                case CoseKeyType.Okp:
+                {
+                    var okpPublicKey = (CoseOkpKey)publicKey;
+
+                    switch (okpPublicKey.Algorithm)
+                    {
+                        case CoseAlgorithm.EdDsa:
+                            return ParseEdDsaSignature(okpPublicKey.Algorithm, okpPublicKey.Curve, bytes, out bytesUsed);
+                        default:
+                            throw new UnreachableException();
+                    }
+                }
                 case CoseKeyType.EC2:
                 {
                     var ec2PublicKey = (CoseEC2Key)publicKey;
@@ -113,6 +126,31 @@ namespace SKSshAgent.WebAuthn
             int offset = fieldElementBytes.Length - bytes.Length;
             fieldElementBytes.Slice(0, offset).Clear();
             bytes.CopyTo(fieldElementBytes.Slice(offset));
+        }
+
+        /// <exception cref="InvalidDataException"/>
+        /// <seealso href="https://www.w3.org/TR/webauthn/#sctn-signature-attestation-types"/>
+        /// <seealso href="https://www.rfc-editor.org/rfc/rfc8152#section-8.2"/>
+        /// <seealso href="https://www.rfc-editor.org/rfc/rfc8032#section-5.1.6"/>
+        private static CoseEdDsaSignature ParseEdDsaSignature(CoseAlgorithm algorithm, CoseEllipticCurve curve, ReadOnlySpan<byte> bytes, out int bytesUsed)
+        {
+            int rsLength;
+            switch (curve)
+            {
+                case CoseEllipticCurve.Ed25519:
+                    rsLength = Ed25519.SignatureLength;
+                    break;
+                default:
+                    throw new UnreachableException();
+            }
+
+            if (bytes.Length < rsLength)
+                throw new InvalidDataException("Insufficient data.");
+
+            var rs = bytes.Slice(0, rsLength);
+
+            bytesUsed = rsLength;
+            return new CoseEdDsaSignature(algorithm, curve, rs.ToImmutableArray());
         }
     }
 }

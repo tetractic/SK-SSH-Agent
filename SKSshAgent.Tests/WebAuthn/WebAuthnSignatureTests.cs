@@ -6,6 +6,7 @@
 
 using SKSshAgent.Cose;
 using System;
+using System.Collections.Immutable;
 using Xunit;
 
 namespace SKSshAgent.WebAuthn.Tests
@@ -34,6 +35,27 @@ namespace SKSshAgent.WebAuthn.Tests
             Assert.Equal(publicKey.Curve, ecdsaSignature.Curve);
             Assert.Equal(expectedSignatureR, ecdsaSignature.R);
             Assert.Equal(expectedSignatureS, ecdsaSignature.S);
+        }
+
+        [Fact]
+        public static void Parse_EdDsaEd25519_ReturnsExpectedResults()
+        {
+            var publicKey = new CoseOkpKey(
+                CoseAlgorithm.EdDsa,
+                CoseEllipticCurve.Ed25519,
+                Convert.FromHexString("C06157A485F1A9BD95AB458C709092FB51FF3E2AFA463D685CC839B2E334DD14").ToImmutableArray());
+
+            byte[] bytes = Convert.FromHexString("FBCE071B8435ACCBE184CCCEC2DF83BF2295718E5E189C130226FC4BB77ACAB2D9C47DFA755DF556E334E04F793ED5DC07ED48BEBC475D2A7AE6A808F96CB003");
+
+            var signature = WebAuthnSignature.Parse(publicKey, bytes, out int bytesUsed);
+            Assert.Equal(bytes.Length, bytesUsed);
+
+            byte[] expectedSignatureRS = Convert.FromHexString("FBCE071B8435ACCBE184CCCEC2DF83BF2295718E5E189C130226FC4BB77ACAB2D9C47DFA755DF556E334E04F793ED5DC07ED48BEBC475D2A7AE6A808F96CB003");
+
+            Assert.Equal(publicKey.Algorithm, signature.Algorithm);
+            var edDsaSignature = Assert.IsType<CoseEdDsaSignature>(signature);
+            Assert.Equal(publicKey.Curve, edDsaSignature.Curve);
+            Assert.Equal(expectedSignatureRS, edDsaSignature.RS);
         }
     }
 }

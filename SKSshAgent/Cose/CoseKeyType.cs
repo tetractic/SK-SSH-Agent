@@ -10,6 +10,7 @@ namespace SKSshAgent.Cose
     /// <seealso href="https://www.iana.org/assignments/cose/cose.xhtml#key-type"/>
     internal enum CoseKeyType
     {
+        Okp = 1,
         EC2 = 2,
     }
 }
