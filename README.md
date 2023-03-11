@@ -50,8 +50,8 @@ Authentication works as it normally would with Pageant or OpenSSH agent.
 
 ## Limitations
 
- * The `no-touch-required` option is not supported because the [Windows WebAuthn APIs](https://learn.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/webauthn-apis) do not support it.
- * The `resident` option is not supported.
+ * The `no-touch-required` option is not supported because the [Windows WebAuthn APIs](https://learn.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/webauthn-apis) do not support suppressing the user presence check.
+ * The `resident` option is not supported because the [Windows WebAuthn APIs](https://learn.microsoft.com/en-us/windows/security/identity-protection/hello-for-business/webauthn-apis) do not support resident key retrieval.
  * Only the following key types are supported:
    * `ecdsa-sha2-nistp256`
    * `ecdsa-sha2-nistp384`
