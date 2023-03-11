@@ -4,13 +4,12 @@
 // General Public License Version 3 as published by the Free Software
 // Foundation.
 
-using SKSshAgent.Ssh;
 using System;
 using System.Collections.Immutable;
 using System.Text;
 using Xunit;
 
-namespace SKSshAgent.Tests.Ssh
+namespace SKSshAgent.Ssh.Tests
 {
     public static class OpenSshEcdsaSKKeyTests
     {
