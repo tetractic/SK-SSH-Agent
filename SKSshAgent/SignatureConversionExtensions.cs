@@ -14,14 +14,17 @@ namespace SKSshAgent
 {
     internal static class SignatureConversionExtensions
     {
-        internal static Dictionary<SshKeyTypeInfo, (CoseKeyType KeyType, CoseAlgorithm Algorithm, CoseEllipticCurve Curve)> OpenSshKeyInfoNameToWebAuthnEllipticCurveInfo => KeyConversionExtensions.OpenSshKeyInfoNameToWebAuthnEllipticCurveInfo;
+        internal static Dictionary<SshKeyTypeInfo, (CoseAlgorithm Algorithm, CoseEllipticCurve Curve)> OpenSshKeyInfoNameToWebAuthnEllipticCurveInfo = new()
+        {
+            [SshKeyTypeInfo.OpenSshSKEcdsaSha2NistP256] = (CoseAlgorithm.ES256, CoseEllipticCurve.P256),
+        };
 
-        internal static Dictionary<(CoseKeyType KeyType, CoseAlgorithm Algorithm, CoseEllipticCurve Curve), SshKeyTypeInfo> WebAuthnEllipticCurveInfoToOpenSshKeyInfoName => KeyConversionExtensions.WebAuthnEllipticCurveInfoToOpenSshKeyInfoName;
+        internal static Dictionary<(CoseAlgorithm Algorithm, CoseEllipticCurve Curve), SshKeyTypeInfo> WebAuthnEllipticCurveInfoToOpenSshKeyInfoName => InvertDictionary(OpenSshKeyInfoNameToWebAuthnEllipticCurveInfo);
 
         /// <exception cref="NotSupportedException"/>
         internal static OpenSshEcdsaSKSignature ToOpenSshSignature(this CoseEcdsaSignature ecdsaSignature, byte flags, uint counter)
         {
-            var info = (ecdsaSignature.KeyType, ecdsaSignature.Algorithm, ecdsaSignature.Curve);
+            var info = (ecdsaSignature.Algorithm, ecdsaSignature.Curve);
             if (!WebAuthnEllipticCurveInfoToOpenSshKeyInfoName.TryGetValue(info, out var keyTypeInfo))
                 throw new NotSupportedException("Unsupported signature type parameters.");
 
@@ -33,6 +36,16 @@ namespace SKSshAgent
                 s: ecdsaSignature.S,
                 flags: flags,
                 counter: counter);
+        }
+
+        private static Dictionary<TValue, TKey> InvertDictionary<TKey, TValue>(Dictionary<TKey, TValue> dictionary)
+            where TKey : notnull
+            where TValue : notnull
+        {
+            var inverted = new Dictionary<TValue, TKey>();
+            foreach (var entry in dictionary)
+                inverted.Add(entry.Value, entry.Key);
+            return inverted;
         }
     }
 }

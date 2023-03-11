@@ -14,7 +14,7 @@ namespace SKSshAgent.Cose
         /// <exception cref="ArgumentOutOfRangeException"/>
         /// <exception cref="ArgumentNullException"/>
         public CoseEcdsaSignature(CoseAlgorithm algorithm, CoseEllipticCurve curve, ImmutableArray<byte> r, ImmutableArray<byte> s)
-            : base(CoseKeyType.EC2, algorithm)
+            : base(algorithm)
         {
             switch (algorithm)
             {

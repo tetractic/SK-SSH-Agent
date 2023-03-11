@@ -8,13 +8,10 @@ namespace SKSshAgent.Cose
 {
     internal abstract class CoseSignature
     {
-        private protected CoseSignature(CoseKeyType keyType, CoseAlgorithm algorithm)
+        private protected CoseSignature(CoseAlgorithm algorithm)
         {
-            KeyType = keyType;
             Algorithm = algorithm;
         }
-
-        public CoseKeyType KeyType { get; }
 
         public CoseAlgorithm Algorithm { get; }
     }

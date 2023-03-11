@@ -84,7 +84,7 @@ namespace SKSshAgent.Cose
         {
             if (signature is null)
                 throw new ArgumentNullException(nameof(signature));
-            if (signature.KeyType != KeyType || signature.Algorithm != Algorithm || signature.Curve != Curve)
+            if (signature.Algorithm != Algorithm || signature.Curve != Curve)
                 throw new ArgumentException("Incompatible signature.", nameof(signature));
 
             byte[] signatureBytes = new byte[signature.R.Length + signature.S.Length];

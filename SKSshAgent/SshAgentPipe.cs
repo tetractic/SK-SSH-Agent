@@ -433,9 +433,11 @@ namespace SKSshAgent
                         byte flags = (byte)result.AuthenticatorData.Flags;
                         uint counter = result.AuthenticatorData.SignCount;
 
-                        switch (webAuthnSignature.KeyType)
+                        switch (webAuthnSignature.Algorithm)
                         {
-                            case CoseKeyType.EC2:
+                            case CoseAlgorithm.ES256:
+                            case CoseAlgorithm.ES384:
+                            case CoseAlgorithm.ES512:
                             {
                                 var webAuthnEcdsaSignature = (CoseEcdsaSignature)webAuthnSignature;
 
