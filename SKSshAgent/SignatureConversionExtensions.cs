@@ -28,7 +28,7 @@ namespace SKSshAgent
             if (!WebAuthnEllipticCurveInfoToOpenSshKeyInfoName.TryGetValue(info, out var keyTypeInfo))
                 throw new NotSupportedException("Unsupported signature type parameters.");
 
-            Debug.Assert(keyTypeInfo.Type == SshKeyType.OpenSshEcdsaSK);
+            Debug.Assert(keyTypeInfo.KeyType == SshKeyType.OpenSshEcdsaSK);
 
             return new OpenSshEcdsaSKSignature(
                 keyTypeInfo: keyTypeInfo,

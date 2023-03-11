@@ -18,7 +18,7 @@ namespace SKSshAgent.Ssh
         public OpenSshEcdsaSKSignature(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> r, ImmutableArray<byte> s, byte flags, uint counter)
             : base(keyTypeInfo)
         {
-            if (keyTypeInfo.Type != SshKeyType.OpenSshEcdsaSK)
+            if (keyTypeInfo.KeyType != SshKeyType.OpenSshEcdsaSK)
                 throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
             int fieldSizeBits = keyTypeInfo.KeySizeBits;
             int fieldElementLength = MPInt.SizeBitsToLength(fieldSizeBits);

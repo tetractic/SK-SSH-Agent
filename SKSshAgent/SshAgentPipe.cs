@@ -367,7 +367,7 @@ namespace SKSshAgent
 
             SshSignature signature;
 
-            switch (key.KeyTypeInfo.Type)
+            switch (key.KeyTypeInfo.KeyType)
             {
                 case SshKeyType.Ecdsa:
                 case SshKeyType.Ed25519:
@@ -381,7 +381,7 @@ namespace SKSshAgent
                         return;
                     }
 
-                    switch (key.KeyTypeInfo.Type)
+                    switch (key.KeyTypeInfo.KeyType)
                     {
                         case SshKeyType.Ecdsa:
                         {

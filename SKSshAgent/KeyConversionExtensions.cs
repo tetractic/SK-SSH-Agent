@@ -25,7 +25,7 @@ namespace SKSshAgent
         /// <exception cref="NotSupportedException"/>
         internal static CoseKey ToWebAuthnKey(this SshKey key)
         {
-            switch (key.KeyTypeInfo.Type)
+            switch (key.KeyTypeInfo.KeyType)
             {
                 case SshKeyType.OpenSshEcdsaSK:
                 {
@@ -61,7 +61,7 @@ namespace SKSshAgent
             if (!WebAuthnEllipticCurveInfoToOpenSshKeyInfoName.TryGetValue(info, out var keyTypeInfo))
                 throw new NotSupportedException("Unsupported key type parameters.");
 
-            Debug.Assert(keyTypeInfo.Type == SshKeyType.OpenSshEcdsaSK);
+            Debug.Assert(keyTypeInfo.KeyType == SshKeyType.OpenSshEcdsaSK);
 
             return new OpenSshEcdsaSKKey(
                 keyTypeInfo: keyTypeInfo,

@@ -14,7 +14,7 @@ namespace SKSshAgent.Ssh
     {
         public static readonly SshKeyTypeInfo EcdsaSha2NistP256 = new(
             name: "ecdsa-sha2-nistp256",
-            type: SshKeyType.Ecdsa,
+            keyType: SshKeyType.Ecdsa,
             hashAlgorithmName: HashAlgorithmName.SHA256,
             curveName: "nistp256",
             curve: ECCurve.NamedCurves.nistP256,
@@ -22,7 +22,7 @@ namespace SKSshAgent.Ssh
 
         public static readonly SshKeyTypeInfo EcdsaSha2NistP384 = new (
             name: "ecdsa-sha2-nistp384",
-            type: SshKeyType.Ecdsa,
+            keyType: SshKeyType.Ecdsa,
             hashAlgorithmName: HashAlgorithmName.SHA384,
             curveName: "nistp384",
             curve: ECCurve.NamedCurves.nistP384,
@@ -30,7 +30,7 @@ namespace SKSshAgent.Ssh
 
         public static readonly SshKeyTypeInfo EcdsaSha2NistP521 = new(
             name: "ecdsa-sha2-nistp521",
-            type: SshKeyType.Ecdsa,
+            keyType: SshKeyType.Ecdsa,
             hashAlgorithmName: HashAlgorithmName.SHA512,
             curveName: "nistp521",
             curve: ECCurve.NamedCurves.nistP521,
@@ -38,7 +38,7 @@ namespace SKSshAgent.Ssh
 
         public static readonly SshKeyTypeInfo Ed25519 = new(
             name: "ssh-ed25519",
-            type: SshKeyType.Ed25519,
+            keyType: SshKeyType.Ed25519,
             hashAlgorithmName: default,
             curveName: null,
             curve: default,
@@ -46,7 +46,7 @@ namespace SKSshAgent.Ssh
 
         public static readonly SshKeyTypeInfo OpenSshSKEcdsaSha2NistP256 = new(
             name: "sk-ecdsa-sha2-nistp256@openssh.com",
-            type: SshKeyType.OpenSshEcdsaSK,
+            keyType: SshKeyType.OpenSshEcdsaSK,
             hashAlgorithmName: HashAlgorithmName.SHA256,
             curveName: "nistp256",
             curve: ECCurve.NamedCurves.nistP256,
@@ -64,10 +64,10 @@ namespace SKSshAgent.Ssh
         internal readonly ECCurve Curve;
         internal readonly int KeySizeBits;
 
-        private SshKeyTypeInfo(string name, SshKeyType type, HashAlgorithmName hashAlgorithmName, string? curveName, ECCurve curve, int keySizeBits)
+        private SshKeyTypeInfo(string name, SshKeyType keyType, HashAlgorithmName hashAlgorithmName, string? curveName, ECCurve curve, int keySizeBits)
         {
             Name = name;
-            Type = type;
+            KeyType = keyType;
             CurveName = curveName;
             HashAlgorithmName = hashAlgorithmName;
             Curve = curve;
@@ -76,7 +76,7 @@ namespace SKSshAgent.Ssh
 
         public string Name { get; }
 
-        public SshKeyType Type { get; }
+        public SshKeyType KeyType { get; }
 
         public HashAlgorithmName HashAlgorithmName { get; }
 

@@ -16,7 +16,7 @@ namespace SKSshAgent.Ssh
         public SshEcdsaSignature(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> r, ImmutableArray<byte> s)
             : base(keyTypeInfo)
         {
-            if (keyTypeInfo.Type != SshKeyType.Ecdsa)
+            if (keyTypeInfo.KeyType != SshKeyType.Ecdsa)
                 throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
             int fieldSizeBits = keyTypeInfo.KeySizeBits;
             int fieldElementLength = MPInt.SizeBitsToLength(fieldSizeBits);

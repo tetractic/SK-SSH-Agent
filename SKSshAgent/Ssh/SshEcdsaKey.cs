@@ -84,7 +84,7 @@ namespace SKSshAgent.Ssh
         private SshEcdsaKey(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> x, ImmutableArray<byte> y, bool hasDecryptedPrivateKey)
             : base(keyTypeInfo, hasDecryptedPrivateKey)
         {
-            if (keyTypeInfo.Type != SshKeyType.Ecdsa)
+            if (keyTypeInfo.KeyType != SshKeyType.Ecdsa)
                 throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
             int fieldSizeBits = keyTypeInfo.KeySizeBits;
             int fieldElementLength = MPInt.SizeBitsToLength(fieldSizeBits);
@@ -121,7 +121,7 @@ namespace SKSshAgent.Ssh
         {
             if (keyTypeInfo is null)
                 throw new ArgumentNullException(nameof(keyTypeInfo));
-            if (keyTypeInfo.Type != SshKeyType.Ecdsa)
+            if (keyTypeInfo.KeyType != SshKeyType.Ecdsa)
                 throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
 
             using (var ecdsa = ECDsa.Create())

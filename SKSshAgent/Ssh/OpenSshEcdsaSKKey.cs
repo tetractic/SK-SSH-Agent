@@ -46,7 +46,7 @@ namespace SKSshAgent.Ssh
         private OpenSshEcdsaSKKey(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> x, ImmutableArray<byte> y, ImmutableArray<byte> application, bool hasDecryptedPrivateKey)
             : base(keyTypeInfo, hasDecryptedPrivateKey)
         {
-            if (keyTypeInfo.Type != SshKeyType.OpenSshEcdsaSK)
+            if (keyTypeInfo.KeyType != SshKeyType.OpenSshEcdsaSK)
                 throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
             int fieldSizeBits = keyTypeInfo.KeySizeBits;
             int fieldElementLength = MPInt.SizeBitsToLength(fieldSizeBits);

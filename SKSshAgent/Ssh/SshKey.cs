@@ -159,7 +159,7 @@ namespace SKSshAgent.Ssh
             if (!SshKeyTypeInfo.TryGetKeyTypeInfoByName(keyTypeName, out var keyTypeInfo))
                 throw new NotSupportedException("Unrecognized key type name.");
 
-            return keyTypeInfo.Type switch
+            return keyTypeInfo.KeyType switch
             {
                 SshKeyType.Ecdsa => SshEcdsaKey.ReadPublicKey(keyTypeInfo, ref reader),
                 SshKeyType.Ed25519 => SshEd25519Key.ReadPublicKey(keyTypeInfo, ref reader),
@@ -180,7 +180,7 @@ namespace SKSshAgent.Ssh
             if (!SshKeyTypeInfo.TryGetKeyTypeInfoByName(keyTypeName, out var keyTypeInfo))
                 throw new NotSupportedException("Unrecognized key type name.");
 
-            return keyTypeInfo.Type switch
+            return keyTypeInfo.KeyType switch
             {
                 SshKeyType.Ecdsa => SshEcdsaKey.ReadPrivateKey(keyTypeInfo, ref reader),
                 SshKeyType.Ed25519 => SshEd25519Key.ReadPrivateKey(keyTypeInfo, ref reader),

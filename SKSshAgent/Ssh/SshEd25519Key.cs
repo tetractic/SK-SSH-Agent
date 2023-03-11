@@ -54,7 +54,7 @@ namespace SKSshAgent.Ssh
         private SshEd25519Key(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> pk, bool hasDecryptedPrivateKey)
             : base(keyTypeInfo, hasDecryptedPrivateKey)
         {
-            if (keyTypeInfo.Type != SshKeyType.Ed25519)
+            if (keyTypeInfo.KeyType != SshKeyType.Ed25519)
                 throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
             if (pk == null)
                 throw new ArgumentNullException(nameof(pk));
@@ -81,7 +81,7 @@ namespace SKSshAgent.Ssh
         {
             if (keyTypeInfo is null)
                 throw new ArgumentNullException(nameof(keyTypeInfo));
-            if (keyTypeInfo.Type != SshKeyType.Ed25519)
+            if (keyTypeInfo.KeyType != SshKeyType.Ed25519)
                 throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
 
             Span<byte> publicKey = stackalloc byte[Ed25519.PublicKeyLength];

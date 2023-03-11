@@ -20,7 +20,7 @@ namespace SKSshAgent.Ssh
         public SshEd25519Signature(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> rs)
             : base(keyTypeInfo)
         {
-            if (keyTypeInfo.Type != SshKeyType.Ed25519)
+            if (keyTypeInfo.KeyType != SshKeyType.Ed25519)
                 throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
             if (rs == null)
                 throw new ArgumentNullException(nameof(rs));

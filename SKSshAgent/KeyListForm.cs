@@ -214,7 +214,7 @@ namespace SKSshAgent
                     throw new InvalidDataException($"Could not read an OpenSSH private key from file '{filePath}'.", ex);
                 }
 
-                switch (key.KeyTypeInfo.Type)
+                switch (key.KeyTypeInfo.KeyType)
                 {
                     case SshKeyType.Ecdsa:
                     case SshKeyType.Ed25519:
@@ -395,7 +395,7 @@ namespace SKSshAgent
             SshKey key;
             try
             {
-                switch (keyTypeInfo.Type)
+                switch (keyTypeInfo.KeyType)
                 {
                     case SshKeyType.Ecdsa:
                         key = SshEcdsaKey.Generate(keyTypeInfo);
@@ -453,7 +453,7 @@ namespace SKSshAgent
 
             var dialog = new SaveFileDialog()
             {
-                FileName = key.KeyTypeInfo.Type.GetDefaultFileName(),
+                FileName = key.KeyTypeInfo.KeyType.GetDefaultFileName(),
                 Filter = "OpenSSH Private Key|*.*",
                 InitialDirectory = sshDirectoryPath,
                 OverwritePrompt = true,
@@ -510,7 +510,7 @@ namespace SKSshAgent
 
                 if (!key.HasDecryptedPrivateKey)
                 {
-                    switch (key.KeyTypeInfo.Type)
+                    switch (key.KeyTypeInfo.KeyType)
                     {
                         case SshKeyType.Ecdsa:
                         case SshKeyType.Ed25519:
