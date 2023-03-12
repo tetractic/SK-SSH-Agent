@@ -62,7 +62,7 @@
   </metadata>
   <data name="_requireUserVerificationInfoIcon.ToolTip" xml:space="preserve">
     <value>User verification is accomplished by requiring a PIN or by a
-mechanism that is built-in to the security key itself.  Not all
+mechanism that is built into the security key itself.  Not all
 security keys support user verification.
 
 When using the private key with OpenSSH, this option
