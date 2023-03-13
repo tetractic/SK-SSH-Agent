@@ -4,6 +4,8 @@
 // General Public License Version 3 as published by the Free Software
 // Foundation.
 
+using System.Windows.Forms;
+
 namespace SKSshAgent
 {
     partial class KeyEncryptionOptionsForm
@@ -16,7 +18,8 @@ namespace SKSshAgent
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.
+        ///     </param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -29,147 +32,131 @@ namespace SKSshAgent
         #region Windows Form Designer generated code
 
         /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
+        /// Required method for Designer support - do not modify the contents of this method with
+        /// the code editor.
         /// </summary>
         private void InitializeComponent()
         {
-            this._kdfLabel = new System.Windows.Forms.Label();
-            this._kdfComboBox = new System.Windows.Forms.ComboBox();
-            this._kdfRoundsLabel = new System.Windows.Forms.Label();
-            this._kdfRoundsNumericUpDown = new System.Windows.Forms.NumericUpDown();
-            this._cipherLabel = new System.Windows.Forms.Label();
-            this._cipherComboBox = new System.Windows.Forms.ComboBox();
-            this._okayButton = new System.Windows.Forms.Button();
-            this._cancelButton = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this._kdfRoundsNumericUpDown)).BeginInit();
-            this.SuspendLayout();
+            _kdfLabel = new Label();
+            _kdfComboBox = new ComboBox();
+            _kdfRoundsLabel = new Label();
+            _kdfRoundsNumericUpDown = new NumericUpDown();
+            _cipherLabel = new Label();
+            _cipherComboBox = new ComboBox();
+            _okayButton = new Button();
+            _cancelButton = new Button();
+            ((System.ComponentModel.ISupportInitialize)_kdfRoundsNumericUpDown).BeginInit();
+            SuspendLayout();
             // 
             // _kdfLabel
             // 
-            this._kdfLabel.AutoSize = true;
-            this._kdfLabel.Location = new System.Drawing.Point(55, 15);
-            this._kdfLabel.Name = "_kdfLabel";
-            this._kdfLabel.Size = new System.Drawing.Size(31, 15);
-            this._kdfLabel.TabIndex = 0;
-            this._kdfLabel.Text = "&KDF:";
-            this._kdfLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            _kdfLabel.AutoSize = true;
+            _kdfLabel.Location = new System.Drawing.Point(55, 15);
+            _kdfLabel.Name = "_kdfLabel";
+            _kdfLabel.Size = new System.Drawing.Size(31, 15);
+            _kdfLabel.TabIndex = 0;
+            _kdfLabel.Text = "&KDF:";
+            _kdfLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // _kdfComboBox
             // 
-            this._kdfComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this._kdfComboBox.DisplayMember = "Name";
-            this._kdfComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this._kdfComboBox.FormattingEnabled = true;
-            this._kdfComboBox.Location = new System.Drawing.Point(92, 12);
-            this._kdfComboBox.Name = "_kdfComboBox";
-            this._kdfComboBox.Size = new System.Drawing.Size(180, 23);
-            this._kdfComboBox.TabIndex = 1;
+            _kdfComboBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _kdfComboBox.DisplayMember = "Name";
+            _kdfComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            _kdfComboBox.FormattingEnabled = true;
+            _kdfComboBox.Location = new System.Drawing.Point(92, 12);
+            _kdfComboBox.Name = "_kdfComboBox";
+            _kdfComboBox.Size = new System.Drawing.Size(180, 23);
+            _kdfComboBox.TabIndex = 1;
             // 
             // _kdfRoundsLabel
             // 
-            this._kdfRoundsLabel.AutoSize = true;
-            this._kdfRoundsLabel.Location = new System.Drawing.Point(12, 43);
-            this._kdfRoundsLabel.Name = "_kdfRoundsLabel";
-            this._kdfRoundsLabel.Size = new System.Drawing.Size(74, 15);
-            this._kdfRoundsLabel.TabIndex = 2;
-            this._kdfRoundsLabel.Text = "KDF &Rounds:";
-            this._kdfRoundsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            _kdfRoundsLabel.AutoSize = true;
+            _kdfRoundsLabel.Location = new System.Drawing.Point(12, 43);
+            _kdfRoundsLabel.Name = "_kdfRoundsLabel";
+            _kdfRoundsLabel.Size = new System.Drawing.Size(74, 15);
+            _kdfRoundsLabel.TabIndex = 2;
+            _kdfRoundsLabel.Text = "KDF &Rounds:";
+            _kdfRoundsLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // _kdfRoundsNumericUpDown
             // 
-            this._kdfRoundsNumericUpDown.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this._kdfRoundsNumericUpDown.Location = new System.Drawing.Point(92, 41);
-            this._kdfRoundsNumericUpDown.Maximum = new decimal(new int[] {
-            -1,
-            0,
-            0,
-            0});
-            this._kdfRoundsNumericUpDown.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this._kdfRoundsNumericUpDown.Name = "_kdfRoundsNumericUpDown";
-            this._kdfRoundsNumericUpDown.Size = new System.Drawing.Size(179, 23);
-            this._kdfRoundsNumericUpDown.TabIndex = 3;
-            this._kdfRoundsNumericUpDown.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this._kdfRoundsNumericUpDown.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
+            _kdfRoundsNumericUpDown.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _kdfRoundsNumericUpDown.Location = new System.Drawing.Point(92, 41);
+            _kdfRoundsNumericUpDown.Maximum = new decimal(new int[] { -1, 0, 0, 0 });
+            _kdfRoundsNumericUpDown.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
+            _kdfRoundsNumericUpDown.Name = "_kdfRoundsNumericUpDown";
+            _kdfRoundsNumericUpDown.Size = new System.Drawing.Size(179, 23);
+            _kdfRoundsNumericUpDown.TabIndex = 3;
+            _kdfRoundsNumericUpDown.TextAlign = HorizontalAlignment.Right;
+            _kdfRoundsNumericUpDown.Value = new decimal(new int[] { 1, 0, 0, 0 });
             // 
             // _cipherLabel
             // 
-            this._cipherLabel.AutoSize = true;
-            this._cipherLabel.Location = new System.Drawing.Point(41, 73);
-            this._cipherLabel.Name = "_cipherLabel";
-            this._cipherLabel.Size = new System.Drawing.Size(45, 15);
-            this._cipherLabel.TabIndex = 4;
-            this._cipherLabel.Text = "&Cipher:";
-            this._cipherLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            _cipherLabel.AutoSize = true;
+            _cipherLabel.Location = new System.Drawing.Point(41, 73);
+            _cipherLabel.Name = "_cipherLabel";
+            _cipherLabel.Size = new System.Drawing.Size(45, 15);
+            _cipherLabel.TabIndex = 4;
+            _cipherLabel.Text = "&Cipher:";
+            _cipherLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // _cipherComboBox
             // 
-            this._cipherComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this._cipherComboBox.DisplayMember = "Name";
-            this._cipherComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this._cipherComboBox.FormattingEnabled = true;
-            this._cipherComboBox.Location = new System.Drawing.Point(91, 70);
-            this._cipherComboBox.Name = "_cipherComboBox";
-            this._cipherComboBox.Size = new System.Drawing.Size(180, 23);
-            this._cipherComboBox.TabIndex = 5;
+            _cipherComboBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            _cipherComboBox.DisplayMember = "Name";
+            _cipherComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            _cipherComboBox.FormattingEnabled = true;
+            _cipherComboBox.Location = new System.Drawing.Point(91, 70);
+            _cipherComboBox.Name = "_cipherComboBox";
+            _cipherComboBox.Size = new System.Drawing.Size(180, 23);
+            _cipherComboBox.TabIndex = 5;
             // 
             // _okayButton
             // 
-            this._okayButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this._okayButton.Location = new System.Drawing.Point(116, 105);
-            this._okayButton.Name = "_okayButton";
-            this._okayButton.Size = new System.Drawing.Size(75, 23);
-            this._okayButton.TabIndex = 6;
-            this._okayButton.Text = "Okay";
-            this._okayButton.UseVisualStyleBackColor = true;
-            this._okayButton.Click += new System.EventHandler(this.HandleOkayButtonClicked);
+            _okayButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            _okayButton.Location = new System.Drawing.Point(116, 105);
+            _okayButton.Name = "_okayButton";
+            _okayButton.Size = new System.Drawing.Size(75, 23);
+            _okayButton.TabIndex = 6;
+            _okayButton.Text = "Okay";
+            _okayButton.UseVisualStyleBackColor = true;
+            _okayButton.Click += HandleOkayButtonClicked;
             // 
             // _cancelButton
             // 
-            this._cancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this._cancelButton.Location = new System.Drawing.Point(197, 105);
-            this._cancelButton.Name = "_cancelButton";
-            this._cancelButton.Size = new System.Drawing.Size(75, 23);
-            this._cancelButton.TabIndex = 7;
-            this._cancelButton.Text = "Cancel";
-            this._cancelButton.UseVisualStyleBackColor = true;
+            _cancelButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            _cancelButton.Location = new System.Drawing.Point(197, 105);
+            _cancelButton.Name = "_cancelButton";
+            _cancelButton.Size = new System.Drawing.Size(75, 23);
+            _cancelButton.TabIndex = 7;
+            _cancelButton.Text = "Cancel";
+            _cancelButton.UseVisualStyleBackColor = true;
             // 
             // KeyEncryptionOptionsForm
             // 
-            this.AcceptButton = this._okayButton;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this._cancelButton;
-            this.ClientSize = new System.Drawing.Size(284, 140);
-            this.Controls.Add(this._cancelButton);
-            this.Controls.Add(this._okayButton);
-            this.Controls.Add(this._cipherComboBox);
-            this.Controls.Add(this._kdfRoundsNumericUpDown);
-            this.Controls.Add(this._kdfComboBox);
-            this.Controls.Add(this._kdfLabel);
-            this.Controls.Add(this._cipherLabel);
-            this.Controls.Add(this._kdfRoundsLabel);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "KeyEncryptionOptionsForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Key Encryption Options";
-            ((System.ComponentModel.ISupportInitialize)(this._kdfRoundsNumericUpDown)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AcceptButton = _okayButton;
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            CancelButton = _cancelButton;
+            ClientSize = new System.Drawing.Size(284, 140);
+            Controls.Add(_cancelButton);
+            Controls.Add(_okayButton);
+            Controls.Add(_cipherComboBox);
+            Controls.Add(_kdfRoundsNumericUpDown);
+            Controls.Add(_kdfComboBox);
+            Controls.Add(_kdfLabel);
+            Controls.Add(_cipherLabel);
+            Controls.Add(_kdfRoundsLabel);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "KeyEncryptionOptionsForm";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "Key Encryption Options";
+            ((System.ComponentModel.ISupportInitialize)_kdfRoundsNumericUpDown).EndInit();
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
