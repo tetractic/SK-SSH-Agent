@@ -11,7 +11,7 @@ namespace SKSshAgent
 {
     internal partial class KeyUseConfirmationForm : Form
     {
-        private const int _ticksInitial = 10;
+        private const int _ticksInitial = 8;
 
         private int _ticksRemaining = _ticksInitial;
 
