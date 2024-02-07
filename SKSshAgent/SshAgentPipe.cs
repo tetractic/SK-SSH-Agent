@@ -452,10 +452,28 @@ namespace SKSshAgent
                     {
                         // Key use is always confirmed by Windows WebAuthn since it doesn't support "no-touch-required".
 
-                        var hWnd = await _form.InvokeAsync(() => new HWND(_form.Handle)).ConfigureAwait(false);
-                        WebAuthnApi.GetAssertionResult? result;
-                        using (var keyHandleUnshieldScope = keyHandle.Unshield())
-                            result = WebAuthnApi.GetAssertion(hWnd, webAuthnKey, rpId, keyHandleUnshieldScope.UnshieldedSpan, keyFlags, challenge, cancellationToken);
+                        WebAuthnApi.GetAssertionResult result;
+
+                        (var form, var handle) = await _form.InvokeAsync(() =>
+                        {
+                            var form = new WebAuthnKeyUseConfirmationForm();
+                            form.Fingerprint = "SHA256:" + Convert.ToBase64String(key.GetSha256Fingerprint()).TrimEnd('=');
+                            form.Text += " — " + _form.Text;
+                            form.Show();
+                            return (form, form.Handle);
+                        }).ConfigureAwait(false);
+
+                        try
+                        {
+                            var hWnd = new HWND(handle);
+                            using (var keyHandleUnshieldScope = keyHandle.Unshield())
+                                result = WebAuthnApi.GetAssertion(hWnd, webAuthnKey, rpId, keyHandleUnshieldScope.UnshieldedSpan, keyFlags, challenge, cancellationToken);
+                        }
+                        finally
+                        {
+                            await form.InvokeAsync(() => form.Close()).ConfigureAwait(false);
+                        }
+
                         var webAuthnSignature = result.Signature;
                         byte flags = (byte)result.AuthenticatorData.Flags;
                         uint counter = result.AuthenticatorData.SignCount;
