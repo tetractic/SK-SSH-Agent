@@ -18,9 +18,9 @@
 
   <PropertyGroup>
     <Product>SK SSH Agent</Product>
-    <FileVersion>1.6</FileVersion>
+    <FileVersion>1.7</FileVersion>
     <InformationalVersion>$(FileVersion)</InformationalVersion>
-    <Copyright>© 2023 Carl Reinke</Copyright>
+    <Copyright>© 2024 Carl Reinke</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
