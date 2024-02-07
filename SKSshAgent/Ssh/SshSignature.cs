@@ -13,8 +13,7 @@ namespace SKSshAgent.Ssh
         /// <exception cref="ArgumentNullException"/>
         protected SshSignature(SshKeyTypeInfo keyTypeInfo)
         {
-            if (keyTypeInfo is null)
-                throw new ArgumentNullException(nameof(keyTypeInfo));
+            ArgumentNullException.ThrowIfNull(keyTypeInfo);
 
             KeyTypeInfo = keyTypeInfo;
         }

@@ -32,8 +32,7 @@ namespace SKSshAgent.Ssh
         /// <exception cref="ArgumentNullException"/>
         public SshWireWriter(IBufferWriter<byte> destination)
         {
-            if (destination is null)
-                throw new ArgumentNullException(nameof(destination));
+            ArgumentNullException.ThrowIfNull(destination);
 
             _buffer = destination;
             _span = destination.GetSpan();

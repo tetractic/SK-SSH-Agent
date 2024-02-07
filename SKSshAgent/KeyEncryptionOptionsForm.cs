@@ -36,8 +36,7 @@ namespace SKSshAgent
             get => (SshKdfInfo)_kdfComboBox.SelectedItem;
             set
             {
-                if (value is null)
-                    throw new ArgumentNullException(nameof(value));
+                ArgumentNullException.ThrowIfNull(value);
                 if (!_kdfComboBox.Items.Contains(value))
                     throw new ArgumentException("Invalid KDF.", nameof(value));
 
@@ -58,8 +57,7 @@ namespace SKSshAgent
             get => (SshCipherInfo)_cipherComboBox.SelectedItem;
             set
             {
-                if (value is null)
-                    throw new ArgumentNullException(nameof(value));
+                ArgumentNullException.ThrowIfNull(value);
                 if (!_cipherComboBox.Items.Contains(value))
                     throw new ArgumentException("Invalid cipher.", nameof(value));
 

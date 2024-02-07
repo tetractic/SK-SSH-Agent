@@ -23,12 +23,10 @@ namespace SKSshAgent.Ssh
         /// <exception cref="ArgumentException"/>
         public OpenSshEncryptedPrivateKey(SshKdfInfo kdfInfo, ImmutableArray<byte> kdfOptions, SshCipherInfo cipherInfo, ImmutableArray<byte> data)
         {
-            if (kdfInfo is null)
-                throw new ArgumentNullException(nameof(kdfInfo));
+            ArgumentNullException.ThrowIfNull(kdfInfo);
             if (kdfOptions == null)
                 throw new ArgumentNullException(nameof(kdfOptions));
-            if (cipherInfo is null)
-                throw new ArgumentNullException(nameof(cipherInfo));
+            ArgumentNullException.ThrowIfNull(cipherInfo);
             if ((kdfInfo == SshKdfInfo.None) != (cipherInfo == SshCipherInfo.None))
                 throw new ArgumentException("Incompatible KDF and cipher.");
             if (data == null)
@@ -58,20 +56,16 @@ namespace SKSshAgent.Ssh
         /// <exception cref="CryptographicException"/>
         public static OpenSshEncryptedPrivateKey Encrypt(SshKey privateKey, string comment, ShieldedImmutableBuffer password, SshKdfInfo kdfInfo, uint kdfRounds, SshCipherInfo cipherInfo)
         {
-            if (privateKey is null)
-                throw new ArgumentNullException(nameof(privateKey));
+            ArgumentNullException.ThrowIfNull(privateKey);
             if (!privateKey.HasDecryptedPrivateKey)
                 throw new ArgumentException("Private key is not present or is not decrypted.", nameof(privateKey));
-            if (comment is null)
-                throw new ArgumentNullException(nameof(comment));
+            ArgumentNullException.ThrowIfNull(comment);
             if (password.IsEmpty && kdfInfo != SshKdfInfo.None)
                 throw new ArgumentException("Invalid password.", nameof(password));
-            if (kdfInfo is null)
-                throw new ArgumentNullException(nameof(kdfInfo));
+            ArgumentNullException.ThrowIfNull(kdfInfo);
             if (kdfRounds < 1 && kdfInfo != SshKdfInfo.None)
                 throw new ArgumentOutOfRangeException(nameof(kdfRounds));
-            if (cipherInfo is null)
-                throw new ArgumentNullException(nameof(cipherInfo));
+            ArgumentNullException.ThrowIfNull(cipherInfo);
             if ((kdfInfo == SshKdfInfo.None) != (cipherInfo == SshCipherInfo.None))
                 throw new ArgumentException("Incompatible KDF and cipher.");
 

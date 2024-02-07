@@ -47,8 +47,7 @@ namespace SKSshAgent
         /// <exception cref="CryptographicException"/>
         public static ShieldedImmutableBuffer Create<T>(int length, ReadOnlySpan<T> source, CreateFromSourceAction<T> action)
         {
-            if (action is null)
-                throw new ArgumentNullException(nameof(action));
+            ArgumentNullException.ThrowIfNull(action);
 
             if (length == 0)
             {
@@ -153,7 +152,7 @@ namespace SKSshAgent
 
             public ReadOnlySpan<byte> UnshieldedSpan => _decryptedBuffer.AsSpan(0, _length);
 
-            public int UnshieldedLength => _length;
+            public readonly int UnshieldedLength => _length;
         }
     }
 }

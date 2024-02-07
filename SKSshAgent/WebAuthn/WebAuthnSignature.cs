@@ -32,8 +32,7 @@ namespace SKSshAgent.WebAuthn
         /// <seealso href="https://www.w3.org/TR/webauthn/#sctn-signature-attestation-types"/>
         public static CoseSignature Parse(CoseKey publicKey, ReadOnlySpan<byte> bytes, out int bytesUsed)
         {
-            if (publicKey is null)
-                throw new ArgumentNullException(nameof(publicKey));
+            ArgumentNullException.ThrowIfNull(publicKey);
 
             switch (publicKey.KeyType)
             {

@@ -72,8 +72,7 @@ namespace SKSshAgent.Ssh
         /// <exception cref="ArgumentException"/>
         public static SshEd25519Key Generate(SshKeyTypeInfo keyTypeInfo)
         {
-            if (keyTypeInfo is null)
-                throw new ArgumentNullException(nameof(keyTypeInfo));
+            ArgumentNullException.ThrowIfNull(keyTypeInfo);
             if (keyTypeInfo.KeyType != SshKeyType.Ed25519)
                 throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
 
@@ -132,8 +131,7 @@ namespace SKSshAgent.Ssh
         /// <exception cref="ArgumentException"/>
         public bool Verify(ReadOnlySpan<byte> data, SshEd25519Signature signature)
         {
-            if (signature is null)
-                throw new ArgumentNullException(nameof(signature));
+            ArgumentNullException.ThrowIfNull(signature);
             if (signature.KeyTypeInfo != KeyTypeInfo)
                 throw new ArgumentException("Incompatible signature.", nameof(signature));
 

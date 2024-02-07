@@ -125,8 +125,7 @@ namespace SKSshAgent.Ssh
         /// <exception cref="ArgumentException"/>
         public bool Verify(ReadOnlySpan<byte> data, OpenSshEd25519SKSignature signature)
         {
-            if (signature is null)
-                throw new ArgumentNullException(nameof(signature));
+            ArgumentNullException.ThrowIfNull(signature);
             if (signature.KeyTypeInfo != KeyTypeInfo)
                 throw new ArgumentException("Incompatible signature.", nameof(signature));
 

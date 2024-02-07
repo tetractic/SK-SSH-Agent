@@ -81,8 +81,7 @@ namespace SKSshAgent.Cose
         /// <exception cref="ArgumentException"/>
         public bool VerifyData(ReadOnlySpan<byte> data, CoseEcdsaSignature signature)
         {
-            if (signature is null)
-                throw new ArgumentNullException(nameof(signature));
+            ArgumentNullException.ThrowIfNull(signature);
             if (signature.Algorithm != Algorithm || signature.Curve != Curve)
                 throw new ArgumentException("Incompatible signature.", nameof(signature));
 
