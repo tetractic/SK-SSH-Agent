@@ -14,7 +14,7 @@ You need a FIDO/U2F security key, obviously.
 ### Client
 
  * Windows 10 (version 1903 or newer)
- * [.NET 6.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/6.0/runtime)
+ * [.NET 8.0 Runtime](https://dotnet.microsoft.com/en-us/download/dotnet/8.0/runtime)
  * SSH Client
    * PuTTY (version 0.75 or newer)
    * WinSCP (version 5.20 or newer)

@@ -568,7 +568,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_C41CE07042C94E8A970F11C8AA7C5FD6"
             {
-            "SourcePath" = "8:..\\SKSshAgent\\obj\\Release\\net6.0-windows\\apphost.exe"
+            "SourcePath" = "8:..\\SKSshAgent\\obj\\Release\\net8.0-windows\\apphost.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_7F404BE6AA2B4B06B0EBE7FF74A5D205"
