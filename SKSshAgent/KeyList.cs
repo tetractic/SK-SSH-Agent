@@ -65,6 +65,42 @@ namespace SKSshAgent
             }
         }
 
+        public bool TryUpgradeKey(SshKey key, string comment)
+        {
+            for (var items = _items; ;)
+            {
+                ImmutableArray<(SshKey Key, string Comment)> newItems;
+                for (int i = 0; ; i++)
+                {
+                    if (i == items.Length)
+                        return false;
+
+                    var item = items[i];
+
+                    if (item.Key.Equals(key, publicOnly: true))
+                    {
+                        if (!item.Key.HasDecryptedPrivateKey && key.HasDecryptedPrivateKey)
+                        {
+                            newItems = items.SetItem(i, (key, comment));
+                            break;
+                        }
+
+                        return false;
+                    }
+                }
+
+                var oldItems = ImmutableInterlocked.InterlockedCompareExchange(ref _items, newItems, items);
+                if (oldItems == items)
+                {
+                    Changed?.Invoke(this);
+
+                    return true;
+                }
+
+                items = oldItems;
+            }
+        }
+
         public bool RemoveKey(SshKey key)
         {
             for (var items = _items; ;)

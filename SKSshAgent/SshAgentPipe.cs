@@ -17,6 +17,7 @@ using System.IO.Pipes;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Windows.Win32.Foundation;
 using static Windows.Win32.PInvoke;
 
@@ -373,7 +374,16 @@ namespace SKSshAgent
                 case SshKeyType.Ed25519:
                 {
                     if (!useConfirmed)
-                        useConfirmed = await _form.InvokeAsync(() => _form.ConfirmKeyUse(key, background: true, cancellationToken)).ConfigureAwait(false);
+                    {
+                        useConfirmed = await _form.InvokeAsync(() =>
+                        {
+                            var form = new KeyUseConfirmationForm();
+                            form.Fingerprint = "SHA256:" + Convert.ToBase64String(key.GetSha256Fingerprint()).TrimEnd('=');
+                            form.Text += " — " + _form.Text;
+                            using (cancellationToken.Register(() => form.Invoke(() => form.Close())))
+                                return form.ShowDialog() == DialogResult.OK;
+                        }).ConfigureAwait(false);
+                    }
 
                     if (!useConfirmed)
                     {

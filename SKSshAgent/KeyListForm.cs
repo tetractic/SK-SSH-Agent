@@ -129,6 +129,8 @@ namespace SKSshAgent
 
         internal async Task<SshKey?> DecryptPrivateKeyAsync(SshKey key, bool background = false, CancellationToken cancellationToken = default)
         {
+            var owner = background ? null : this;
+
             while (true)
             {
                 var form = new KeyDecryptionForm();
@@ -136,12 +138,13 @@ namespace SKSshAgent
                 if (background)
                 {
                     form.ShowIcon = true;
+                    form.ShowInTaskbar = true;
                     form.StartPosition = FormStartPosition.CenterScreen;
                     form.TopMost = true;
                     form.Text += " — " + Text;
                 }
                 using (cancellationToken.Register(() => form.Invoke(() => form.Close())))
-                    if (form.ShowDialog(this) != DialogResult.OK)
+                    if (form.ShowDialog(owner) != DialogResult.OK)
                         return null;
 
                 var password = form.Result;
@@ -158,7 +161,7 @@ namespace SKSshAgent
 
                     if (result is (SshKey privateKey, string privateComment))
                     {
-                        _ = KeyList.Instance.AddOrUpgradeKey(privateKey, privateComment);
+                        _ = KeyList.Instance.TryUpgradeKey(privateKey, privateComment);
 
                         return privateKey;
                     }
@@ -169,28 +172,13 @@ namespace SKSshAgent
                           ex is NotSupportedException ||
                           ex is CryptographicException)
                 {
-                    _ = MessageBox.Show(this, ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    _ = MessageBox.Show(owner, ex.Message, Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                     return null;
                 }
 
-                _ = MessageBox.Show(this, "Incorrect password.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                _ = MessageBox.Show(owner, "Incorrect password.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
-        }
-
-        internal bool ConfirmKeyUse(SshKey key, bool background = false, CancellationToken cancellationToken = default)
-        {
-            var form = new KeyUseConfirmationForm();
-            form.Fingerprint = "SHA256:" + Convert.ToBase64String(key.GetSha256Fingerprint()).TrimEnd('=');
-            if (background)
-            {
-                form.ShowIcon = true;
-                form.StartPosition = FormStartPosition.CenterScreen;
-                form.TopMost = true;
-                form.Text += " — " + Text;
-            }
-            using (cancellationToken.Register(() => form.Invoke(() => form.Close())))
-                return form.ShowDialog(this) == DialogResult.OK;
         }
 
         private async Task LoadKeyFromFileCore(string filePath, bool async)

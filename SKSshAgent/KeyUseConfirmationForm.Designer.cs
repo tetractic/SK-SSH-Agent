@@ -108,10 +108,9 @@ namespace SKSshAgent
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "KeyUseConfirmationForm";
-            ShowIcon = false;
-            ShowInTaskbar = false;
-            StartPosition = FormStartPosition.CenterParent;
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Confirm Key Use";
+            TopMost = true;
             ResumeLayout(false);
             PerformLayout();
         }
