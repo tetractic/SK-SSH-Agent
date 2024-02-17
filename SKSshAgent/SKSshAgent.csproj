@@ -4,9 +4,11 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
 
-    <Features>strict</Features>
     <Deterministic>true</Deterministic>
+    <Features>strict</Features>
     <Nullable>enable</Nullable>
+    <WarningLevel>9999</WarningLevel>
+    <NoWarn>CS8981</NoWarn>
 
     <AnalysisLevel>latest</AnalysisLevel>
     <AnalysisMode>Recommended</AnalysisMode>

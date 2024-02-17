@@ -368,8 +368,7 @@ namespace SKSshAgent.Ssh
         /// <exception cref="ArgumentOutOfRangeException"/>
         public static void DeriveKey(ReadOnlySpan<byte> password, ReadOnlySpan<byte> salt, Span<byte> key, uint rounds)
         {
-            if (rounds < 1)
-                throw new ArgumentOutOfRangeException(nameof(rounds));
+            ArgumentOutOfRangeException.ThrowIfLessThan(rounds, 1u);
             if (password.Length == 0)
                 throw new ArgumentException("Password cannot be empty.", nameof(password));
             if (salt.Length == 0 || salt.Length > (1 << 20))

@@ -59,7 +59,7 @@ namespace SKSshAgent
 
         private void HandleLinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string url = (string)e.Link.LinkData;
+            string url = (string)e.Link!.LinkData!;
 
             try
             {

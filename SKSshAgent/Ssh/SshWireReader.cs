@@ -40,8 +40,7 @@ namespace SKSshAgent.Ssh
         /// <exception cref="SshWireContentException"/>
         public ReadOnlySpan<byte> ReadBytes(int length)
         {
-            if (length < 0)
-                throw new ArgumentOutOfRangeException(nameof(length));
+            ArgumentOutOfRangeException.ThrowIfNegative(length);
 
             EnsureLength(length);
 

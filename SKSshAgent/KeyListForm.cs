@@ -49,7 +49,7 @@ namespace SKSshAgent
             _keyListImageList.Images.Add(Resources.key);
             _keyListImageList.Images.Add(Resources._lock);
 
-            _notifyIcon.Icon = new Icon(_notifyIcon.Icon, SystemInformation.SmallIconSize);
+            _notifyIcon.Icon = new Icon(_notifyIcon.Icon!, SystemInformation.SmallIconSize);
         }
 
         public bool AllowVisible { get; set; }
@@ -611,7 +611,7 @@ namespace SKSshAgent
                 bool focus = focusedItem != null;
                 if (focus)
                 {
-                    int focusedIndex = _keyListView.Items.IndexOf(focusedItem);
+                    int focusedIndex = _keyListView.Items.IndexOf(focusedItem!);
                     if (focusedIndex >= 0)
                         focusedItem = Refocus(keySet, focusedIndex);
                 }

@@ -33,7 +33,7 @@ namespace SKSshAgent
         /// <exception cref="ArgumentException" accessor="set"/>
         public SshKdfInfo KdfInfo
         {
-            get => (SshKdfInfo)_kdfComboBox.SelectedItem;
+            get => (SshKdfInfo)_kdfComboBox.SelectedItem!;
             set
             {
                 ArgumentNullException.ThrowIfNull(value);
@@ -54,7 +54,7 @@ namespace SKSshAgent
         /// <exception cref="ArgumentException" accessor="set"/>
         public SshCipherInfo CipherInfo
         {
-            get => (SshCipherInfo)_cipherComboBox.SelectedItem;
+            get => (SshCipherInfo)_cipherComboBox.SelectedItem!;
             set
             {
                 ArgumentNullException.ThrowIfNull(value);

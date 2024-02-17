@@ -77,7 +77,7 @@ namespace SKSshAgent
 
         private void HandleGenerateButtonClicked(object sender, EventArgs e)
         {
-            var keyTypeInfo = (SshKeyTypeInfo)_keyTypeComboBox.SelectedItem;
+            var keyTypeInfo = (SshKeyTypeInfo)_keyTypeComboBox.SelectedItem!;
 
             ShieldedImmutableBuffer password = ShieldedImmutableBuffer.Empty;
             SshKdfInfo kdfInfo = SshKdfInfo.None;

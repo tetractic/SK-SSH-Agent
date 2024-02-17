@@ -36,8 +36,7 @@ namespace SKSshAgent.Ssh
         /// <exception cref="InvalidOperationException"/>
         public void Advance(int count)
         {
-            if (count < 0)
-                throw new ArgumentOutOfRangeException(nameof(count));
+            ArgumentOutOfRangeException.ThrowIfNegative(count);
             if (count > _buffer.Length - _length)
                 throw new InvalidOperationException("Attempted to advance beyond the end of the buffer.");
 
@@ -63,8 +62,7 @@ namespace SKSshAgent.Ssh
         /// <exception cref="ArgumentOutOfRangeException"/>
         private void EnsureCapacity(int sizeHint)
         {
-            if (sizeHint < 0)
-                throw new ArgumentOutOfRangeException(nameof(sizeHint));
+            ArgumentOutOfRangeException.ThrowIfNegative(sizeHint);
 
             uint minCapacity = (uint)_buffer.Length + (uint)sizeHint;
             uint newCapacity = Math.Max(minCapacity, (uint)_buffer.Length * 2);

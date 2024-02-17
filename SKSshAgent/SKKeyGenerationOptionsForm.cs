@@ -140,7 +140,7 @@ namespace SKSshAgent
 
         private void HandleGenerateButtonClicked(object sender, EventArgs e)
         {
-            var keyTypeInfo = (SshKeyTypeInfo)_keyTypeComboBox.SelectedItem;
+            var keyTypeInfo = (SshKeyTypeInfo)_keyTypeComboBox.SelectedItem!;
 
             string userName = _userIdTextBox.Text;
 
@@ -214,7 +214,7 @@ namespace SKSshAgent
         private void ShowToolTip(object sender, EventArgs e)
         {
             var control = (Control)sender;
-            string text = _toolTip.GetToolTip(control);
+            string text = _toolTip.GetToolTip(control)!;
             _toolTip.Show(string.Empty, control, 0);
             _toolTip.Show(text, control, 30000);
             _toolTip.SetToolTip(control, text);

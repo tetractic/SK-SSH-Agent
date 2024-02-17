@@ -23,14 +23,14 @@ namespace SKSshAgent
         {
             return await Task.Factory.FromAsync(
                 control.BeginInvoke(func),
-                asyncResult => (T)control.EndInvoke(asyncResult)).ConfigureAwait(false);
+                asyncResult => (T)control.EndInvoke(asyncResult)!).ConfigureAwait(false);
         }
 
         public static async Task<T> InvokeAsync<T>(this Control control, Func<Task<T>> func)
         {
             var task = await Task.Factory.FromAsync(
                 control.BeginInvoke(func),
-                asyncResult => (Task<T>)control.EndInvoke(asyncResult)).ConfigureAwait(false);
+                asyncResult => (Task<T>)control.EndInvoke(asyncResult)!).ConfigureAwait(false);
             return await task.ConfigureAwait(false);
         }
     }
