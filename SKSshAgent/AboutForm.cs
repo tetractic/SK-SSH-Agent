@@ -17,7 +17,7 @@ namespace SKSshAgent
         public AboutForm()
         {
             InitializeComponent();
-            _versionLablel.Text = $"Version {AssemblyVersion}";
+            _versionLabel.Text = $"Version {AssemblyVersion}";
             _copyrightLabel.Text = AssemblyCopyright;
 
             _licenseLabel.Links.Clear();

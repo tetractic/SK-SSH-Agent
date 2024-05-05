@@ -37,7 +37,7 @@ namespace SKSshAgent
         {
             _tableLayoutPanel = new TableLayoutPanel();
             _productNameLabel = new Label();
-            _versionLablel = new Label();
+            _versionLabel = new Label();
             _copyrightLabel = new Label();
             _licenseLabel = new LinkLabel();
             _silkLicenseLinkLabel = new LinkLabel();
@@ -51,7 +51,7 @@ namespace SKSshAgent
             _tableLayoutPanel.ColumnCount = 1;
             _tableLayoutPanel.ColumnStyles.Add(new ColumnStyle());
             _tableLayoutPanel.Controls.Add(_productNameLabel, 0, 0);
-            _tableLayoutPanel.Controls.Add(_versionLablel, 0, 1);
+            _tableLayoutPanel.Controls.Add(_versionLabel, 0, 1);
             _tableLayoutPanel.Controls.Add(_copyrightLabel, 0, 2);
             _tableLayoutPanel.Controls.Add(_licenseLabel, 0, 3);
             _tableLayoutPanel.Controls.Add(_silkLicenseLinkLabel, 0, 4);
@@ -76,15 +76,15 @@ namespace SKSshAgent
             _productNameLabel.Text = "SK SSH Agent";
             _productNameLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // _versionLablel
+            // _versionLabel
             // 
-            _versionLablel.Dock = DockStyle.Fill;
-            _versionLablel.Location = new System.Drawing.Point(3, 20);
-            _versionLablel.Name = "_versionLablel";
-            _versionLablel.Size = new System.Drawing.Size(402, 20);
-            _versionLablel.TabIndex = 1;
-            _versionLablel.Text = "Version";
-            _versionLablel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            _versionLabel.Dock = DockStyle.Fill;
+            _versionLabel.Location = new System.Drawing.Point(3, 20);
+            _versionLabel.Name = "_versionLabel";
+            _versionLabel.Size = new System.Drawing.Size(402, 20);
+            _versionLabel.TabIndex = 1;
+            _versionLabel.Text = "Version";
+            _versionLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // _copyrightLabel
             // 
@@ -160,7 +160,7 @@ namespace SKSshAgent
 
         private System.Windows.Forms.TableLayoutPanel _tableLayoutPanel;
         private System.Windows.Forms.Label _productNameLabel;
-        private System.Windows.Forms.Label _versionLablel;
+        private System.Windows.Forms.Label _versionLabel;
         private System.Windows.Forms.Label _copyrightLabel;
         private System.Windows.Forms.LinkLabel _licenseLabel;
         private System.Windows.Forms.LinkLabel _silkLicenseLinkLabel;
