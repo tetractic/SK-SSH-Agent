@@ -24,7 +24,7 @@ namespace SKSshAgent
 
         private const int _userIdLength = 32;
 
-        private static readonly HRESULT HR_ERROR_CANCELLED = new(-2147023673);
+        private static readonly HRESULT HRESULT_ERROR_CANCELLED = (HRESULT)0x800704C7;
 
         static WebAuthnApi()
         {
@@ -153,7 +153,7 @@ namespace SKSshAgent
                                         dwLargeBlobSupport = WEBAUTHN_LARGE_BLOB_SUPPORT_NONE,
                                         bPreferResidentKey = false,
                                     },
-                                    ppWebAuthNCredentialAttestation: &credentialAttestation);
+                                    ppWebAuthNCredentialAttestation: out credentialAttestation);
 
                                 ThrowIfError(hr);
                             }
@@ -257,7 +257,7 @@ namespace SKSshAgent
                                         cbCredLargeBlob = 0,
                                         pbCredLargeBlob = null,
                                     },
-                                    ppWebAuthNAssertion: &assertion);
+                                    ppWebAuthNAssertion: out assertion);
 
                                 ThrowIfError(hr);
                             }
@@ -348,11 +348,11 @@ namespace SKSshAgent
         {
             // https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-erref/32cce05d-3a39-4c7e-8f66-5e788e1107cf
 
-            if (hr == HR_ERROR_CANCELLED)
+            if (hr == HRESULT_ERROR_CANCELLED)
                 throw new OperationCanceledException();
-            else if (hr == NTE_NOT_SUPPORTED)
+            else if (hr == HRESULT.NTE_NOT_SUPPORTED)
                 throw new NotSupportedException("The requested operation is not supported.");
-            else if (hr == RPC_E_TIMEOUT)
+            else if (hr == HRESULT.RPC_E_TIMEOUT)
                 throw new TimeoutException("The requested operation timed out.");
             else if (hr != 0)
                 throw new Win32Exception(hr, $"{hr.Value:X8}: {WebAuthNGetErrorName(hr)}");
