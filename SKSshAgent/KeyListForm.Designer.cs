@@ -362,7 +362,6 @@ namespace SKSshAgent
             // 
             // _showNotifyMenuItem
             // 
-            _showNotifyMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
             _showNotifyMenuItem.Name = "_showNotifyMenuItem";
             _showNotifyMenuItem.Size = new System.Drawing.Size(130, 22);
             _showNotifyMenuItem.Text = "&Show";

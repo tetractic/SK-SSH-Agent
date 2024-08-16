@@ -50,6 +50,8 @@ namespace SKSshAgent
             _keyListImageList.Images.Add(Resources._lock);
 
             _notifyIcon.Icon = new Icon(_notifyIcon.Icon!, SystemInformation.SmallIconSize);
+
+            _showNotifyMenuItem.Font = new Font(_showNotifyMenuItem.Font, FontStyle.Bold);
         }
 
         public bool AllowVisible { get; set; }
