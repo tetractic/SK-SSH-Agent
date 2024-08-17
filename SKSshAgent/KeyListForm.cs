@@ -326,11 +326,6 @@ internal partial class KeyListForm : Form
 
             var webAuthnKey = attestedCredentialData.CredentialPublicKey;
 
-            // OpenSSH clears the UserVerificationRequired flag if authenticator info options
-            // includes "uv", but we don't have access to authenticator info.  And we don't want
-            // to clear it anyway since it's how we decide whether to require user verification
-            // from the authenticator.
-
             var application = Encoding.UTF8.GetBytes(rpId).ToImmutableArray();
             var keyHandle = attestedCredentialData.CredentialId;
 
