@@ -583,7 +583,7 @@ internal abstract class SshAgentPipe
 
     public delegate void StatusChangedEventHandler(SshAgentPipe pipe, SshAgentPipeStatus status);
 
-    // https://datatracker.ietf.org/doc/html/draft-miller-ssh-agent-04#section-7.1
+    // https://datatracker.ietf.org/doc/html/draft-miller-ssh-agent-14#section-6.1
     internal enum MessageType : byte
     {
         SSH_AGENT_FAILURE = 5,
@@ -605,7 +605,7 @@ internal abstract class SshAgentPipe
         SSH_AGENT_EXTENSION_FAILURE = 28,
     }
 
-    // https://datatracker.ietf.org/doc/html/draft-miller-ssh-agent-04#section-7.3
+    // https://datatracker.ietf.org/doc/html/draft-miller-ssh-agent-14#section-6.3
     [Flags]
     internal enum SignatureFlags : uint
     {
