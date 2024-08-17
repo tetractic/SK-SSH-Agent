@@ -6,20 +6,19 @@
 
 using System;
 
-namespace SKSshAgent.Ssh
+namespace SKSshAgent.Ssh;
+
+internal abstract class SshSignature
 {
-    internal abstract class SshSignature
+    /// <exception cref="ArgumentNullException"/>
+    protected SshSignature(SshKeyTypeInfo keyTypeInfo)
     {
-        /// <exception cref="ArgumentNullException"/>
-        protected SshSignature(SshKeyTypeInfo keyTypeInfo)
-        {
-            ArgumentNullException.ThrowIfNull(keyTypeInfo);
+        ArgumentNullException.ThrowIfNull(keyTypeInfo);
 
-            KeyTypeInfo = keyTypeInfo;
-        }
-
-        public SshKeyTypeInfo KeyTypeInfo { get; }
-
-        public abstract void WriteTo(ref SshWireWriter writer);
+        KeyTypeInfo = keyTypeInfo;
     }
+
+    public SshKeyTypeInfo KeyTypeInfo { get; }
+
+    public abstract void WriteTo(ref SshWireWriter writer);
 }

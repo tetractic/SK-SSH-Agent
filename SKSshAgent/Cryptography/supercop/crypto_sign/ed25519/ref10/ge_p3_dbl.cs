@@ -17,19 +17,18 @@
 #pragma warning disable CA1704 // Identifiers should be spelled correctly
 #pragma warning disable CA1707 // Identifiers should not contain underscores
 
-namespace supercop.crypto_sign.ed25519.ref10
-{
-    internal static partial class ge
-    {
-        /*
-        r = 2 * p
-        */
+namespace supercop.crypto_sign.ed25519.ref10;
 
-        internal static void ge_p3_dbl(out ge_p1p1 r, in ge_p3 p)
-        {
-            ge_p2 q;
-            ge_p3_to_p2(out q, in p);
-            ge_p2_dbl(out r, in q);
-        }
+internal static partial class ge
+{
+    /*
+    r = 2 * p
+    */
+
+    internal static void ge_p3_dbl(out ge_p1p1 r, in ge_p3 p)
+    {
+        ge_p2 q;
+        ge_p3_to_p2(out q, in p);
+        ge_p2_dbl(out r, in q);
     }
 }

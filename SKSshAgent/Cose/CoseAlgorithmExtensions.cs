@@ -7,20 +7,19 @@
 using System;
 using System.Security.Cryptography;
 
-namespace SKSshAgent.Cose
+namespace SKSshAgent.Cose;
+
+internal static class CoseAlgorithmExtensions
 {
-    internal static class CoseAlgorithmExtensions
+    /// <exception cref="ArgumentException"/>
+    public static HashAlgorithmName GetHashAlgorithmName(this CoseAlgorithm algorithm)
     {
-        /// <exception cref="ArgumentException"/>
-        public static HashAlgorithmName GetHashAlgorithmName(this CoseAlgorithm algorithm)
+        return algorithm switch
         {
-            return algorithm switch
-            {
-                CoseAlgorithm.ES256 => HashAlgorithmName.SHA256,
-                CoseAlgorithm.ES384 => HashAlgorithmName.SHA384,
-                CoseAlgorithm.ES512 => HashAlgorithmName.SHA512,
-                _ => throw new ArgumentException("Invalid algorithm.", nameof(algorithm)),
-            };
-        }
+            CoseAlgorithm.ES256 => HashAlgorithmName.SHA256,
+            CoseAlgorithm.ES384 => HashAlgorithmName.SHA384,
+            CoseAlgorithm.ES512 => HashAlgorithmName.SHA512,
+            _ => throw new ArgumentException("Invalid algorithm.", nameof(algorithm)),
+        };
     }
 }

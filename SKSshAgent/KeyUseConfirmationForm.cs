@@ -7,88 +7,87 @@
 using System;
 using System.Windows.Forms;
 
-namespace SKSshAgent
+namespace SKSshAgent;
+
+internal partial class KeyUseConfirmationForm : Form
 {
-    internal partial class KeyUseConfirmationForm : Form
+    private const int _ticksInitial = 8;
+
+    private int _ticksRemaining = _ticksInitial;
+
+    public KeyUseConfirmationForm()
     {
-        private const int _ticksInitial = 8;
+        InitializeComponent();
+    }
 
-        private int _ticksRemaining = _ticksInitial;
-
-        public KeyUseConfirmationForm()
+    /// <exception cref="ArgumentNullException" accessor="set"/>
+    public string Fingerprint
+    {
+        get => _fingerprintTextBox.Text;
+        set
         {
-            InitializeComponent();
+            if (_fingerprintTextBox == null)
+                throw new ArgumentNullException(nameof(value));
+
+            _fingerprintTextBox.Text = value;
+        }
+    }
+
+    public ShieldedImmutableBuffer Result { get; private set; }
+
+    protected override void OnShown(EventArgs e)
+    {
+        base.OnShown(e);
+
+        Activate();
+    }
+
+    private void HandleConfirmButtonKeyPressed(object sender, KeyPressEventArgs e)
+    {
+        if (_ticksRemaining > 0)
+        {
+            e.Handled = true;
+
+            ResetDelay();
+            return;
+        }
+    }
+
+    private void HandleAllowButtonClicked(object sender, EventArgs e)
+    {
+        if (_ticksRemaining > 0)
+        {
+            ResetDelay();
+            return;
         }
 
-        /// <exception cref="ArgumentNullException" accessor="set"/>
-        public string Fingerprint
+        DialogResult = DialogResult.OK;
+    }
+
+    private void HandleDelayTimerTicked(object sender, EventArgs e)
+    {
+        if (_ticksRemaining > 0)
         {
-            get => _fingerprintTextBox.Text;
-            set
-            {
-                if (_fingerprintTextBox == null)
-                    throw new ArgumentNullException(nameof(value));
+            _confirmButton.Text = $"{_ticksRemaining / 10f:F1} s";
 
-                _fingerprintTextBox.Text = value;
-            }
+            _ticksRemaining -= 1;
         }
-
-        public ShieldedImmutableBuffer Result { get; private set; }
-
-        protected override void OnShown(EventArgs e)
+        else
         {
-            base.OnShown(e);
+            _delayTimer.Enabled = false;
 
-            Activate();
+            _confirmButton.Text = "Confirm";
+            _confirmButton.UseWaitCursor = false;
         }
+    }
 
-        private void HandleConfirmButtonKeyPressed(object sender, KeyPressEventArgs e)
-        {
-            if (_ticksRemaining > 0)
-            {
-                e.Handled = true;
+    private void ResetDelay()
+    {
+        _confirmButton.Text = "Delay";
 
-                ResetDelay();
-                return;
-            }
-        }
+        _ticksRemaining = _ticksInitial;
 
-        private void HandleAllowButtonClicked(object sender, EventArgs e)
-        {
-            if (_ticksRemaining > 0)
-            {
-                ResetDelay();
-                return;
-            }
-
-            DialogResult = DialogResult.OK;
-        }
-
-        private void HandleDelayTimerTicked(object sender, EventArgs e)
-        {
-            if (_ticksRemaining > 0)
-            {
-                _confirmButton.Text = $"{_ticksRemaining / 10f:F1} s";
-
-                _ticksRemaining -= 1;
-            }
-            else
-            {
-                _delayTimer.Enabled = false;
-
-                _confirmButton.Text = "Confirm";
-                _confirmButton.UseWaitCursor = false;
-            }
-        }
-
-        private void ResetDelay()
-        {
-            _confirmButton.Text = "Delay";
-
-            _ticksRemaining = _ticksInitial;
-
-            _delayTimer.Stop();
-            _delayTimer.Start();
-        }
+        _delayTimer.Stop();
+        _delayTimer.Start();
     }
 }

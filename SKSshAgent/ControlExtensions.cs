@@ -8,30 +8,29 @@ using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SKSshAgent
+namespace SKSshAgent;
+
+internal static class ControlExtensions
 {
-    internal static class ControlExtensions
+    public static async Task InvokeAsync(this Control control, Action action)
     {
-        public static async Task InvokeAsync(this Control control, Action action)
-        {
-            _ = await Task.Factory.FromAsync(
-                control.BeginInvoke(action),
-                asyncResult => control.EndInvoke(asyncResult)).ConfigureAwait(false);
-        }
+        _ = await Task.Factory.FromAsync(
+            control.BeginInvoke(action),
+            asyncResult => control.EndInvoke(asyncResult)).ConfigureAwait(false);
+    }
 
-        public static async Task<T> InvokeAsync<T>(this Control control, Func<T> func)
-        {
-            return await Task.Factory.FromAsync(
-                control.BeginInvoke(func),
-                asyncResult => (T)control.EndInvoke(asyncResult)!).ConfigureAwait(false);
-        }
+    public static async Task<T> InvokeAsync<T>(this Control control, Func<T> func)
+    {
+        return await Task.Factory.FromAsync(
+            control.BeginInvoke(func),
+            asyncResult => (T)control.EndInvoke(asyncResult)!).ConfigureAwait(false);
+    }
 
-        public static async Task<T> InvokeAsync<T>(this Control control, Func<Task<T>> func)
-        {
-            var task = await Task.Factory.FromAsync(
-                control.BeginInvoke(func),
-                asyncResult => (Task<T>)control.EndInvoke(asyncResult)!).ConfigureAwait(false);
-            return await task.ConfigureAwait(false);
-        }
+    public static async Task<T> InvokeAsync<T>(this Control control, Func<Task<T>> func)
+    {
+        var task = await Task.Factory.FromAsync(
+            control.BeginInvoke(func),
+            asyncResult => (Task<T>)control.EndInvoke(asyncResult)!).ConfigureAwait(false);
+        return await task.ConfigureAwait(false);
     }
 }

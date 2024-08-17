@@ -6,13 +6,12 @@
 
 using System;
 
-namespace SKSshAgent.Ssh
+namespace SKSshAgent.Ssh;
+
+internal sealed class SshWireContentException : Exception
 {
-    internal sealed class SshWireContentException : Exception
+    public SshWireContentException(string? message)
+        : base(message)
     {
-        public SshWireContentException(string? message)
-            : base(message)
-        {
-        }
     }
 }

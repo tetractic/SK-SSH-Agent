@@ -7,54 +7,53 @@
 using System;
 using System.Collections.Immutable;
 
-namespace SKSshAgent.Ssh
+namespace SKSshAgent.Ssh;
+
+// https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.u2f
+// https://github.com/openssh/openssh-portable/blob/V_8_9_P1/ssh-ecdsa-sk.c#L178
+internal sealed class OpenSshEcdsaSKSignature : SshSignature
 {
-    // https://github.com/openssh/openssh-portable/blob/master/PROTOCOL.u2f
-    // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/ssh-ecdsa-sk.c#L178
-    internal sealed class OpenSshEcdsaSKSignature : SshSignature
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="ArgumentNullException"/>
+    public OpenSshEcdsaSKSignature(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> r, ImmutableArray<byte> s, byte flags, uint counter)
+        : base(keyTypeInfo)
     {
-        /// <exception cref="ArgumentException"/>
-        /// <exception cref="ArgumentNullException"/>
-        public OpenSshEcdsaSKSignature(SshKeyTypeInfo keyTypeInfo, ImmutableArray<byte> r, ImmutableArray<byte> s, byte flags, uint counter)
-            : base(keyTypeInfo)
-        {
-            if (keyTypeInfo.KeyType != SshKeyType.OpenSshEcdsaSK)
-                throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
-            int fieldSizeBits = keyTypeInfo.KeySizeBits;
-            int fieldElementLength = MPInt.SizeBitsToLength(fieldSizeBits);
-            if (r == null)
-                throw new ArgumentNullException(nameof(r));
-            if (r.Length != fieldElementLength || MPInt.GetBitLength(r.AsSpan()) > fieldSizeBits)
-                throw new ArgumentException("Invalid EC field element.", nameof(r));
-            if (s == null)
-                throw new ArgumentNullException(nameof(s));
-            if (s.Length != fieldElementLength || MPInt.GetBitLength(s.AsSpan()) > fieldSizeBits)
-                throw new ArgumentException("Invalid EC field element.", nameof(s));
+        if (keyTypeInfo.KeyType != SshKeyType.OpenSshEcdsaSK)
+            throw new ArgumentException("Incompatible key type.", nameof(keyTypeInfo));
+        int fieldSizeBits = keyTypeInfo.KeySizeBits;
+        int fieldElementLength = MPInt.SizeBitsToLength(fieldSizeBits);
+        if (r == null)
+            throw new ArgumentNullException(nameof(r));
+        if (r.Length != fieldElementLength || MPInt.GetBitLength(r.AsSpan()) > fieldSizeBits)
+            throw new ArgumentException("Invalid EC field element.", nameof(r));
+        if (s == null)
+            throw new ArgumentNullException(nameof(s));
+        if (s.Length != fieldElementLength || MPInt.GetBitLength(s.AsSpan()) > fieldSizeBits)
+            throw new ArgumentException("Invalid EC field element.", nameof(s));
 
-            R = r;
-            S = s;
-            Flags = flags;
-            Counter = counter;
-        }
+        R = r;
+        S = s;
+        Flags = flags;
+        Counter = counter;
+    }
 
-        public ImmutableArray<byte> R { get; }
+    public ImmutableArray<byte> R { get; }
 
-        public ImmutableArray<byte> S { get; }
+    public ImmutableArray<byte> S { get; }
 
-        public byte Flags { get; }
+    public byte Flags { get; }
 
-        public uint Counter { get; }
+    public uint Counter { get; }
 
-        public override void WriteTo(ref SshWireWriter writer)
-        {
-            // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/PROTOCOL.u2f#L199-L213
-            // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/ssh-sk.c#L692
-            // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/ssh-sk.c#L560
+    public override void WriteTo(ref SshWireWriter writer)
+    {
+        // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/PROTOCOL.u2f#L199-L213
+        // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/ssh-sk.c#L692
+        // https://github.com/openssh/openssh-portable/blob/V_8_9_P1/ssh-sk.c#L560
 
-            writer.WriteString(KeyTypeInfo.Name);
-            SshEcdsaSignature.WriteEcdsaSignature(ref writer, R, S);
-            writer.WriteByte(Flags);
-            writer.WriteUInt32(Counter);
-        }
+        writer.WriteString(KeyTypeInfo.Name);
+        SshEcdsaSignature.WriteEcdsaSignature(ref writer, R, S);
+        writer.WriteByte(Flags);
+        writer.WriteUInt32(Counter);
     }
 }

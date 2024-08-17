@@ -4,15 +4,14 @@
 // General Public License Version 3 as published by the Free Software
 // Foundation.
 
-namespace SKSshAgent
+namespace SKSshAgent;
+
+internal enum SshAgentPipeStatus
 {
-    internal enum SshAgentPipeStatus
-    {
-        NotStarted = 0,
-        Starting,
-        RunningIdle,
-        RunningBusy,
-        Stopped,
-        AlreadyInUse,
-    }
+    NotStarted = 0,
+    Starting,
+    RunningIdle,
+    RunningBusy,
+    Stopped,
+    AlreadyInUse,
 }

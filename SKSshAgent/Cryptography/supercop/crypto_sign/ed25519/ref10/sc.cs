@@ -18,32 +18,31 @@ using System;
 
 #pragma warning disable CA1707 // Identifiers should not contain underscores
 
-namespace supercop.crypto_sign.ed25519.ref10
+namespace supercop.crypto_sign.ed25519.ref10;
+
+internal static partial class sc
 {
-    internal static partial class sc
+    /*
+    The set of scalars is \Z/l
+    where l = 2^252 + 27742317777372353535851937790883648493.
+    */
+
+    private static long load_3(ReadOnlySpan<byte> @in)
     {
-        /*
-        The set of scalars is \Z/l
-        where l = 2^252 + 27742317777372353535851937790883648493.
-        */
+        ulong result;
+        result = (ulong)@in[0];
+        result |= ((ulong)@in[1]) << 8;
+        result |= ((ulong)@in[2]) << 16;
+        return (long)result;
+    }
 
-        private static long load_3(ReadOnlySpan<byte> @in)
-        {
-            ulong result;
-            result = (ulong)@in[0];
-            result |= ((ulong)@in[1]) << 8;
-            result |= ((ulong)@in[2]) << 16;
-            return (long)result;
-        }
-
-        private static long load_4(ReadOnlySpan<byte> @in)
-        {
-            ulong result;
-            result = (ulong)@in[0];
-            result |= ((ulong)@in[1]) << 8;
-            result |= ((ulong)@in[2]) << 16;
-            result |= ((ulong)@in[3]) << 24;
-            return (long)result;
-        }
+    private static long load_4(ReadOnlySpan<byte> @in)
+    {
+        ulong result;
+        result = (ulong)@in[0];
+        result |= ((ulong)@in[1]) << 8;
+        result |= ((ulong)@in[2]) << 16;
+        result |= ((ulong)@in[3]) << 24;
+        return (long)result;
     }
 }

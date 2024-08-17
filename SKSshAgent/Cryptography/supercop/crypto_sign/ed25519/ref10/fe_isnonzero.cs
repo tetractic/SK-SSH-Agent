@@ -20,24 +20,23 @@ using static nacl.crypto_verify.crypto;
 #pragma warning disable CA1704 // Identifiers should be spelled correctly
 #pragma warning disable CA1707 // Identifiers should not contain underscores
 
-namespace supercop.crypto_sign.ed25519.ref10
+namespace supercop.crypto_sign.ed25519.ref10;
+
+internal partial struct fe
 {
-    internal partial struct fe
+    /*
+    return  0 if f == 0
+    return -1 if f != 0
+
+    Preconditions:
+       |f| bounded by 1.1*2^26,1.1*2^25,1.1*2^26,1.1*2^25,etc.
+    */
+
+    internal static int fe_isnonzero(in fe f)
     {
-        /*
-        return  0 if f == 0
-        return -1 if f != 0
-
-        Preconditions:
-           |f| bounded by 1.1*2^26,1.1*2^25,1.1*2^26,1.1*2^25,etc.
-        */
-
-        internal static int fe_isnonzero(in fe f)
-        {
-            Span<byte> zero = stackalloc byte[32];
-            Span<byte> s = stackalloc byte[32];
-            fe_tobytes(s,f);
-            return crypto_verify_32(s, zero);
-        }
+        Span<byte> zero = stackalloc byte[32];
+        Span<byte> s = stackalloc byte[32];
+        fe_tobytes(s,f);
+        return crypto_verify_32(s, zero);
     }
 }

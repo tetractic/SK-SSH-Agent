@@ -7,43 +7,42 @@
 using Microsoft.Win32;
 using System.Diagnostics;
 
-namespace SKSshAgent
+namespace SKSshAgent;
+
+internal static class Settings
 {
-    internal static class Settings
+    private const string _registryPath = @"HKEY_CURRENT_USER\SOFTWARE\SK SSH Agent";
+
+    private const string _confirmEachKeyUseName = "ConfirmEachKeyUse";
+
+    private static bool? _confirmEachKeyUse;
+
+    public static bool ConfirmEachKeyUse
     {
-        private const string _registryPath = @"HKEY_CURRENT_USER\SOFTWARE\SK SSH Agent";
-
-        private const string _confirmEachKeyUseName = "ConfirmEachKeyUse";
-
-        private static bool? _confirmEachKeyUse;
-
-        public static bool ConfirmEachKeyUse
+        get
         {
-            get
+            try
             {
-                try
-                {
-                    _confirmEachKeyUse ??= Registry.GetValue(_registryPath, _confirmEachKeyUseName, null) is int value ? value != 0 : null;
-                }
-                catch
-                {
-                    Debug.Assert(false);
-                }
-
-                return _confirmEachKeyUse.GetValueOrDefault(true);
+                _confirmEachKeyUse ??= Registry.GetValue(_registryPath, _confirmEachKeyUseName, null) is int value ? value != 0 : null;
             }
-            set
+            catch
             {
-                _confirmEachKeyUse = value;
+                Debug.Assert(false);
+            }
 
-                try
-                {
-                    Registry.SetValue(_registryPath, _confirmEachKeyUseName, value ? 1 : 0);
-                }
-                catch
-                {
-                    Debug.Assert(false);
-                }
+            return _confirmEachKeyUse.GetValueOrDefault(true);
+        }
+        set
+        {
+            _confirmEachKeyUse = value;
+
+            try
+            {
+                Registry.SetValue(_registryPath, _confirmEachKeyUseName, value ? 1 : 0);
+            }
+            catch
+            {
+                Debug.Assert(false);
             }
         }
     }

@@ -20,21 +20,20 @@ using static supercop.crypto_sign.ed25519.ref10.fe;
 #pragma warning disable CA1704 // Identifiers should be spelled correctly
 #pragma warning disable CA1707 // Identifiers should not contain underscores
 
-namespace supercop.crypto_sign.ed25519.ref10
-{
-    internal static partial class ge
-    {
-        internal static void ge_p3_tobytes(Span<byte> s, in ge_p3 h)
-        {
-            fe recip;
-            fe x;
-            fe y;
+namespace supercop.crypto_sign.ed25519.ref10;
 
-            fe_invert(out recip, in h.Z);
-            fe_mul(out x, in h.X, in recip);
-            fe_mul(out y, in h.Y, in recip);
-            fe_tobytes(s, in y);
-            s[31] ^= (byte)(fe_isnegative(in x) << 7);
-        }
+internal static partial class ge
+{
+    internal static void ge_p3_tobytes(Span<byte> s, in ge_p3 h)
+    {
+        fe recip;
+        fe x;
+        fe y;
+
+        fe_invert(out recip, in h.Z);
+        fe_mul(out x, in h.X, in recip);
+        fe_mul(out y, in h.Y, in recip);
+        fe_tobytes(s, in y);
+        s[31] ^= (byte)(fe_isnegative(in x) << 7);
     }
 }

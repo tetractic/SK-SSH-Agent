@@ -23,47 +23,46 @@ using static supercop.crypto_sign.ed25519.ref10.sc;
 #pragma warning disable CA1704 // Identifiers should be spelled correctly
 #pragma warning disable CA1707 // Identifiers should not contain underscores
 
-namespace supercop.crypto_sign.ed25519.ref10
+namespace supercop.crypto_sign.ed25519.ref10;
+
+internal static partial class crypto
 {
-    internal static partial class crypto
+    /// <remarks>
+    /// <para>
+    /// This is modified from the reference implementation to take the message in
+    /// <paramref name="m"/> rather than in <paramref name="sm"/>.
+    /// </para>
+    /// <para>
+    /// Note that the reference implementation does not provide some security guarantees that may be
+    /// desired.  See <see href="https://eprint.iacr.org/2020/1244"/>.
+    /// </para>
+    /// </remarks>
+    internal static int crypto_sign_open(ReadOnlySpan<byte> m, Span<byte> sm, ReadOnlySpan<byte> pk)
     {
-        /// <remarks>
-        /// <para>
-        /// This is modified from the reference implementation to take the message in
-        /// <paramref name="m"/> rather than in <paramref name="sm"/>.
-        /// </para>
-        /// <para>
-        /// Note that the reference implementation does not provide some security guarantees that
-        /// may be desired.  See <see href="https://eprint.iacr.org/2020/1244"/>.
-        /// </para>
-        /// </remarks>
-        internal static int crypto_sign_open(ReadOnlySpan<byte> m, Span<byte> sm, ReadOnlySpan<byte> pk)
-        {
-            Span<byte> scopy = stackalloc byte[32];
-            Span<byte> hram = stackalloc byte[64];
-            Span<byte> rcheck = stackalloc byte[32];
-            ge_p3 A;
-            ge_p2 R;
+        Span<byte> scopy = stackalloc byte[32];
+        Span<byte> hram = stackalloc byte[64];
+        Span<byte> rcheck = stackalloc byte[32];
+        ge_p3 A;
+        ge_p2 R;
 
-            if ((sm[63] & 224) != 0)
-                return -1;
-            if (ge_frombytes_negate_vartime(out A, pk) != 0)
-                return -1;
-
-            sm.Slice(32, 32).CopyTo(scopy);
-
-            m.CopyTo(sm.Slice(64));
-            pk.CopyTo(sm.Slice(32));
-            _ = SHA512.HashData(sm, hram);
-            sc_reduce(hram);
-
-            ge_double_scalarmult_vartime(out R, hram, in A, scopy);
-            ge_tobytes(rcheck, in R);
-
-            if (crypto_verify_32(sm.Slice(0, 32), rcheck) == 0)
-                return 0;
-
+        if ((sm[63] & 224) != 0)
             return -1;
-        }
+        if (ge_frombytes_negate_vartime(out A, pk) != 0)
+            return -1;
+
+        sm.Slice(32, 32).CopyTo(scopy);
+
+        m.CopyTo(sm.Slice(64));
+        pk.CopyTo(sm.Slice(32));
+        _ = SHA512.HashData(sm, hram);
+        sc_reduce(hram);
+
+        ge_double_scalarmult_vartime(out R, hram, in A, scopy);
+        ge_tobytes(rcheck, in R);
+
+        if (crypto_verify_32(sm.Slice(0, 32), rcheck) == 0)
+            return 0;
+
+        return -1;
     }
 }

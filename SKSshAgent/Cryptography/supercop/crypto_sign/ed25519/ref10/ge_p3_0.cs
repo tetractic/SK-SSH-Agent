@@ -19,16 +19,15 @@ using static supercop.crypto_sign.ed25519.ref10.fe;
 #pragma warning disable CA1704 // Identifiers should be spelled correctly
 #pragma warning disable CA1707 // Identifiers should not contain underscores
 
-namespace supercop.crypto_sign.ed25519.ref10
+namespace supercop.crypto_sign.ed25519.ref10;
+
+internal static partial class ge
 {
-    internal static partial class ge
+    internal static void ge_p3_0(out ge_p3 h)
     {
-        internal static void ge_p3_0(out ge_p3 h)
-        {
-            fe_0(out h.X);
-            fe_1(out h.Y);
-            fe_1(out h.Z);
-            fe_0(out h.T);
-        }
+        fe_0(out h.X);
+        fe_1(out h.Y);
+        fe_1(out h.Z);
+        fe_0(out h.T);
     }
 }

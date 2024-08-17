@@ -4,18 +4,17 @@
 // General Public License Version 3 as published by the Free Software
 // Foundation.
 
-namespace SKSshAgent.Cose
+namespace SKSshAgent.Cose;
+
+internal abstract class CoseKey
 {
-    internal abstract class CoseKey
+    private protected CoseKey(CoseKeyType keyType, CoseAlgorithm algorithm)
     {
-        private protected CoseKey(CoseKeyType keyType, CoseAlgorithm algorithm)
-        {
-            KeyType = keyType;
-            Algorithm = algorithm;
-        }
-
-        public CoseKeyType KeyType { get; }
-
-        public CoseAlgorithm Algorithm { get; }
+        KeyType = keyType;
+        Algorithm = algorithm;
     }
+
+    public CoseKeyType KeyType { get; }
+
+    public CoseAlgorithm Algorithm { get; }
 }

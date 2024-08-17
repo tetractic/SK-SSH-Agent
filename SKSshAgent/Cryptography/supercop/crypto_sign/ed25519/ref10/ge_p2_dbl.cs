@@ -19,44 +19,43 @@ using static supercop.crypto_sign.ed25519.ref10.fe;
 #pragma warning disable CA1704 // Identifiers should be spelled correctly
 #pragma warning disable CA1707 // Identifiers should not contain underscores
 
-namespace supercop.crypto_sign.ed25519.ref10
+namespace supercop.crypto_sign.ed25519.ref10;
+
+internal static partial class ge
 {
-    internal static partial class ge
+    /*
+    r = 2 * p
+    */
+
+    internal static void ge_p2_dbl(out ge_p1p1 r, in ge_p2 p)
     {
-        /*
-        r = 2 * p
-        */
+        fe t0;
 
-        internal static void ge_p2_dbl(out ge_p1p1 r, in ge_p2 p)
-        {
-            fe t0;
+        /* qhasm: XX=X1^2 */
+        fe_sq(out r.X, in p.X);
 
-            /* qhasm: XX=X1^2 */
-            fe_sq(out r.X, in p.X);
+        /* qhasm: YY=Y1^2 */
+        fe_sq(out r.Z, in p.Y);
 
-            /* qhasm: YY=Y1^2 */
-            fe_sq(out r.Z, in p.Y);
+        /* qhasm: B=2*Z1^2 */
+        fe_sq2(out r.T, in p.Z);
 
-            /* qhasm: B=2*Z1^2 */
-            fe_sq2(out r.T, in p.Z);
+        /* qhasm: A=X1+Y1 */
+        fe_add(out r.Y, in p.X, in p.Y);
 
-            /* qhasm: A=X1+Y1 */
-            fe_add(out r.Y, in p.X, in p.Y);
+        /* qhasm: AA=A^2 */
+        fe_sq(out t0, in r.Y);
 
-            /* qhasm: AA=A^2 */
-            fe_sq(out t0, in r.Y);
+        /* qhasm: Y3=YY+XX */
+        fe_add(out r.Y, in r.Z, in r.X);
 
-            /* qhasm: Y3=YY+XX */
-            fe_add(out r.Y, in r.Z, in r.X);
+        /* qhasm: Z3=YY-XX */
+        fe_sub(out r.Z, in r.Z, in r.X);
 
-            /* qhasm: Z3=YY-XX */
-            fe_sub(out r.Z, in r.Z, in r.X);
+        /* qhasm: X3=AA-Y3 */
+        fe_sub(out r.X, in t0, in r.Y);
 
-            /* qhasm: X3=AA-Y3 */
-            fe_sub(out r.X, in t0, in r.Y);
-
-            /* qhasm: T3=B-Z3 */
-            fe_sub(out r.T, in r.T, in r.Z);
-        }
+        /* qhasm: T3=B-Z3 */
+        fe_sub(out r.T, in r.T, in r.Z);
     }
 }

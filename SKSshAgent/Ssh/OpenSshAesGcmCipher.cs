@@ -7,42 +7,41 @@
 using System;
 using System.Security.Cryptography;
 
-namespace SKSshAgent.Ssh
+namespace SKSshAgent.Ssh;
+
+internal sealed class OpenSshAesGcmCipher : IDisposable
 {
-    internal sealed class OpenSshAesGcmCipher : IDisposable
+    public const int BlockLength = 16;
+
+    private readonly AesGcm _aesGcm;
+
+    /// <exception cref="ArgumentException"/>
+    public OpenSshAesGcmCipher(ReadOnlySpan<byte> key)
     {
-        public const int BlockLength = 16;
+        if (key.Length != 16 && key.Length != 24 && key.Length != 32)
+            throw new ArgumentException("Invalid length.", nameof(key));
 
-        private readonly AesGcm _aesGcm;
+        _aesGcm = new AesGcm(key);
+    }
 
-        /// <exception cref="ArgumentException"/>
-        public OpenSshAesGcmCipher(ReadOnlySpan<byte> key)
-        {
-            if (key.Length != 16 && key.Length != 24 && key.Length != 32)
-                throw new ArgumentException("Invalid length.", nameof(key));
+    public static bool IsSupported = AesGcm.IsSupported;
 
-            _aesGcm = new AesGcm(key);
-        }
+    public void Dispose()
+    {
+        _aesGcm.Dispose();
+    }
 
-        public static bool IsSupported = AesGcm.IsSupported;
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="CryptographicException"/>
+    public void Encrypt(ReadOnlySpan<byte> iv, ReadOnlySpan<byte> plaintext, Span<byte> ciphertext, Span<byte> tag)
+    {
+        _aesGcm.Encrypt(iv, plaintext, ciphertext, tag);
+    }
 
-        public void Dispose()
-        {
-            _aesGcm.Dispose();
-        }
-
-        /// <exception cref="ArgumentException"/>
-        /// <exception cref="CryptographicException"/>
-        public void Encrypt(ReadOnlySpan<byte> iv, ReadOnlySpan<byte> plaintext, Span<byte> ciphertext, Span<byte> tag)
-        {
-            _aesGcm.Encrypt(iv, plaintext, ciphertext, tag);
-        }
-
-        /// <exception cref="ArgumentException"/>
-        /// <exception cref="CryptographicException"/>
-        public void Decrypt(ReadOnlySpan<byte> iv, ReadOnlySpan<byte> ciphertext, ReadOnlySpan<byte> tag, Span<byte> plaintext)
-        {
-            _aesGcm.Decrypt(iv, ciphertext, tag, plaintext);
-        }
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="CryptographicException"/>
+    public void Decrypt(ReadOnlySpan<byte> iv, ReadOnlySpan<byte> ciphertext, ReadOnlySpan<byte> tag, Span<byte> plaintext)
+    {
+        _aesGcm.Decrypt(iv, ciphertext, tag, plaintext);
     }
 }

@@ -6,20 +6,19 @@
 
 using System;
 
-namespace SKSshAgent.Cose
+namespace SKSshAgent.Cose;
+
+internal static class CoseEllipticCurveExtensions
 {
-    internal static class CoseEllipticCurveExtensions
+    /// <exception cref="ArgumentException"/>
+    public static int GetFieldSizeBits(this CoseEllipticCurve curve)
     {
-        /// <exception cref="ArgumentException"/>
-        public static int GetFieldSizeBits(this CoseEllipticCurve curve)
+        return curve switch
         {
-            return curve switch
-            {
-                CoseEllipticCurve.P256 => 256,
-                CoseEllipticCurve.P384 => 384,
-                CoseEllipticCurve.P521 => 521,
-                _ => throw new ArgumentException("Invalid curve.", nameof(curve)),
-            };
-        }
+            CoseEllipticCurve.P256 => 256,
+            CoseEllipticCurve.P384 => 384,
+            CoseEllipticCurve.P521 => 521,
+            _ => throw new ArgumentException("Invalid curve.", nameof(curve)),
+        };
     }
 }

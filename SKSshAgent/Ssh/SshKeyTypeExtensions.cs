@@ -6,21 +6,20 @@
 
 using System;
 
-namespace SKSshAgent.Ssh
+namespace SKSshAgent.Ssh;
+
+internal static class SshKeyTypeExtensions
 {
-    internal static class SshKeyTypeExtensions
+    /// <exception cref="ArgumentException"/>
+    public static string GetDefaultFileName(this SshKeyType keyType)
     {
-        /// <exception cref="ArgumentException"/>
-        public static string GetDefaultFileName(this SshKeyType keyType)
+        return keyType switch
         {
-            return keyType switch
-            {
-                SshKeyType.Ecdsa => "id_ecdsa",
-                SshKeyType.Ed25519 => "id_ed25519",
-                SshKeyType.OpenSshEcdsaSK => "id_ecdsa_sk",
-                SshKeyType.OpenSshEd25519SK => "id_ed25519_sk",
-                _ => throw new ArgumentException("Invalid key type.", nameof(keyType)),
-            };
-        }
+            SshKeyType.Ecdsa => "id_ecdsa",
+            SshKeyType.Ed25519 => "id_ed25519",
+            SshKeyType.OpenSshEcdsaSK => "id_ecdsa_sk",
+            SshKeyType.OpenSshEd25519SK => "id_ed25519_sk",
+            _ => throw new ArgumentException("Invalid key type.", nameof(keyType)),
+        };
     }
 }

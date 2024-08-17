@@ -4,15 +4,14 @@
 // General Public License Version 3 as published by the Free Software
 // Foundation.
 
-namespace SKSshAgent.Cose
+namespace SKSshAgent.Cose;
+
+/// <seealso href="https://datatracker.ietf.org/doc/html/rfc8152#section-13.1"/>
+/// <seealso href="https://www.iana.org/assignments/cose/cose.xhtml#elliptic-curves"/>
+internal enum CoseEllipticCurve
 {
-    /// <seealso href="https://datatracker.ietf.org/doc/html/rfc8152#section-13.1"/>
-    /// <seealso href="https://www.iana.org/assignments/cose/cose.xhtml#elliptic-curves"/>
-    internal enum CoseEllipticCurve
-    {
-        P256 = 1,
-        P384 = 2,
-        P521 = 3,
-        Ed25519 = 6,
-    }
+    P256 = 1,
+    P384 = 2,
+    P521 = 3,
+    Ed25519 = 6,
 }

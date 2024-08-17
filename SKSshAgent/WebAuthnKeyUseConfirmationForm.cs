@@ -7,26 +7,25 @@
 using System;
 using System.Windows.Forms;
 
-namespace SKSshAgent
+namespace SKSshAgent;
+
+public partial class WebAuthnKeyUseConfirmationForm : Form
 {
-    public partial class WebAuthnKeyUseConfirmationForm : Form
+    public WebAuthnKeyUseConfirmationForm()
     {
-        public WebAuthnKeyUseConfirmationForm()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+    }
 
-        /// <exception cref="ArgumentNullException" accessor="set"/>
-        public string Fingerprint
+    /// <exception cref="ArgumentNullException" accessor="set"/>
+    public string Fingerprint
+    {
+        get => _fingerprintTextBox.Text;
+        set
         {
-            get => _fingerprintTextBox.Text;
-            set
-            {
-                if (_fingerprintTextBox == null)
-                    throw new ArgumentNullException(nameof(value));
+            if (_fingerprintTextBox == null)
+                throw new ArgumentNullException(nameof(value));
 
-                _fingerprintTextBox.Text = value;
-            }
+            _fingerprintTextBox.Text = value;
         }
     }
 }

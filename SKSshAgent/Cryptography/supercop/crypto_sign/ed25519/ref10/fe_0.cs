@@ -17,26 +17,25 @@
 #pragma warning disable CA1704 // Identifiers should be spelled correctly
 #pragma warning disable CA1707 // Identifiers should not contain underscores
 
-namespace supercop.crypto_sign.ed25519.ref10
-{
-    internal partial struct fe
-    {
-        /*
-        h = 0
-        */
+namespace supercop.crypto_sign.ed25519.ref10;
 
-        internal static void fe_0(out fe h)
-        {
-            h.e0 = 0;
-            h.e1 = 0;
-            h.e2 = 0;
-            h.e3 = 0;
-            h.e4 = 0;
-            h.e5 = 0;
-            h.e6 = 0;
-            h.e7 = 0;
-            h.e8 = 0;
-            h.e9 = 0;
-        }
+internal partial struct fe
+{
+    /*
+    h = 0
+    */
+
+    internal static void fe_0(out fe h)
+    {
+        h.e0 = 0;
+        h.e1 = 0;
+        h.e2 = 0;
+        h.e3 = 0;
+        h.e4 = 0;
+        h.e5 = 0;
+        h.e6 = 0;
+        h.e7 = 0;
+        h.e8 = 0;
+        h.e9 = 0;
     }
 }

@@ -4,16 +4,15 @@
 // General Public License Version 3 as published by the Free Software
 // Foundation.
 
-namespace SKSshAgent.Cose
+namespace SKSshAgent.Cose;
+
+/// <seealso href="https://datatracker.ietf.org/doc/html/rfc8152#section-8.1"/>
+/// <seealso href="https://datatracker.ietf.org/doc/html/rfc8152#section-8.2"/>
+/// <seealso href="https://www.iana.org/assignments/cose/cose.xhtml#algorithms"/>
+internal enum CoseAlgorithm
 {
-    /// <seealso href="https://datatracker.ietf.org/doc/html/rfc8152#section-8.1"/>
-    /// <seealso href="https://datatracker.ietf.org/doc/html/rfc8152#section-8.2"/>
-    /// <seealso href="https://www.iana.org/assignments/cose/cose.xhtml#algorithms"/>
-    internal enum CoseAlgorithm
-    {
-        ES256 = -7,
-        EdDsa = -8,
-        ES384 = -35,
-        ES512 = -36,
-    }
+    ES256 = -7,
+    EdDsa = -8,
+    ES384 = -35,
+    ES512 = -36,
 }

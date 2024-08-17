@@ -8,21 +8,20 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace SKSshAgent.Ssh
+namespace SKSshAgent.Ssh;
+
+internal abstract class SshEncryptedPrivateKey : IEquatable<SshEncryptedPrivateKey>
 {
-    internal abstract class SshEncryptedPrivateKey : IEquatable<SshEncryptedPrivateKey>
-    {
-        /// <exception cref="ArgumentException"/>
-        /// <exception cref="SshWireContentException"/>
-        /// <exception cref="InvalidDataException"/>
-        /// <exception cref="NotSupportedException"/>
-        /// <exception cref="System.Security.Cryptography.CryptographicException"/>
-        public abstract bool TryDecrypt(ShieldedImmutableBuffer password, [MaybeNullWhen(false)] out SshKey privateKey, [MaybeNullWhen(false)] out string comment);
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="SshWireContentException"/>
+    /// <exception cref="InvalidDataException"/>
+    /// <exception cref="NotSupportedException"/>
+    /// <exception cref="System.Security.Cryptography.CryptographicException"/>
+    public abstract bool TryDecrypt(ShieldedImmutableBuffer password, [MaybeNullWhen(false)] out SshKey privateKey, [MaybeNullWhen(false)] out string comment);
 
-        public abstract bool Equals([NotNullWhen(true)] SshEncryptedPrivateKey? other);
+    public abstract bool Equals([NotNullWhen(true)] SshEncryptedPrivateKey? other);
 
-        public sealed override bool Equals([NotNullWhen(true)] object? obj) => Equals(obj as SshEncryptedPrivateKey);
+    public sealed override bool Equals([NotNullWhen(true)] object? obj) => Equals(obj as SshEncryptedPrivateKey);
 
-        public abstract override int GetHashCode();
-    }
+    public abstract override int GetHashCode();
 }

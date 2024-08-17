@@ -6,29 +6,28 @@
 
 using System.Windows.Forms;
 
-namespace SKSshAgent
+namespace SKSshAgent;
+
+internal sealed class CustomToolStripRenderer : ToolStripProfessionalRenderer
 {
-    internal sealed class CustomToolStripRenderer : ToolStripProfessionalRenderer
+    public CustomToolStripRenderer()
+        : base(new CustomColorTable())
     {
-        public CustomToolStripRenderer()
-            : base(new CustomColorTable())
-        {
-        }
+    }
 
-        protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e)
-        {
-            if (e.ToolStrip is StatusStrip)
-                return;
+    protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e)
+    {
+        if (e.ToolStrip is StatusStrip)
+            return;
 
-            base.OnRenderToolStripBorder(e);
-        }
+        base.OnRenderToolStripBorder(e);
+    }
 
-        private class CustomColorTable : ProfessionalColorTable
+    private class CustomColorTable : ProfessionalColorTable
+    {
+        public CustomColorTable()
         {
-            public CustomColorTable()
-            {
-                UseSystemColors = true;
-            }
+            UseSystemColors = true;
         }
     }
 }

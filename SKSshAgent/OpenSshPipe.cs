@@ -4,15 +4,14 @@
 // General Public License Version 3 as published by the Free Software
 // Foundation.
 
-namespace SKSshAgent
-{
-    internal sealed class OpenSshPipe : SshAgentPipe
-    {
-        public OpenSshPipe(KeyListForm form)
-            : base(form)
-        {
-        }
+namespace SKSshAgent;
 
-        public override string PipeName => @"openssh-ssh-agent";
+internal sealed class OpenSshPipe : SshAgentPipe
+{
+    public OpenSshPipe(KeyListForm form)
+        : base(form)
+    {
     }
+
+    public override string PipeName => @"openssh-ssh-agent";
 }

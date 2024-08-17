@@ -6,16 +6,15 @@
 
 using System;
 
-namespace SKSshAgent.WebAuthn
+namespace SKSshAgent.WebAuthn;
+
+/// <seealso href="https://www.w3.org/TR/webauthn/#sctn-authenticator-data"/>
+[Flags]
+internal enum WebAuthnAuthenticatorDataFlags : byte
 {
-    /// <seealso href="https://www.w3.org/TR/webauthn/#sctn-authenticator-data"/>
-    [Flags]
-    internal enum WebAuthnAuthenticatorDataFlags : byte
-    {
-        None = 0,
-        UserPresent = 0x01,
-        UserVerified = 0x04,
-        AttestedCredentialDataIncluded = 0x40,
-        ExtensionsIncluded = 0x80,
-    }
+    None = 0,
+    UserPresent = 0x01,
+    UserVerified = 0x04,
+    AttestedCredentialDataIncluded = 0x40,
+    ExtensionsIncluded = 0x80,
 }

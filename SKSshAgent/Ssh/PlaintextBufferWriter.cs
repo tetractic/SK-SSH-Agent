@@ -8,72 +8,71 @@ using System;
 using System.Buffers;
 using System.Security.Cryptography;
 
-namespace SKSshAgent.Ssh
+namespace SKSshAgent.Ssh;
+
+internal sealed class PlaintextBufferWriter : IBufferWriter<byte>, IDisposable
 {
-    internal sealed class PlaintextBufferWriter : IBufferWriter<byte>, IDisposable
+    private const int _arrayMaxLength = 0x7FEFFFFF;
+
+    private byte[] _buffer;
+
+    private int _length;
+
+    public PlaintextBufferWriter()
     {
-        private const int _arrayMaxLength = 0x7FEFFFFF;
+        _buffer = Array.Empty<byte>();
+    }
 
-        private byte[] _buffer;
+    public int WrittenLength => _length;
 
-        private int _length;
+    public Span<byte> WrittenSpan => _buffer.AsSpan(0, _length);
 
-        public PlaintextBufferWriter()
-        {
-            _buffer = Array.Empty<byte>();
-        }
+    public void Dispose()
+    {
+        CryptographicOperations.ZeroMemory(_buffer.AsSpan(0, _length));
+    }
 
-        public int WrittenLength => _length;
+    /// <exception cref="ArgumentOutOfRangeException"/>
+    /// <exception cref="InvalidOperationException"/>
+    public void Advance(int count)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        if (count > _buffer.Length - _length)
+            throw new InvalidOperationException("Attempted to advance beyond the end of the buffer.");
 
-        public Span<byte> WrittenSpan => _buffer.AsSpan(0, _length);
+        _length += count;
+    }
 
-        public void Dispose()
-        {
-            CryptographicOperations.ZeroMemory(_buffer.AsSpan(0, _length));
-        }
+    /// <exception cref="ArgumentOutOfRangeException"/>
+    public Memory<byte> GetMemory(int sizeHint = 0)
+    {
+        EnsureCapacity(sizeHint);
 
-        /// <exception cref="ArgumentOutOfRangeException"/>
-        /// <exception cref="InvalidOperationException"/>
-        public void Advance(int count)
-        {
-            ArgumentOutOfRangeException.ThrowIfNegative(count);
-            if (count > _buffer.Length - _length)
-                throw new InvalidOperationException("Attempted to advance beyond the end of the buffer.");
+        return _buffer.AsMemory(_length);
+    }
 
-            _length += count;
-        }
+    /// <exception cref="ArgumentOutOfRangeException"/>
+    public Span<byte> GetSpan(int sizeHint = 0)
+    {
+        EnsureCapacity(sizeHint);
 
-        /// <exception cref="ArgumentOutOfRangeException"/>
-        public Memory<byte> GetMemory(int sizeHint = 0)
-        {
-            EnsureCapacity(sizeHint);
+        return _buffer.AsSpan(_length);
+    }
 
-            return _buffer.AsMemory(_length);
-        }
+    /// <exception cref="ArgumentOutOfRangeException"/>
+    private void EnsureCapacity(int sizeHint)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(sizeHint);
 
-        /// <exception cref="ArgumentOutOfRangeException"/>
-        public Span<byte> GetSpan(int sizeHint = 0)
-        {
-            EnsureCapacity(sizeHint);
+        uint minCapacity = (uint)_buffer.Length + (uint)sizeHint;
+        uint newCapacity = Math.Max(minCapacity, (uint)_buffer.Length * 2);
+        if (newCapacity > _arrayMaxLength)
+            newCapacity = Math.Max(minCapacity, _arrayMaxLength);
 
-            return _buffer.AsSpan(_length);
-        }
-
-        /// <exception cref="ArgumentOutOfRangeException"/>
-        private void EnsureCapacity(int sizeHint)
-        {
-            ArgumentOutOfRangeException.ThrowIfNegative(sizeHint);
-
-            uint minCapacity = (uint)_buffer.Length + (uint)sizeHint;
-            uint newCapacity = Math.Max(minCapacity, (uint)_buffer.Length * 2);
-            if (newCapacity > _arrayMaxLength)
-                newCapacity = Math.Max(minCapacity, _arrayMaxLength);
-
-            byte[] newBuffer = GC.AllocateUninitializedArray<byte>((int)newCapacity, pinned: true);
-            Array.Copy(_buffer, newBuffer, _length);
-            Array.Clear(newBuffer, _length, newBuffer.Length - _length);
-            CryptographicOperations.ZeroMemory(_buffer.AsSpan(0, _length));
-            _buffer = newBuffer;
-        }
+        byte[] newBuffer = GC.AllocateUninitializedArray<byte>((int)newCapacity, pinned: true);
+        Array.Copy(_buffer, newBuffer, _length);
+        Array.Clear(newBuffer, _length, newBuffer.Length - _length);
+        CryptographicOperations.ZeroMemory(_buffer.AsSpan(0, _length));
+        _buffer = newBuffer;
     }
 }

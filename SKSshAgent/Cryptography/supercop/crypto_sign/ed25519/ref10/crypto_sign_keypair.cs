@@ -21,26 +21,25 @@ using static supercop.crypto_sign.ed25519.ref10.ge;
 #pragma warning disable CA1704 // Identifiers should be spelled correctly
 #pragma warning disable CA1707 // Identifiers should not contain underscores
 
-namespace supercop.crypto_sign.ed25519.ref10
+namespace supercop.crypto_sign.ed25519.ref10;
+
+internal static partial class crypto
 {
-    internal static partial class crypto
+    internal static void crypto_sign_keypair(Span<byte> pk, Span<byte> sk)
     {
-        internal static void crypto_sign_keypair(Span<byte> pk, Span<byte> sk)
-        {
-            Span<byte> az = stackalloc byte[64];
-            ge_p3 A;
+        Span<byte> az = stackalloc byte[64];
+        ge_p3 A;
 
-            using (var rng = RandomNumberGenerator.Create())
-                rng.GetBytes(sk.Slice(0, 32));
-            _ = SHA512.HashData(sk.Slice(0, 32), az);
-            az[0] &= 248;
-            az[31] &= 63;
-            az[31] |= 64;
+        using (var rng = RandomNumberGenerator.Create())
+            rng.GetBytes(sk.Slice(0, 32));
+        _ = SHA512.HashData(sk.Slice(0, 32), az);
+        az[0] &= 248;
+        az[31] &= 63;
+        az[31] |= 64;
 
-            ge_scalarmult_base(out A, az);
-            ge_p3_tobytes(pk, in A);
+        ge_scalarmult_base(out A, az);
+        ge_p3_tobytes(pk, in A);
 
-            pk.CopyTo(sk.Slice(32));
-        }
+        pk.CopyTo(sk.Slice(32));
     }
 }

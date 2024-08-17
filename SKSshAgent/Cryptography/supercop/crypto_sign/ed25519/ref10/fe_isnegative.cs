@@ -19,23 +19,22 @@ using System;
 #pragma warning disable CA1704 // Identifiers should be spelled correctly
 #pragma warning disable CA1707 // Identifiers should not contain underscores
 
-namespace supercop.crypto_sign.ed25519.ref10
+namespace supercop.crypto_sign.ed25519.ref10;
+
+internal partial struct fe
 {
-    internal partial struct fe
+    /*
+    return 1 if f is in {1,3,5,...,q-2}
+    return 0 if f is in {0,2,4,...,q-1}
+
+    Preconditions:
+       |f| bounded by 1.1*2^26,1.1*2^25,1.1*2^26,1.1*2^25,etc.
+    */
+
+    internal static int fe_isnegative(in fe f)
     {
-        /*
-        return 1 if f is in {1,3,5,...,q-2}
-        return 0 if f is in {0,2,4,...,q-1}
-
-        Preconditions:
-           |f| bounded by 1.1*2^26,1.1*2^25,1.1*2^26,1.1*2^25,etc.
-        */
-
-        internal static int fe_isnegative(in fe f)
-        {
-            Span<byte> s = stackalloc byte[32];
-            fe_tobytes(s, f);
-            return s[0] & 1;
-        }
+        Span<byte> s = stackalloc byte[32];
+        fe_tobytes(s, f);
+        return s[0] & 1;
     }
 }

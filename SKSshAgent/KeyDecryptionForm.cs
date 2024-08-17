@@ -7,52 +7,51 @@
 using System;
 using System.Windows.Forms;
 
-namespace SKSshAgent
+namespace SKSshAgent;
+
+internal partial class KeyDecryptionForm : Form
 {
-    internal partial class KeyDecryptionForm : Form
+    public KeyDecryptionForm()
     {
-        public KeyDecryptionForm()
+        InitializeComponent();
+    }
+
+    /// <exception cref="ArgumentNullException" accessor="set"/>
+    public string Fingerprint
+    {
+        get => _fingerprintTextBox.Text;
+        set
         {
-            InitializeComponent();
+            if (_fingerprintTextBox == null)
+                throw new ArgumentNullException(nameof(value));
+
+            _fingerprintTextBox.Text = value;
+        }
+    }
+
+    public ShieldedImmutableBuffer Result { get; private set; }
+
+    protected override void OnShown(EventArgs e)
+    {
+        base.OnShown(e);
+
+        Activate();
+    }
+
+    private void HandleDecryptButtonClicked(object sender, EventArgs e)
+    {
+        if (_passwordTextBox.TextLength == 0)
+        {
+            _ = _passwordTextBox.Focus();
+
+            _ = MessageBox.Show(this, "Password cannot be empty.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
         }
 
-        /// <exception cref="ArgumentNullException" accessor="set"/>
-        public string Fingerprint
-        {
-            get => _fingerprintTextBox.Text;
-            set
-            {
-                if (_fingerprintTextBox == null)
-                    throw new ArgumentNullException(nameof(value));
+        Result = _passwordTextBox.GetPassword();
 
-                _fingerprintTextBox.Text = value;
-            }
-        }
+        _passwordTextBox.ZeroMemory();
 
-        public ShieldedImmutableBuffer Result { get; private set; }
-
-        protected override void OnShown(EventArgs e)
-        {
-            base.OnShown(e);
-
-            Activate();
-        }
-
-        private void HandleDecryptButtonClicked(object sender, EventArgs e)
-        {
-            if (_passwordTextBox.TextLength == 0)
-            {
-                _ = _passwordTextBox.Focus();
-
-                _ = MessageBox.Show(this, "Password cannot be empty.", Text, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
-
-            Result = _passwordTextBox.GetPassword();
-
-            _passwordTextBox.ZeroMemory();
-
-            DialogResult = DialogResult.OK;
-        }
+        DialogResult = DialogResult.OK;
     }
 }

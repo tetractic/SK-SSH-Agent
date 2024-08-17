@@ -19,22 +19,21 @@ using static supercop.crypto_sign.ed25519.ref10.fe;
 #pragma warning disable CA1704 // Identifiers should be spelled correctly
 #pragma warning disable CA1707 // Identifiers should not contain underscores
 
-namespace supercop.crypto_sign.ed25519.ref10
+namespace supercop.crypto_sign.ed25519.ref10;
+
+internal static partial class ge
 {
-    internal static partial class ge
+    /*
+    r = p
+    */
+
+    private static readonly fe d2 = new(new[] { -21827239, -5839606, -30745221, 13898782, 229458, 15978800, -12551817, -6495438, 29715968, 9444199 });
+
+    internal static void ge_p3_to_cached(out ge_cached r, in ge_p3 p)
     {
-        /*
-        r = p
-        */
-
-        private static readonly fe d2 = new(new[] { -21827239, -5839606, -30745221, 13898782, 229458, 15978800, -12551817, -6495438, 29715968, 9444199 });
-
-        internal static void ge_p3_to_cached(out ge_cached r, in ge_p3 p)
-        {
-            fe_add(out r.YplusX, in p.Y, in p.X);
-            fe_sub(out r.YminusX, in p.Y, in p.X);
-            fe_copy(out r.Z, in p.Z);
-            fe_mul(out r.T2d, in p.T, in d2);
-        }
+        fe_add(out r.YplusX, in p.Y, in p.X);
+        fe_sub(out r.YminusX, in p.Y, in p.X);
+        fe_copy(out r.Z, in p.Z);
+        fe_mul(out r.T2d, in p.T, in d2);
     }
 }

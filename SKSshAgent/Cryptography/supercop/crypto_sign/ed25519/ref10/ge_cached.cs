@@ -17,13 +17,12 @@
 #pragma warning disable CA1704 // Identifiers should be spelled correctly
 #pragma warning disable CA1707 // Identifiers should not contain underscores
 
-namespace supercop.crypto_sign.ed25519.ref10
+namespace supercop.crypto_sign.ed25519.ref10;
+
+internal struct ge_cached
 {
-    internal struct ge_cached
-    {
-        internal fe YplusX;
-        internal fe YminusX;
-        internal fe Z;
-        internal fe T2d;
-    }
+    internal fe YplusX;
+    internal fe YminusX;
+    internal fe Z;
+    internal fe T2d;
 }

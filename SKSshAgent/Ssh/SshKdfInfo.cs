@@ -8,52 +8,51 @@ using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
-namespace SKSshAgent.Ssh
+namespace SKSshAgent.Ssh;
+
+internal sealed class SshKdfInfo
 {
-    internal sealed class SshKdfInfo
+    public static readonly SshKdfInfo None = new(
+        name: "none");
+
+    public static readonly SshKdfInfo Bcrypt = new(
+        name: "bcrypt");
+
+    public static readonly ImmutableArray<SshKdfInfo> KdfInfos =
+    [
+        None,
+        Bcrypt,
+    ];
+
+    private static uint _defaultBcryptRounds;
+
+    private SshKdfInfo(string name)
     {
-        public static readonly SshKdfInfo None = new(
-            name: "none");
+        Name = name;
+    }
 
-        public static readonly SshKdfInfo Bcrypt = new(
-            name: "bcrypt");
+    public string Name { get; }
 
-        public static readonly ImmutableArray<SshKdfInfo> KdfInfos = ImmutableArray.Create(new[]
+    public static bool TryGetKdfInfoByName(string name, [MaybeNullWhen(false)] out SshKdfInfo kdfInfo)
+    {
+        foreach (var entry in KdfInfos)
         {
-            None,
-            Bcrypt,
-        });
-
-        private static uint _defaultBcryptRounds;
-
-        private SshKdfInfo(string name)
-        {
-            Name = name;
-        }
-
-        public string Name { get; }
-
-        public static bool TryGetKdfInfoByName(string name, [MaybeNullWhen(false)] out SshKdfInfo kdfInfo)
-        {
-            foreach (var entry in KdfInfos)
+            if (entry.Name == name)
             {
-                if (entry.Name == name)
-                {
-                    kdfInfo = entry;
-                    return true;
-                }
+                kdfInfo = entry;
+                return true;
             }
-
-            kdfInfo = default;
-            return false;
         }
 
-        public static uint GetDefaultBcryptRounds()
-        {
-            if (_defaultBcryptRounds == 0)
-                _defaultBcryptRounds = Math.Max(16, BcryptPbkdf.BenchmarkRoundsPerSecond() / 4);
+        kdfInfo = default;
+        return false;
+    }
 
-            return _defaultBcryptRounds;
-        }
+    public static uint GetDefaultBcryptRounds()
+    {
+        if (_defaultBcryptRounds == 0)
+            _defaultBcryptRounds = Math.Max(16, BcryptPbkdf.BenchmarkRoundsPerSecond() / 4);
+
+        return _defaultBcryptRounds;
     }
 }

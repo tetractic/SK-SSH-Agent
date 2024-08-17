@@ -22,37 +22,36 @@ using static supercop.crypto_sign.ed25519.ref10.sc;
 #pragma warning disable CA1704 // Identifiers should be spelled correctly
 #pragma warning disable CA1707 // Identifiers should not contain underscores
 
-namespace supercop.crypto_sign.ed25519.ref10
+namespace supercop.crypto_sign.ed25519.ref10;
+
+internal static partial class crypto
 {
-    internal static partial class crypto
+    internal static void crypto_sign(Span<byte> sm, ReadOnlySpan<byte> m, ReadOnlySpan<byte> sk)
     {
-        internal static void crypto_sign(Span<byte> sm, ReadOnlySpan<byte> m, ReadOnlySpan<byte> sk)
-        {
-            Span<byte> pk = stackalloc byte[32];
-            Span<byte> az = stackalloc byte[64];
-            Span<byte> nonce = stackalloc byte[64];
-            Span<byte> hram = stackalloc byte[64];
-            ge_p3 R;
+        Span<byte> pk = stackalloc byte[32];
+        Span<byte> az = stackalloc byte[64];
+        Span<byte> nonce = stackalloc byte[64];
+        Span<byte> hram = stackalloc byte[64];
+        ge_p3 R;
 
-            sk.Slice(32).CopyTo(pk);
+        sk.Slice(32).CopyTo(pk);
 
-            _ = SHA512.HashData(sk.Slice(0, 32), az);
-            az[0] &= 248;
-            az[31] &= 63;
-            az[31] |= 64;
+        _ = SHA512.HashData(sk.Slice(0, 32), az);
+        az[0] &= 248;
+        az[31] &= 63;
+        az[31] |= 64;
 
-            m.CopyTo(sm.Slice(64));
-            az.Slice(32).CopyTo(sm.Slice(32));
-            _ = SHA512.HashData(sm.Slice(32), nonce);
-            pk.CopyTo(sm.Slice(32));
+        m.CopyTo(sm.Slice(64));
+        az.Slice(32).CopyTo(sm.Slice(32));
+        _ = SHA512.HashData(sm.Slice(32), nonce);
+        pk.CopyTo(sm.Slice(32));
 
-            sc_reduce(nonce);
-            ge_scalarmult_base(out R, nonce);
-            ge_p3_tobytes(sm, in R);
+        sc_reduce(nonce);
+        ge_scalarmult_base(out R, nonce);
+        ge_p3_tobytes(sm, in R);
 
-            _ = SHA512.HashData(sm, hram);
-            sc_reduce(hram);
-            sc_muladd(sm.Slice(32), hram, az, nonce);
-        }
+        _ = SHA512.HashData(sm, hram);
+        sc_reduce(hram);
+        sc_muladd(sm.Slice(32), hram, az, nonce);
     }
 }

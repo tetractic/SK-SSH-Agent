@@ -7,24 +7,23 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace SKSshAgent.Ssh
+namespace SKSshAgent.Ssh;
+
+internal sealed class SshPublicKeyEqualityComparer : IEqualityComparer<SshKey>
 {
-    internal sealed class SshPublicKeyEqualityComparer : IEqualityComparer<SshKey>
+    public static readonly SshPublicKeyEqualityComparer Instance = new();
+
+    private SshPublicKeyEqualityComparer()
     {
-        public static readonly SshPublicKeyEqualityComparer Instance = new();
+    }
 
-        private SshPublicKeyEqualityComparer()
-        {
-        }
+    public bool Equals(SshKey? x, SshKey? y)
+    {
+        return x == null ? y == null : x.Equals(y, publicOnly: true);
+    }
 
-        public bool Equals(SshKey? x, SshKey? y)
-        {
-            return x == null ? y == null : x.Equals(y, publicOnly: true);
-        }
-
-        public int GetHashCode([DisallowNull] SshKey obj)
-        {
-            return obj.GetHashCode(publicOnly: true);
-        }
+    public int GetHashCode([DisallowNull] SshKey obj)
+    {
+        return obj.GetHashCode(publicOnly: true);
     }
 }

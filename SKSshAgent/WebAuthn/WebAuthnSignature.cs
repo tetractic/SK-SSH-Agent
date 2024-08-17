@@ -12,144 +12,143 @@ using System.Formats.Asn1;
 using System.IO;
 using System.Security.Cryptography;
 
-namespace SKSshAgent.WebAuthn
+namespace SKSshAgent.WebAuthn;
+
+internal static class WebAuthnSignature
 {
-    internal static class WebAuthnSignature
+    /// <seealso href="https://www.w3.org/TR/webauthn/#fig-signature"/>
+    public static byte[] GetSignedData(ReadOnlySpan<byte> challenge, ReadOnlySpan<byte> authenticatorData)
     {
-        /// <seealso href="https://www.w3.org/TR/webauthn/#fig-signature"/>
-        public static byte[] GetSignedData(ReadOnlySpan<byte> challenge, ReadOnlySpan<byte> authenticatorData)
-        {
-            const int sha256HashLength = 32;
-            byte[] signedData = new byte[authenticatorData.Length + sha256HashLength];
-            authenticatorData.CopyTo(signedData);
-            _ = SHA256.HashData(challenge, signedData.AsSpan(authenticatorData.Length));
-            return signedData;
-        }
+        const int sha256HashLength = 32;
+        byte[] signedData = new byte[authenticatorData.Length + sha256HashLength];
+        authenticatorData.CopyTo(signedData);
+        _ = SHA256.HashData(challenge, signedData.AsSpan(authenticatorData.Length));
+        return signedData;
+    }
 
-        /// <exception cref="ArgumentNullException"/>
-        /// <exception cref="ArgumentException"/>
-        /// <exception cref="InvalidDataException"/>
-        /// <seealso href="https://www.w3.org/TR/webauthn/#sctn-signature-attestation-types"/>
-        public static CoseSignature Parse(CoseKey publicKey, ReadOnlySpan<byte> bytes, out int bytesUsed)
-        {
-            ArgumentNullException.ThrowIfNull(publicKey);
+    /// <exception cref="ArgumentNullException"/>
+    /// <exception cref="ArgumentException"/>
+    /// <exception cref="InvalidDataException"/>
+    /// <seealso href="https://www.w3.org/TR/webauthn/#sctn-signature-attestation-types"/>
+    public static CoseSignature Parse(CoseKey publicKey, ReadOnlySpan<byte> bytes, out int bytesUsed)
+    {
+        ArgumentNullException.ThrowIfNull(publicKey);
 
-            switch (publicKey.KeyType)
+        switch (publicKey.KeyType)
+        {
+            case CoseKeyType.Okp:
             {
-                case CoseKeyType.Okp:
+                var okpPublicKey = (CoseOkpKey)publicKey;
+
+                switch (okpPublicKey.Algorithm)
                 {
-                    var okpPublicKey = (CoseOkpKey)publicKey;
-
-                    switch (okpPublicKey.Algorithm)
-                    {
-                        case CoseAlgorithm.EdDsa:
-                            return ParseEdDsaSignature(okpPublicKey.Algorithm, okpPublicKey.Curve, bytes, out bytesUsed);
-                        default:
-                            throw new UnreachableException();
-                    }
+                    case CoseAlgorithm.EdDsa:
+                        return ParseEdDsaSignature(okpPublicKey.Algorithm, okpPublicKey.Curve, bytes, out bytesUsed);
+                    default:
+                        throw new UnreachableException();
                 }
-                case CoseKeyType.EC2:
+            }
+            case CoseKeyType.EC2:
+            {
+                var ec2PublicKey = (CoseEC2Key)publicKey;
+
+                switch (ec2PublicKey.Algorithm)
                 {
-                    var ec2PublicKey = (CoseEC2Key)publicKey;
-
-                    switch (ec2PublicKey.Algorithm)
-                    {
-                        case CoseAlgorithm.ES256:
-                        case CoseAlgorithm.ES384:
-                        case CoseAlgorithm.ES512:
-                            return ParseEcdsaAsn1(ec2PublicKey.Algorithm, ec2PublicKey.Curve, bytes, out bytesUsed);
-                        default:
-                            throw new UnreachableException();
-                    }
+                    case CoseAlgorithm.ES256:
+                    case CoseAlgorithm.ES384:
+                    case CoseAlgorithm.ES512:
+                        return ParseEcdsaAsn1(ec2PublicKey.Algorithm, ec2PublicKey.Curve, bytes, out bytesUsed);
+                    default:
+                        throw new UnreachableException();
                 }
-                default:
-                    throw new ArgumentException("Unrecognized algorithm.", nameof(publicKey));
             }
+            default:
+                throw new ArgumentException("Unrecognized algorithm.", nameof(publicKey));
         }
+    }
 
-        /// <exception cref="InvalidDataException"/>
-        /// <seealso href="https://www.w3.org/TR/webauthn/#sctn-signature-attestation-types"/>
-        /// <seealso href="https://www.rfc-editor.org/rfc/rfc3279#section-2.2.3"/>
-        internal static CoseEcdsaSignature ParseEcdsaAsn1(CoseAlgorithm algorithm, CoseEllipticCurve curve, ReadOnlySpan<byte> bytes, out int bytesUsed)
+    /// <exception cref="InvalidDataException"/>
+    /// <seealso href="https://www.w3.org/TR/webauthn/#sctn-signature-attestation-types"/>
+    /// <seealso href="https://www.rfc-editor.org/rfc/rfc3279#section-2.2.3"/>
+    internal static CoseEcdsaSignature ParseEcdsaAsn1(CoseAlgorithm algorithm, CoseEllipticCurve curve, ReadOnlySpan<byte> bytes, out int bytesUsed)
+    {
+        try
         {
-            try
-            {
-                int offset;
-                int length;
+            int offset;
+            int length;
 
-                AsnDecoder.ReadSequence(bytes, AsnEncodingRules.DER, out offset, out length, out bytesUsed);
-                int sequenceEnd = offset + length;
+            AsnDecoder.ReadSequence(bytes, AsnEncodingRules.DER, out offset, out length, out bytesUsed);
+            int sequenceEnd = offset + length;
 
-                var integerR = AsnDecoder.ReadIntegerBytes(bytes.Slice(offset), AsnEncodingRules.DER, out length);
-                offset += length;
+            var integerR = AsnDecoder.ReadIntegerBytes(bytes.Slice(offset), AsnEncodingRules.DER, out length);
+            offset += length;
 
-                var integerS = AsnDecoder.ReadIntegerBytes(bytes.Slice(offset), AsnEncodingRules.DER, out length);
-                offset += length;
+            var integerS = AsnDecoder.ReadIntegerBytes(bytes.Slice(offset), AsnEncodingRules.DER, out length);
+            offset += length;
 
-                if (offset != sequenceEnd)
-                    throw new InvalidDataException("Excess data in ASN.1 sequence.");
+            if (offset != sequenceEnd)
+                throw new InvalidDataException("Excess data in ASN.1 sequence.");
 
-                int fieldSizeBits = curve.GetFieldSizeBits();
-                int fieldElementLength = MPInt.SizeBitsToLength(fieldSizeBits);
+            int fieldSizeBits = curve.GetFieldSizeBits();
+            int fieldElementLength = MPInt.SizeBitsToLength(fieldSizeBits);
 
-                Span<byte> r = stackalloc byte[fieldElementLength];
-                AsnIntegerToFieldElementBytes(integerR, r);
-                Span<byte> s = stackalloc byte[fieldElementLength];
-                AsnIntegerToFieldElementBytes(integerS, s);
+            Span<byte> r = stackalloc byte[fieldElementLength];
+            AsnIntegerToFieldElementBytes(integerR, r);
+            Span<byte> s = stackalloc byte[fieldElementLength];
+            AsnIntegerToFieldElementBytes(integerS, s);
 
-                if (MPInt.GetBitLength(r) > fieldSizeBits)
-                    throw new InvalidDataException("Invalid EC field element.");
-                if (MPInt.GetBitLength(s) > fieldSizeBits)
-                    throw new InvalidDataException("Invalid EC field element.");
-
-                return new CoseEcdsaSignature(algorithm, curve, r.ToImmutableArray(), s.ToImmutableArray());
-            }
-            catch (AsnContentException ex)
-            {
-                throw new InvalidDataException("Invalid ASN.1 DER data.", ex);
-            }
-        }
-
-        /// <exception cref="InvalidDataException"/>
-        private static void AsnIntegerToFieldElementBytes(ReadOnlySpan<byte> bytes, Span<byte> fieldElementBytes)
-        {
-            if (bytes.Length > 0 && (bytes[0] & 0x80) != 0)
+            if (MPInt.GetBitLength(r) > fieldSizeBits)
+                throw new InvalidDataException("Invalid EC field element.");
+            if (MPInt.GetBitLength(s) > fieldSizeBits)
                 throw new InvalidDataException("Invalid EC field element.");
 
-            while (bytes.Length > 0 && bytes[0] == 0)
-                bytes = bytes.Slice(1);
-
-            if (bytes.Length > fieldElementBytes.Length)
-                throw new InvalidDataException("Invalid EC field element.");
-
-            int offset = fieldElementBytes.Length - bytes.Length;
-            fieldElementBytes.Slice(0, offset).Clear();
-            bytes.CopyTo(fieldElementBytes.Slice(offset));
+            return new CoseEcdsaSignature(algorithm, curve, r.ToImmutableArray(), s.ToImmutableArray());
         }
-
-        /// <exception cref="InvalidDataException"/>
-        /// <seealso href="https://www.w3.org/TR/webauthn/#sctn-signature-attestation-types"/>
-        /// <seealso href="https://www.rfc-editor.org/rfc/rfc8152#section-8.2"/>
-        /// <seealso href="https://www.rfc-editor.org/rfc/rfc8032#section-5.1.6"/>
-        private static CoseEdDsaSignature ParseEdDsaSignature(CoseAlgorithm algorithm, CoseEllipticCurve curve, ReadOnlySpan<byte> bytes, out int bytesUsed)
+        catch (AsnContentException ex)
         {
-            int rsLength;
-            switch (curve)
-            {
-                case CoseEllipticCurve.Ed25519:
-                    rsLength = Ed25519.SignatureLength;
-                    break;
-                default:
-                    throw new UnreachableException();
-            }
-
-            if (bytes.Length < rsLength)
-                throw new InvalidDataException("Insufficient data.");
-
-            var rs = bytes.Slice(0, rsLength);
-
-            bytesUsed = rsLength;
-            return new CoseEdDsaSignature(algorithm, curve, rs.ToImmutableArray());
+            throw new InvalidDataException("Invalid ASN.1 DER data.", ex);
         }
+    }
+
+    /// <exception cref="InvalidDataException"/>
+    private static void AsnIntegerToFieldElementBytes(ReadOnlySpan<byte> bytes, Span<byte> fieldElementBytes)
+    {
+        if (bytes.Length > 0 && (bytes[0] & 0x80) != 0)
+            throw new InvalidDataException("Invalid EC field element.");
+
+        while (bytes.Length > 0 && bytes[0] == 0)
+            bytes = bytes.Slice(1);
+
+        if (bytes.Length > fieldElementBytes.Length)
+            throw new InvalidDataException("Invalid EC field element.");
+
+        int offset = fieldElementBytes.Length - bytes.Length;
+        fieldElementBytes.Slice(0, offset).Clear();
+        bytes.CopyTo(fieldElementBytes.Slice(offset));
+    }
+
+    /// <exception cref="InvalidDataException"/>
+    /// <seealso href="https://www.w3.org/TR/webauthn/#sctn-signature-attestation-types"/>
+    /// <seealso href="https://www.rfc-editor.org/rfc/rfc8152#section-8.2"/>
+    /// <seealso href="https://www.rfc-editor.org/rfc/rfc8032#section-5.1.6"/>
+    private static CoseEdDsaSignature ParseEdDsaSignature(CoseAlgorithm algorithm, CoseEllipticCurve curve, ReadOnlySpan<byte> bytes, out int bytesUsed)
+    {
+        int rsLength;
+        switch (curve)
+        {
+            case CoseEllipticCurve.Ed25519:
+                rsLength = Ed25519.SignatureLength;
+                break;
+            default:
+                throw new UnreachableException();
+        }
+
+        if (bytes.Length < rsLength)
+            throw new InvalidDataException("Insufficient data.");
+
+        var rs = bytes.Slice(0, rsLength);
+
+        bytesUsed = rsLength;
+        return new CoseEdDsaSignature(algorithm, curve, rs.ToImmutableArray());
     }
 }
